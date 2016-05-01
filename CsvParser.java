@@ -51,9 +51,10 @@ public final class CsvParser {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, "UTF-8"))) {
             for (Row row : table) {
-                for (int i = 0; i < row.size(); i++) {
+                int size = row.size();
+                for (int i = 0; i < size; i++) {
                     writer.append(QUOTE).append(row.column(i)).append(QUOTE);
-                    if (i != row.size() - 1) {
+                    if (i != size - 1) {
                         writer.append(separator);
                     }
                 }
@@ -69,9 +70,10 @@ public final class CsvParser {
     public static String encode(Table table, char separator) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Row row : table) {
-            for (int i = 0; i < row.size(); i++) {
+            int size = row.size();
+            for (int i = 0; i < size; i++) {
                 stringBuilder.append(QUOTE).append(row.column(i)).append(QUOTE);
-                if (i != row.size() - 1) {
+                if (i != size - 1) {
                     stringBuilder.append(separator);
                 }
             }
