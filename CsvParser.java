@@ -40,6 +40,8 @@ import java.util.Iterator;
  * @link https://github.com/yuriy-budiyev/Wheels
  */
 public final class CsvParser {
+    private static final String QUOTE_STRING = "\"";
+    private static final String DOUBLE_QUOTE_STRING = "\"\"";
     private static final char QUOTE = '\"';
     private static final char CR = '\r';
     private static final char LF = '\n';
@@ -53,7 +55,9 @@ public final class CsvParser {
             for (Row row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
-                    writer.append(QUOTE).append(row.column(i).replace("\"", "\"\"")).append(QUOTE);
+                    writer.append(QUOTE)
+                            .append(row.column(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                            .append(QUOTE);
                     if (i != size - 1) {
                         writer.append(separator);
                     }
@@ -72,7 +76,8 @@ public final class CsvParser {
         for (Row row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
-                stringBuilder.append(QUOTE).append(row.column(i).replace("\"", "\"\""))
+                stringBuilder.append(QUOTE)
+                        .append(row.column(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
                         .append(QUOTE);
                 if (i != size - 1) {
                     stringBuilder.append(separator);
