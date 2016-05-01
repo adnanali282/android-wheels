@@ -23,6 +23,8 @@
  */
 package com.budiyev.wheels;
 
+import android.support.annotation.NonNull;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -63,12 +65,29 @@ public final class CsvParser {
         }
     }
 
-    public static Table parse(String string, char separator) {
-        return new Table(string, separator);
+    @NonNull
+    public static String encode(Table table, char separator) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Row row : table) {
+            for (int i = 0; i < row.size(); i++) {
+                stringBuilder.append(QUOTE).append(row.column(i)).append(QUOTE);
+                if (i != row.size() - 1) {
+                    stringBuilder.append(separator);
+                }
+            }
+            stringBuilder.append(LF);
+        }
+        return stringBuilder.toString();
     }
 
+    @NonNull
     public static Table parse(InputStream inputStream, char separator) {
         return new Table(inputStream, separator);
+    }
+
+    @NonNull
+    public static Table parse(String string, char separator) {
+        return new Table(string, separator);
     }
 
     public static class Table implements Iterable<Row> {
