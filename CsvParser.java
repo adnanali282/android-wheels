@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,12 +23,13 @@
  */
 package com.budiyev.wheels;
 
-import android.support.annotation.NonNull;
-
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -44,13 +45,29 @@ public final class CsvParser {
     private CsvParser() {
     }
 
-    @NonNull
-    public static Table parse(@NonNull String string, char separator) {
+    public static boolean encode(Table table, OutputStream outputStream, char separator) {
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(outputStream, "UTF-8"))) {
+            for (Row row : table) {
+                for (int i = 0; i < row.size(); i++) {
+                    writer.append(QUOTE).append(row.column(i)).append(QUOTE);
+                    if (i != row.size() - 1) {
+                        writer.append(separator);
+                    }
+                }
+                writer.append(LF);
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static Table parse(String string, char separator) {
         return new Table(string, separator);
     }
 
-    @NonNull
-    public static Table parse(@NonNull InputStream inputStream, char separator) {
+    public static Table parse(InputStream inputStream, char separator) {
         return new Table(inputStream, separator);
     }
 
