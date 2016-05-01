@@ -53,7 +53,7 @@ public final class CsvParser {
             for (Row row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
-                    writer.append(QUOTE).append(row.column(i)).append(QUOTE);
+                    writer.append(QUOTE).append(row.column(i).replace("\"", "\"\"")).append(QUOTE);
                     if (i != size - 1) {
                         writer.append(separator);
                     }
@@ -72,7 +72,8 @@ public final class CsvParser {
         for (Row row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
-                stringBuilder.append(QUOTE).append(row.column(i)).append(QUOTE);
+                stringBuilder.append(QUOTE).append(row.column(i).replace("\"", "\"\""))
+                        .append(QUOTE);
                 if (i != size - 1) {
                     stringBuilder.append(separator);
                 }
