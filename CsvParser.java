@@ -56,7 +56,7 @@ public final class CsvParser {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
                     writer.append(QUOTE)
-                            .append(row.column(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                            .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
                             .append(QUOTE);
                     if (i != size - 1) {
                         writer.append(separator);
@@ -77,7 +77,7 @@ public final class CsvParser {
             int size = row.size();
             for (int i = 0; i < size; i++) {
                 stringBuilder.append(QUOTE)
-                        .append(row.column(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                        .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
                         .append(QUOTE);
                 if (i != size - 1) {
                     stringBuilder.append(separator);
@@ -166,6 +166,15 @@ public final class CsvParser {
             }
         }
 
+        public Table() {
+        }
+
+        public Table(int rows, int columns) {
+            for (int i = 0; i < rows; i++) {
+                add(new Row(columns));
+            }
+        }
+
         @Override
         public Iterator<Row> iterator() {
             return mRows.iterator();
@@ -179,6 +188,22 @@ public final class CsvParser {
          */
         public Row row(int index) {
             return mRows.get(index);
+        }
+
+        /**
+         * Add empty row
+         */
+        public void add() {
+            mRows.add(new Row());
+        }
+
+        /**
+         * Add row to table
+         *
+         * @param row Row
+         */
+        public void add(Row row) {
+            mRows.add(row);
         }
 
         /**
@@ -202,34 +227,46 @@ public final class CsvParser {
     }
 
     public static class Row implements Iterable<String> {
-        private final ArrayList<String> mColumns = new ArrayList<>();
-        private final char mSeparator;
+        private final ArrayList<String> mCells = new ArrayList<>();
 
         private Row(String row, char separator) {
-            mSeparator = separator;
-            StringBuilder column = new StringBuilder();
+            StringBuilder cell = new StringBuilder();
             boolean inQuotes = false;
             int length = row.length();
             for (int i = 0; i < length; i++) {
                 char current = row.charAt(i);
                 if (current == separator && !inQuotes) {
-                    mColumns.add(column.toString());
-                    column.delete(0, column.length());
+                    mCells.add(cell.toString());
+                    cell.delete(0, cell.length());
                 } else if (current == QUOTE) {
                     int n = i + 1;
                     if (n < length && row.charAt(n) == QUOTE) {
-                        column.append(current);
+                        cell.append(current);
                         i++;
                     } else {
                         inQuotes = !inQuotes;
                     }
                 } else {
-                    column.append(current);
+                    cell.append(current);
                 }
             }
-            if (column.length() != 0) {
-                mColumns.add(column.toString());
+            if (cell.length() != 0) {
+                mCells.add(cell.toString());
             }
+        }
+
+        public Row() {
+        }
+
+        public Row(int cells) {
+            for (int i = 0; i < cells; i++) {
+                add();
+            }
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return mCells.iterator();
         }
 
         /**
@@ -238,18 +275,34 @@ public final class CsvParser {
          * @param index Column position in row
          * @return Column at index
          */
-        public String column(int index) {
-            return mColumns.get(index);
+        public String cell(int index) {
+            return mCells.get(index);
         }
 
         /**
-         * Remove column from current row
+         * Add cell with null value to row
+         */
+        public void add() {
+            mCells.add(null);
+        }
+
+        /**
+         * Add cell to row
+         *
+         * @param cell Cell value
+         */
+        public void add(String cell) {
+            mCells.add(cell);
+        }
+
+        /**
+         * Remove cell from row
          *
          * @param index Column index
-         * @return Removed column value
+         * @return Removed cell value
          */
         public String remove(int index) {
-            return mColumns.remove(index);
+            return mCells.remove(index);
         }
 
         /**
@@ -258,25 +311,7 @@ public final class CsvParser {
          * @return Columns count
          */
         public int size() {
-            return mColumns.size();
-        }
-
-        @Override
-        public Iterator<String> iterator() {
-            return mColumns.iterator();
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder stringBuilder = new StringBuilder();
-            int size = mColumns.size();
-            for (int i = 0; i < size; i++) {
-                stringBuilder.append(column(i));
-                if (i < size - 1) {
-                    stringBuilder.append(mSeparator).append(" ");
-                }
-            }
-            return stringBuilder.toString();
+            return mCells.size();
         }
     }
 }
