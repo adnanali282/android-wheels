@@ -32,6 +32,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -185,7 +186,7 @@ public class CircularProgressBar extends View {
                 if (mIndeterminateAppearingMode) {
                     mIndeterminateStartAngleOffset =
                             (mIndeterminateStartAngleOffset + mIndeterminateMinimumAngle * 2F) %
-                            360F;
+                                    360F;
                 }
             }
         });
@@ -236,21 +237,25 @@ public class CircularProgressBar extends View {
 
     private void startIndeterminateAnimations() {
         if (isLaidOutCompat()) {
-            if (!mIndeterminateStartAngleAnimator.isRunning()) {
-                mIndeterminateStartAngleAnimator.start();
+            ValueAnimator startAngleAnimator = mIndeterminateStartAngleAnimator;
+            if (startAngleAnimator != null && !startAngleAnimator.isRunning()) {
+                startAngleAnimator.start();
             }
-            if (!mIndeterminateSweepAngleAnimator.isRunning()) {
-                mIndeterminateSweepAngleAnimator.start();
+            ValueAnimator sweepAngleAnimator = mIndeterminateSweepAngleAnimator;
+            if (sweepAngleAnimator != null && !sweepAngleAnimator.isRunning()) {
+                sweepAngleAnimator.start();
             }
         }
     }
 
     private void stopIndeterminateAnimations() {
-        if (mIndeterminateStartAngleAnimator.isRunning()) {
-            mIndeterminateStartAngleAnimator.cancel();
+        ValueAnimator startAngleAnimator = mIndeterminateStartAngleAnimator;
+        if (startAngleAnimator != null && startAngleAnimator.isRunning()) {
+            startAngleAnimator.cancel();
         }
-        if (mIndeterminateSweepAngleAnimator.isRunning()) {
-            mIndeterminateSweepAngleAnimator.cancel();
+        ValueAnimator sweepAngleAnimator = mIndeterminateSweepAngleAnimator;
+        if (sweepAngleAnimator != null && sweepAngleAnimator.isRunning()) {
+            sweepAngleAnimator.cancel();
         }
     }
 
@@ -277,6 +282,32 @@ public class CircularProgressBar extends View {
     }
 
     @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility == VISIBLE) {
+            if (mIndeterminate) {
+                startIndeterminateAnimations();
+            }
+        } else {
+            stopIndeterminateAnimations();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mIndeterminate && isLaidOutCompat()) {
+            startIndeterminateAnimations();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        stopIndeterminateAnimations();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (mDrawBackgroundStroke) {
@@ -290,7 +321,7 @@ public class CircularProgressBar extends View {
                 sweepAngle = mIndeterminateSweepAngle + mIndeterminateMinimumAngle;
             } else {
                 startAngle = mIndeterminateStartAngle + mIndeterminateSweepAngle -
-                             mIndeterminateStartAngleOffset;
+                        mIndeterminateStartAngleOffset;
                 sweepAngle = 360F - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
             }
             canvas.drawArc(mDrawRect, startAngle, sweepAngle, false, mForegroundStrokePaint);
