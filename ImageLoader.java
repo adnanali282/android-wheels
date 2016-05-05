@@ -48,8 +48,6 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
-import org.jetbrains.annotations.Contract;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -154,19 +152,6 @@ public class ImageLoader<T> {
                 new ImageLoaderThreadFactory(INSTANCE_COUNTER.getAndIncrement()));
     }
 
-    protected void setImageDrawable(@NonNull ImageView imageView, @NonNull Drawable drawable) {
-        if (isImageFadeIn()) {
-            TransitionDrawable transitionDrawable = new TransitionDrawable(
-                    new Drawable[]{new ColorDrawable(Color.TRANSPARENT), drawable});
-            imageView.setBackground(
-                    new BitmapDrawable(getContext().getResources(), getPlaceholderImage()));
-            imageView.setImageDrawable(transitionDrawable);
-            transitionDrawable.startTransition(getImageFadeInTime());
-        } else {
-            imageView.setImageDrawable(drawable);
-        }
-    }
-
     protected void cancelWork(@Nullable ImageView imageView) {
         LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
         if (loadImageAction != null) {
@@ -225,23 +210,36 @@ public class ImageLoader<T> {
      *
      * @param imageSource Image source
      * @param imageView   Image view
+     * @param callback    Optional callback
      */
-    public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView) {
+    public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
+            @Nullable Callback callback) {
         BitmapDrawable drawable = null;
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
             drawable = memoryImageCache.get(imageSource.getKey());
         }
         if (drawable != null) {
-            runOnMainThread(new SimpleSetImageAction(imageView, drawable));
+            runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
         } else if (cancelPotentialWork(imageSource, imageView)) {
-            LoadImageAction<T> loadAction = new LoadImageAction<>(imageSource, imageView, this);
+            LoadImageAction<T> loadAction =
+                    new LoadImageAction<>(imageSource, imageView, callback, this);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
-            runOnMainThread(new SimpleSetImageAction(imageView, asyncBitmapDrawable));
+            runOnMainThread(new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
             loadAction.execute(getAsyncExecutor());
         }
+    }
+
+    /**
+     * Load image to imageView from imageSource
+     *
+     * @param imageSource Image source
+     * @param imageView   Image view
+     */
+    public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView) {
+        loadImage(imageSource, imageView, null);
     }
 
     public void invalidate(@NonNull ImageSource<T> imageSource) {
@@ -354,7 +352,6 @@ public class ImageLoader<T> {
      *                                  (requiredWidth * requiredHeight)
      * @return Sample size
      */
-    @Contract(pure = true)
     protected static int calculateSampleSize(int sourceWidth, int sourceHeight, int requiredWidth,
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         int sampleSize = 1;
@@ -557,19 +554,21 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static final class LoadImageAction<T> {
+    protected static class LoadImageAction<T> {
         private final ImageSource<T> mImageSource;
         private final WeakReference<ImageView> mImageViewReference;
         private final ImageLoader<T> mImageLoader;
+        private final Callback mCallback;
         private final AtomicBoolean mSubmitted = new AtomicBoolean(false);
         private volatile boolean mFinished = false;
         private volatile boolean mCancelled = false;
         private volatile Future<Void> mFuture = null;
 
-        public LoadImageAction(ImageSource<T> imageSource, ImageView imageView,
+        public LoadImageAction(ImageSource<T> imageSource, ImageView imageView, Callback callback,
                 ImageLoader<T> imageLoader) {
             mImageSource = imageSource;
             mImageViewReference = new WeakReference<>(imageView);
+            mCallback = callback;
             mImageLoader = imageLoader;
         }
 
@@ -608,7 +607,8 @@ public class ImageLoader<T> {
                     memoryImageCache.put(mImageSource.getKey(), drawable);
                 }
             }
-            mImageLoader.runOnMainThread(new SetImageAction(drawable, mImageLoader, this));
+            mImageLoader
+                    .runOnMainThread(new SetImageAction(drawable, mImageLoader, mCallback, this));
         }
 
         @Nullable
@@ -669,45 +669,79 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static final class SetImageAction implements Runnable {
+    protected static class SetImageAction implements Runnable {
         private final BitmapDrawable mBitmapDrawable;
         private final ImageLoader<?> mImageLoader;
         private final LoadImageAction<?> mLoadImageAction;
+        private final Callback mCallback;
 
         public SetImageAction(BitmapDrawable bitmapDrawable, ImageLoader<?> imageLoader,
-                LoadImageAction<?> loadImageAction) {
+                Callback callback, LoadImageAction<?> loadImageAction) {
             mBitmapDrawable = bitmapDrawable;
             mImageLoader = imageLoader;
+            mCallback = callback;
             mLoadImageAction = loadImageAction;
         }
 
         @Override
         public void run() {
             if (!mLoadImageAction.isCancelled() && !mImageLoader.isExitTasksEarly()) {
-                ImageView imageView = mLoadImageAction.getAttachedImageView();
-                if (mBitmapDrawable != null && imageView != null) {
-                    mImageLoader.setImageDrawable(imageView, mBitmapDrawable);
+                final ImageView imageView = mLoadImageAction.getAttachedImageView();
+                if (mBitmapDrawable == null || imageView == null) {
+                    return;
+                }
+                if (mImageLoader.isImageFadeIn()) {
+                    TransitionDrawable transitionDrawable = new TransitionDrawable(
+                            new Drawable[]{new ColorDrawable(Color.TRANSPARENT), mBitmapDrawable});
+                    imageView.setBackground(
+                            new BitmapDrawable(mImageLoader.getContext().getResources(),
+                                    mImageLoader.getPlaceholderImage()));
+                    imageView.setImageDrawable(transitionDrawable);
+                    int imageFadeInTime = mImageLoader.getImageFadeInTime();
+                    transitionDrawable.startTransition(imageFadeInTime);
+                    mImageLoader.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mCallback != null) {
+                                mCallback.onBitmapLoaded(imageView);
+                            }
+                        }
+                    }, imageFadeInTime);
+                } else {
+                    imageView.setImageDrawable(mBitmapDrawable);
+                    if (mCallback != null) {
+                        mCallback.onBitmapLoaded(imageView);
+                    }
                 }
             }
         }
     }
 
-    protected static final class SimpleSetImageAction implements Runnable {
+    protected static class SimpleSetImageAction implements Runnable {
         private final ImageView mImageView;
         private final BitmapDrawable mBitmapDrawable;
+        private final Callback mCallback;
 
-        public SimpleSetImageAction(ImageView imageView, BitmapDrawable bitmapDrawable) {
+        public SimpleSetImageAction(ImageView imageView, BitmapDrawable bitmapDrawable,
+                Callback callback) {
             mImageView = imageView;
             mBitmapDrawable = bitmapDrawable;
+            mCallback = callback;
         }
 
         @Override
         public void run() {
+            if (mBitmapDrawable == null || mImageView == null) {
+                return;
+            }
             mImageView.setImageDrawable(mBitmapDrawable);
+            if (mCallback != null) {
+                mCallback.onBitmapLoaded(mImageView);
+            }
         }
     }
 
-    protected static final class AsyncBitmapDrawable extends BitmapDrawable {
+    protected static class AsyncBitmapDrawable extends BitmapDrawable {
         private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
 
         public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
@@ -721,7 +755,7 @@ public class ImageLoader<T> {
         }
     }
 
-    public static final class MemoryImageCache {
+    public static class MemoryImageCache {
         private static final float DEFAULT_MEMORY_PERCENT = 0.25F;
         private final LruCache<String, RecyclingBitmapDrawable> mCache;
 
@@ -771,7 +805,7 @@ public class ImageLoader<T> {
         }
     }
 
-    public static final class StorageImageCache {
+    public static class StorageImageCache {
         private static final double DEFAULT_STORAGE_PERCENT = 0.25D;
         private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT =
                 Bitmap.CompressFormat.JPEG;
@@ -893,7 +927,7 @@ public class ImageLoader<T> {
     /**
      * BitmapDrawable that recycles it's bitmap.
      */
-    public static final class RecyclingBitmapDrawable extends BitmapDrawable {
+    public static class RecyclingBitmapDrawable extends BitmapDrawable {
         private int mDisplayReferencesCount;
         private int mCacheReferencesCount;
         private boolean mHasBeenDisplayed;
@@ -941,7 +975,7 @@ public class ImageLoader<T> {
     /**
      * ImageView that notifies RecyclingBitmapDrawable when image drawable is changed.
      */
-    public static final class RecyclingImageView extends ImageView {
+    public static class RecyclingImageView extends ImageView {
         private boolean mClearDrawableOnDetach;
 
         public RecyclingImageView(Context context) {
@@ -1036,5 +1070,9 @@ public class ImageLoader<T> {
          * @return Loaded bitmap
          */
         Bitmap load(T data);
+    }
+
+    public interface Callback {
+        void onBitmapLoaded(ImageView imageView);
     }
 }
