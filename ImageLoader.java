@@ -26,15 +26,20 @@ package com.budiyev.wheels;
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -691,22 +696,25 @@ public class ImageLoader<T> {
                     return;
                 }
                 if (mImageLoader.isImageFadeIn()) {
-                    TransitionDrawable transitionDrawable = new TransitionDrawable(
-                            new Drawable[]{new ColorDrawable(Color.TRANSPARENT), mBitmapDrawable});
+                    FadeDrawable fadeDrawable =
+                            new FadeDrawable(new ColorDrawable(Color.TRANSPARENT), mBitmapDrawable);
                     imageView.setBackground(
                             new BitmapDrawable(mImageLoader.getContext().getResources(),
                                     mImageLoader.getPlaceholderImage()));
-                    imageView.setImageDrawable(transitionDrawable);
-                    int imageFadeInTime = mImageLoader.getImageFadeInTime();
-                    transitionDrawable.startTransition(imageFadeInTime);
-                    mImageLoader.runOnMainThread(new Runnable() {
+                    imageView.setImageDrawable(fadeDrawable);
+                    fadeDrawable.setFadeCallback(new FadeDrawable.FadeCallback() {
                         @Override
-                        public void run() {
+                        public void onStart(FadeDrawable drawable) {
+                        }
+
+                        @Override
+                        public void onEnd(FadeDrawable drawable) {
                             if (mCallback != null) {
                                 mCallback.onBitmapLoaded(imageView);
                             }
                         }
-                    }, imageFadeInTime);
+                    });
+                    fadeDrawable.startFade(mImageLoader.getImageFadeInTime());
                 } else {
                     imageView.setImageDrawable(mBitmapDrawable);
                     if (mCallback != null) {
@@ -752,6 +760,226 @@ public class ImageLoader<T> {
 
         public LoadImageAction<?> getLoadImageAction() {
             return mLoadImageActionReference.get();
+        }
+    }
+
+    protected static class FadeDrawable extends Drawable {
+        private static final int FADE_NONE = 0;
+        private static final int FADE_RUNNING = 1;
+        private static final int FADE_DONE = 2;
+        private int mFadeState = FADE_NONE;
+        private int mAlpha;
+        private long mStartTime;
+        private long mDuration;
+        private Drawable mStartDrawable;
+        private Drawable mEndDrawable;
+        private FadeCallback mFadeCallback;
+
+        public FadeDrawable(@Nullable Drawable startDrawable, @Nullable Drawable endDrawable) {
+            mStartDrawable = startDrawable;
+            mEndDrawable = endDrawable;
+        }
+
+        private void draw(Canvas canvas, Drawable drawable, int alpha) {
+            int originalAlpha = drawable.getAlpha();
+            drawable.setAlpha(alpha);
+            drawable.draw(canvas);
+            drawable.setAlpha(originalAlpha);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (mFadeState == FADE_RUNNING) {
+                float progress =
+                        Math.min((float) (System.currentTimeMillis() - mStartTime) / mDuration, 1F);
+                mAlpha = (int) Math.ceil(255 * progress);
+                FadeCallback fadeCallback = mFadeCallback;
+                Drawable startDrawable = mStartDrawable;
+                if (startDrawable != null) {
+                    draw(canvas, startDrawable, 255 - mAlpha);
+                }
+                Drawable endDrawable = mEndDrawable;
+                if (endDrawable != null) {
+                    draw(canvas, endDrawable, mAlpha);
+                }
+                if (progress == 1F && fadeCallback != null) {
+                    mFadeState = FADE_DONE;
+                    fadeCallback.onEnd(this);
+                } else {
+                    invalidateSelf();
+                }
+            } else if (mFadeState == FADE_NONE) {
+                Drawable startDrawable = mStartDrawable;
+                if (startDrawable != null) {
+                    draw(canvas, startDrawable, 255);
+                }
+            } else if (mFadeState == FADE_DONE) {
+                Drawable endDrawable = mEndDrawable;
+                if (endDrawable != null) {
+                    draw(canvas, endDrawable, 255);
+                }
+            }
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+            Drawable startDrawable = mStartDrawable;
+            if (startDrawable != null) {
+                startDrawable.setColorFilter(colorFilter);
+            }
+            Drawable endDrawable = mEndDrawable;
+            if (endDrawable != null) {
+                endDrawable.setColorFilter(colorFilter);
+            }
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            mStartDrawable.setBounds(bounds);
+            mEndDrawable.setBounds(bounds);
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            int width = -1;
+            Drawable startDrawable = mStartDrawable;
+            if (startDrawable != null) {
+                width = startDrawable.getIntrinsicWidth();
+            }
+            Drawable endDrawable = mEndDrawable;
+            if (endDrawable != null) {
+                int endWidth = endDrawable.getIntrinsicWidth();
+                if (endWidth > width) {
+                    width = endWidth;
+                }
+            }
+            return width;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            int height = -1;
+            Drawable startDrawable = mStartDrawable;
+            if (startDrawable != null) {
+                height = startDrawable.getIntrinsicHeight();
+            }
+            Drawable endDrawable = mEndDrawable;
+            if (endDrawable != null) {
+                int endHeight = endDrawable.getIntrinsicHeight();
+                if (endHeight > height) {
+                    height = endHeight;
+                }
+            }
+            return height;
+        }
+
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public void setTintList(ColorStateList tint) {
+            Drawable startDrawable = mStartDrawable;
+            if (startDrawable != null) {
+                startDrawable.setTintList(tint);
+            }
+            Drawable endDrawable = mEndDrawable;
+            if (endDrawable != null) {
+                endDrawable.setTintList(tint);
+            }
+        }
+
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
+            Drawable startDrawable = mStartDrawable;
+            if (startDrawable != null) {
+                startDrawable.setTintMode(tintMode);
+            }
+            Drawable endDrawable = mEndDrawable;
+            if (endDrawable != null) {
+                endDrawable.setTintMode(tintMode);
+            }
+        }
+
+        @TargetApi(Build.VERSION_CODES.M)
+        @Override
+        public boolean onLayoutDirectionChanged(int layoutDirection) {
+            Drawable startDrawable = mStartDrawable;
+            Drawable endDrawable = mEndDrawable;
+            return !(startDrawable == null || endDrawable == null) &&
+                    (startDrawable.setLayoutDirection(layoutDirection) ||
+                            endDrawable.setLayoutDirection(layoutDirection));
+        }
+
+        @Override
+        protected boolean onLevelChange(int level) {
+            Drawable startDrawable = mStartDrawable;
+            Drawable endDrawable = mEndDrawable;
+            return !(startDrawable == null || endDrawable == null) &&
+                    (startDrawable.setLevel(level) || endDrawable.setLevel(level));
+        }
+
+        @Override
+        protected boolean onStateChange(int[] state) {
+            Drawable startDrawable = mStartDrawable;
+            Drawable endDrawable = mEndDrawable;
+            return !(startDrawable == null || endDrawable == null) &&
+                    (startDrawable.setState(state) || endDrawable.setState(state));
+        }
+
+        public void startFade(int duration) {
+            mAlpha = 0;
+            mDuration = duration;
+            mStartTime = System.currentTimeMillis();
+            mFadeState = FADE_RUNNING;
+            FadeCallback fadeCallback = mFadeCallback;
+            if (fadeCallback != null) {
+                fadeCallback.onStart(this);
+            }
+            invalidateSelf();
+        }
+
+        public void resetFade() {
+            mAlpha = 0;
+            mFadeState = FADE_NONE;
+            invalidateSelf();
+        }
+
+        public Drawable getStartDrawable() {
+            return mStartDrawable;
+        }
+
+        public void setStartDrawable(Drawable startDrawable) {
+            mStartDrawable = startDrawable;
+        }
+
+        public Drawable getEndDrawable() {
+            return mEndDrawable;
+        }
+
+        public void setEndDrawable(Drawable endDrawable) {
+            mEndDrawable = endDrawable;
+        }
+
+        public FadeCallback getFadeCallback() {
+            return mFadeCallback;
+        }
+
+        public void setFadeCallback(FadeCallback fadeCallback) {
+            mFadeCallback = fadeCallback;
+        }
+
+        public interface FadeCallback {
+            void onStart(FadeDrawable drawable);
+
+            void onEnd(FadeDrawable drawable);
         }
     }
 
