@@ -842,7 +842,6 @@ public class ImageLoader<T> {
 
         public void setStartDrawable(@Nullable Drawable startDrawable) {
             setDrawableByLayerId(START_DRAWABLE, startDrawable);
-
         }
 
         @Nullable
