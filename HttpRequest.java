@@ -48,7 +48,7 @@ import java.util.concurrent.Executor;
 
 /**
  * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/Wheels
+ * @link https://github.com/yuriy-budiyev/android-wheels
  */
 public final class HttpRequest {
     /**

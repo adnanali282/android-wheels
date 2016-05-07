@@ -37,7 +37,7 @@ import java.util.Iterator;
 
 /**
  * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/Wheels
+ * @link https://github.com/yuriy-budiyev/android-wheels
  */
 public final class CsvParser {
     private static final String QUOTE_STRING = "\"";

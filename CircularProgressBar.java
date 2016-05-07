@@ -41,7 +41,7 @@ import android.view.animation.LinearInterpolator;
 
 /**
  * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/Wheels
+ * @link https://github.com/yuriy-budiyev/android-wheels
  */
 public class CircularProgressBar extends View {
     private static final float DEFAULT_MAXIMUM = 100F;

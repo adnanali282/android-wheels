@@ -74,7 +74,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @param <T> Source data type
  * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/Wheels
+ * @link https://github.com/yuriy-budiyev/android-wheels
  */
 public class ImageLoader<T> {
     private static final AtomicInteger INSTANCE_COUNTER = new AtomicInteger(1);
