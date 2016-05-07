@@ -744,6 +744,20 @@ public class ImageLoader<T> {
         }
     }
 
+    protected static class AsyncBitmapDrawable extends BitmapDrawable {
+        private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
+
+        public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
+                LoadImageAction<?> loadImageAction) {
+            super(res, bitmap);
+            mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
+        }
+
+        public LoadImageAction<?> getLoadImageAction() {
+            return mLoadImageActionReference.get();
+        }
+    }
+
     public static class MemoryImageCache {
         private static final float DEFAULT_MEMORY_PERCENT = 0.25F;
         private final LruCache<String, RecyclingBitmapDrawable> mCache;
@@ -1021,20 +1035,6 @@ public class ImageLoader<T> {
             void onStart(FadeDrawable drawable);
 
             void onEnd(FadeDrawable drawable);
-        }
-    }
-
-    public static class AsyncBitmapDrawable extends BitmapDrawable {
-        private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
-
-        public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
-                LoadImageAction<?> loadImageAction) {
-            super(res, bitmap);
-            mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
-        }
-
-        public LoadImageAction<?> getLoadImageAction() {
-            return mLoadImageActionReference.get();
         }
     }
 
