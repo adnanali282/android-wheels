@@ -744,131 +744,6 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static class AsyncBitmapDrawable extends BitmapDrawable {
-        private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
-
-        public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
-                LoadImageAction<?> loadImageAction) {
-            super(res, bitmap);
-            mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
-        }
-
-        public LoadImageAction<?> getLoadImageAction() {
-            return mLoadImageActionReference.get();
-        }
-    }
-
-    protected static class FadeDrawable extends LayerDrawable implements Drawable.Callback {
-        private static final int FADE_NONE = 0;
-        private static final int FADE_RUNNING = 1;
-        private static final int FADE_DONE = 2;
-        private static final int START_DRAWABLE = 0;
-        private static final int END_DRAWABLE = 0;
-        private static final int MAX_ALPHA = 255;
-        private int mFadeState = FADE_NONE;
-        private long mStartTime;
-        private long mDuration;
-        private FadeCallback mFadeCallback;
-
-        public FadeDrawable(@Nullable Drawable startDrawable, @Nullable Drawable endDrawable) {
-            super(new Drawable[]{startDrawable, endDrawable});
-            setId(START_DRAWABLE, START_DRAWABLE);
-            setId(END_DRAWABLE, END_DRAWABLE);
-        }
-
-        private void draw(Canvas canvas, Drawable drawable, int alpha) {
-            int originalAlpha = drawable.getAlpha();
-            drawable.setAlpha(alpha);
-            drawable.draw(canvas);
-            drawable.setAlpha(originalAlpha);
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            if (mFadeState == FADE_RUNNING) {
-                int alpha = Math.min((int) Math
-                        .ceil(MAX_ALPHA * (float) (System.currentTimeMillis() - mStartTime) /
-                                mDuration), MAX_ALPHA);
-                Drawable startDrawable = getStartDrawable();
-                if (startDrawable != null) {
-                    draw(canvas, startDrawable, MAX_ALPHA - alpha);
-                }
-                Drawable endDrawable = getEndDrawable();
-                if (endDrawable != null) {
-                    draw(canvas, endDrawable, alpha);
-                }
-                if (alpha == MAX_ALPHA) {
-                    mFadeState = FADE_DONE;
-                    FadeCallback fadeCallback = getFadeCallback();
-                    if (fadeCallback != null) {
-                        fadeCallback.onEnd(this);
-                    }
-                } else {
-                    invalidateSelf();
-                }
-            } else if (mFadeState == FADE_NONE) {
-                Drawable startDrawable = getStartDrawable();
-                if (startDrawable != null) {
-                    draw(canvas, startDrawable, MAX_ALPHA);
-                }
-            } else if (mFadeState == FADE_DONE) {
-                Drawable endDrawable = getEndDrawable();
-                if (endDrawable != null) {
-                    draw(canvas, endDrawable, MAX_ALPHA);
-                }
-            }
-        }
-
-        public void startFade(int duration) {
-            mDuration = duration;
-            mStartTime = System.currentTimeMillis();
-            mFadeState = FADE_RUNNING;
-            FadeCallback fadeCallback = mFadeCallback;
-            if (fadeCallback != null) {
-                fadeCallback.onStart(this);
-            }
-            invalidateSelf();
-        }
-
-        public void resetFade() {
-            mFadeState = FADE_NONE;
-            invalidateSelf();
-        }
-
-        @Nullable
-        public Drawable getStartDrawable() {
-            return getDrawable(START_DRAWABLE);
-        }
-
-        public void setStartDrawable(@Nullable Drawable startDrawable) {
-            setDrawableByLayerId(START_DRAWABLE, startDrawable);
-        }
-
-        @Nullable
-        public Drawable getEndDrawable() {
-            return getDrawable(END_DRAWABLE);
-        }
-
-        public void setEndDrawable(@Nullable Drawable endDrawable) {
-            setDrawableByLayerId(END_DRAWABLE, endDrawable);
-        }
-
-        @Nullable
-        public FadeCallback getFadeCallback() {
-            return mFadeCallback;
-        }
-
-        public void setFadeCallback(@Nullable FadeCallback fadeCallback) {
-            mFadeCallback = fadeCallback;
-        }
-
-        public interface FadeCallback {
-            void onStart(FadeDrawable drawable);
-
-            void onEnd(FadeDrawable drawable);
-        }
-    }
-
     public static class MemoryImageCache {
         private static final float DEFAULT_MEMORY_PERCENT = 0.25F;
         private final LruCache<String, RecyclingBitmapDrawable> mCache;
@@ -1035,6 +910,131 @@ public class ImageLoader<T> {
             }
             StatFs stat = new StatFs(path.getAbsolutePath());
             return Math.round(stat.getTotalBytes() * percent);
+        }
+    }
+
+    public static class FadeDrawable extends LayerDrawable implements Drawable.Callback {
+        private static final int FADE_NONE = 0;
+        private static final int FADE_RUNNING = 1;
+        private static final int FADE_DONE = 2;
+        private static final int START_DRAWABLE = 0;
+        private static final int END_DRAWABLE = 1;
+        private static final int MAX_ALPHA = 255;
+        private int mFadeState = FADE_NONE;
+        private long mStartTime;
+        private long mDuration;
+        private FadeCallback mFadeCallback;
+
+        public FadeDrawable(@Nullable Drawable startDrawable, @Nullable Drawable endDrawable) {
+            super(new Drawable[]{startDrawable, endDrawable});
+            setId(START_DRAWABLE, START_DRAWABLE);
+            setId(END_DRAWABLE, END_DRAWABLE);
+        }
+
+        private void draw(Canvas canvas, Drawable drawable, int alpha) {
+            int originalAlpha = drawable.getAlpha();
+            drawable.setAlpha(alpha);
+            drawable.draw(canvas);
+            drawable.setAlpha(originalAlpha);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (mFadeState == FADE_RUNNING) {
+                int alpha = Math.min((int) Math
+                        .ceil(MAX_ALPHA * (float) (System.currentTimeMillis() - mStartTime) /
+                                mDuration), MAX_ALPHA);
+                Drawable startDrawable = getStartDrawable();
+                if (startDrawable != null) {
+                    draw(canvas, startDrawable, MAX_ALPHA - alpha);
+                }
+                Drawable endDrawable = getEndDrawable();
+                if (endDrawable != null) {
+                    draw(canvas, endDrawable, alpha);
+                }
+                if (alpha == MAX_ALPHA) {
+                    mFadeState = FADE_DONE;
+                    FadeCallback fadeCallback = getFadeCallback();
+                    if (fadeCallback != null) {
+                        fadeCallback.onEnd(this);
+                    }
+                } else {
+                    invalidateSelf();
+                }
+            } else if (mFadeState == FADE_NONE) {
+                Drawable startDrawable = getStartDrawable();
+                if (startDrawable != null) {
+                    draw(canvas, startDrawable, MAX_ALPHA);
+                }
+            } else if (mFadeState == FADE_DONE) {
+                Drawable endDrawable = getEndDrawable();
+                if (endDrawable != null) {
+                    draw(canvas, endDrawable, MAX_ALPHA);
+                }
+            }
+        }
+
+        public void startFade(int duration) {
+            mDuration = duration;
+            mStartTime = System.currentTimeMillis();
+            mFadeState = FADE_RUNNING;
+            FadeCallback fadeCallback = mFadeCallback;
+            if (fadeCallback != null) {
+                fadeCallback.onStart(this);
+            }
+            invalidateSelf();
+        }
+
+        public void resetFade() {
+            mFadeState = FADE_NONE;
+            invalidateSelf();
+        }
+
+        @Nullable
+        public Drawable getStartDrawable() {
+            return getDrawable(START_DRAWABLE);
+        }
+
+        public void setStartDrawable(@Nullable Drawable startDrawable) {
+            setDrawableByLayerId(START_DRAWABLE, startDrawable);
+        }
+
+        @Nullable
+        public Drawable getEndDrawable() {
+            return getDrawable(END_DRAWABLE);
+        }
+
+        public void setEndDrawable(@Nullable Drawable endDrawable) {
+            setDrawableByLayerId(END_DRAWABLE, endDrawable);
+        }
+
+        @Nullable
+        public FadeCallback getFadeCallback() {
+            return mFadeCallback;
+        }
+
+        public void setFadeCallback(@Nullable FadeCallback fadeCallback) {
+            mFadeCallback = fadeCallback;
+        }
+
+        public interface FadeCallback {
+            void onStart(FadeDrawable drawable);
+
+            void onEnd(FadeDrawable drawable);
+        }
+    }
+
+    public static class AsyncBitmapDrawable extends BitmapDrawable {
+        private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
+
+        public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
+                LoadImageAction<?> loadImageAction) {
+            super(res, bitmap);
+            mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
+        }
+
+        public LoadImageAction<?> getLoadImageAction() {
+            return mLoadImageActionReference.get();
         }
     }
 
