@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.wheels;
+package com.budiyev.android.wheels;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
