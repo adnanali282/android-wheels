@@ -113,7 +113,7 @@ public final class CsvParser {
                 } else if (current == QUOTE) {
                     int n = i + 1;
                     if (n < length && table.charAt(n) == QUOTE) {
-                        row.append(current);
+                        row.append(current).append(current);
                         i++;
                     } else {
                         inQuotes = !inQuotes;
@@ -148,8 +148,10 @@ public final class CsvParser {
                         previous = -1;
                     } else if (current == QUOTE) {
                         if (previous != -1 && (char) previous == QUOTE) {
-                            row.append(current);
+                            row.append(current).append(current);
                             previous = -1;
+                        } else {
+                            previous = (int) current;
                         }
                         inQuotes = !inQuotes;
                     } else {
@@ -261,6 +263,12 @@ public final class CsvParser {
         public Row(int cells) {
             for (int i = 0; i < cells; i++) {
                 add();
+            }
+        }
+
+        public Row(Object... cells) {
+            for (Object cell : cells) {
+                add(String.valueOf(cell));
             }
         }
 
