@@ -220,6 +220,9 @@ public class ImageLoader<T> {
             drawable = memoryImageCache.get(imageSource.getKey());
         }
         if (drawable != null) {
+            if (callback != null) {
+                callback.onImageLoaded(drawable.getBitmap(), true, false);
+            }
             runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
@@ -573,7 +576,7 @@ public class ImageLoader<T> {
         }
 
         private void loadImage() {
-            Bitmap bitmap = null;
+            Bitmap image = null;
             synchronized (mImageLoader.mPauseWorkLock) {
                 for (; mImageLoader.isPauseWork() && !isCancelled(); ) {
                     try {
@@ -586,22 +589,30 @@ public class ImageLoader<T> {
                     !mImageLoader.isExitTasksEarly()) {
                 StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
                 if (storageImageCache != null) {
-                    bitmap = storageImageCache.get(mImageSource.getKey());
+                    image = storageImageCache.get(mImageSource.getKey());
+                    if (image != null && mCallback != null) {
+                        mCallback.onImageLoaded(image, false, true);
+                    }
                 }
-                if (bitmap == null) {
+                if (image == null) {
                     BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
                     if (bitmapLoader != null) {
-                        bitmap = bitmapLoader.load(mImageSource.getData());
+                        image = bitmapLoader.load(mImageSource.getData());
                     }
-                    if (bitmap != null && storageImageCache != null) {
-                        storageImageCache.put(mImageSource.getKey(), bitmap);
+                    if (image != null) {
+                        if (mCallback != null) {
+                            mCallback.onImageLoaded(image, false, false);
+                        }
+                        if (storageImageCache != null) {
+                            storageImageCache.put(mImageSource.getKey(), image);
+                        }
                     }
                 }
             }
             RecyclingBitmapDrawable drawable = null;
-            if (bitmap != null) {
+            if (image != null) {
                 drawable = new RecyclingBitmapDrawable(mImageLoader.getContext().getResources(),
-                        bitmap);
+                        image);
                 MemoryImageCache memoryImageCache = mImageLoader.getMemoryImageCache();
                 if (memoryImageCache != null) {
                     memoryImageCache.put(mImageSource.getKey(), drawable);
@@ -705,7 +716,7 @@ public class ImageLoader<T> {
                         @Override
                         public void onEnd(FadeDrawable drawable) {
                             if (mCallback != null) {
-                                mCallback.onBitmapLoaded(imageView);
+                                mCallback.onImageDisplayed(imageView);
                             }
                         }
                     });
@@ -713,7 +724,7 @@ public class ImageLoader<T> {
                 } else {
                     imageView.setImageDrawable(mBitmapDrawable);
                     if (mCallback != null) {
-                        mCallback.onBitmapLoaded(imageView);
+                        mCallback.onImageDisplayed(imageView);
                     }
                 }
             }
@@ -739,7 +750,7 @@ public class ImageLoader<T> {
             }
             mImageView.setImageDrawable(mBitmapDrawable);
             if (mCallback != null) {
-                mCallback.onBitmapLoaded(mImageView);
+                mCallback.onImageDisplayed(mImageView);
             }
         }
     }
@@ -1187,6 +1198,8 @@ public class ImageLoader<T> {
     }
 
     public interface Callback {
-        void onBitmapLoaded(ImageView imageView);
+        void onImageLoaded(Bitmap image, boolean fromMemoryCache, boolean fromStorageCache);
+
+        void onImageDisplayed(ImageView imageView);
     }
 }
