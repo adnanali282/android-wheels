@@ -221,9 +221,9 @@ public class ImageLoader<T> {
         }
         if (drawable != null) {
             if (callback != null) {
-                Bitmap bitmap = drawable.getBitmap();
-                if (bitmap != null) {
-                    callback.onImageLoaded(bitmap, true, false);
+                Bitmap image = drawable.getBitmap();
+                if (image != null) {
+                    callback.onImageLoaded(image, true, false);
                 }
             }
             runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
