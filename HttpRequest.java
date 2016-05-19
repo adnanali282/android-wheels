@@ -43,7 +43,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
@@ -54,17 +54,19 @@ public final class HttpRequest {
     /**
      * Create new GET HTTP request
      *
-     * @param url                URL-address
-     * @param queryParameterList Query string parameter list
-     * @param resultType         Type of request result in callback
-     * @param callback           Response callback
+     * @param url              URL-address
+     * @param headerParameters Request header parameters
+     * @param queryParameters  Query string parameters
+     * @param resultType       Type of request result in callback
+     * @param callback         Response callback
      * @return New GET request instance
      */
     @NonNull
     public static Get newGetRequest(@NonNull String url,
-            @Nullable List<QueryParameter> queryParameterList, @NonNull ResultType resultType,
+            @Nullable Collection<HeaderParameter> headerParameters,
+            @Nullable Collection<QueryParameter> queryParameters, @NonNull ResultType resultType,
             @Nullable Callback callback) {
-        return new Get(url, queryParameterList, resultType, callback);
+        return new Get(url, headerParameters, queryParameters, resultType, callback);
     }
 
     /**
@@ -81,19 +83,22 @@ public final class HttpRequest {
     /**
      * Create new POST HTTP request
      *
-     * @param url                URL-address
-     * @param queryParameterList Query string parameter list
-     * @param postParameterList  Request body multipart/form-data parameter list
-     * @param resultType         Type of request result in callback
-     * @param callback           Response callback
+     * @param url              URL-address
+     * @param headerParameters Request header parameters
+     * @param queryParameters  Query string parameters
+     * @param postParameters   Request body multipart/form-data parameters
+     * @param resultType       Type of request result in callback
+     * @param callback         Response callback
      * @return New GET request instance
      */
     @NonNull
     public static Post newPostRequest(@NonNull String url,
-            @Nullable List<QueryParameter> queryParameterList,
-            @Nullable List<PostParameter> postParameterList, @NonNull ResultType resultType,
+            @Nullable Collection<HeaderParameter> headerParameters,
+            @Nullable Collection<QueryParameter> queryParameters,
+            @Nullable Collection<PostParameter> postParameters, @NonNull ResultType resultType,
             @Nullable Callback callback) {
-        return new Post(url, queryParameterList, postParameterList, resultType, callback);
+        return new Post(url, headerParameters, queryParameters, postParameters, resultType,
+                callback);
     }
 
     /**
@@ -105,6 +110,21 @@ public final class HttpRequest {
     @NonNull
     public static Post.Builder newPostBuilder(@NonNull String url) {
         return new Post.Builder(url);
+    }
+
+    /**
+     * Create new request header parameter
+     *
+     * @param key   Key
+     * @param value Value
+     * @return New request header parameter
+     */
+    @NonNull
+    public static HeaderParameter newHeaderParameter(@NonNull String key, @Nullable String value) {
+        HeaderParameter headerParameter = new HeaderParameter();
+        headerParameter.key = key;
+        headerParameter.value = value;
+        return headerParameter;
     }
 
     /**
@@ -174,7 +194,7 @@ public final class HttpRequest {
     }
 
     @NonNull
-    private static String buildParamsUrlString(@NonNull List<QueryParameter> params,
+    private static String buildParamsUrlString(@NonNull Collection<QueryParameter> params,
             @NonNull String charset) throws UnsupportedEncodingException {
         StringBuilder dataBuilder = new StringBuilder();
         boolean firstEntry = true;
@@ -196,6 +216,17 @@ public final class HttpRequest {
     }
 
     private HttpRequest() {
+    }
+
+    /**
+     * Query header request parameter
+     */
+    public static final class HeaderParameter {
+        private String key = null;
+        private String value = null;
+
+        private HeaderParameter() {
+        }
     }
 
     /**
@@ -344,7 +375,8 @@ public final class HttpRequest {
         private static final int CONNECTION_TIMEOUT = 10000;
         private final Object mResultLock = new Object();
         private final String mUrl;
-        private final List<QueryParameter> mQueryParameterList;
+        private final Collection<HeaderParameter> mHeaderParameters;
+        private final Collection<QueryParameter> mQueryParameters;
         private final Callback mCallback;
         private final ResultType mResultType;
         private volatile Result mResult = null;
@@ -356,13 +388,20 @@ public final class HttpRequest {
                 try {
                     mResult = null;
                     String request = mUrl;
-                    if (mQueryParameterList != null && mQueryParameterList.size() > 0) {
-                        request += "?" + buildParamsUrlString(mQueryParameterList, UTF_8);
+                    if (mQueryParameters != null && mQueryParameters.size() > 0) {
+                        request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                     }
                     URL url = new URL(request);
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod(GET);
                     connection.setRequestProperty(ACCEPT_CHARSET, UTF_8);
+                    if (mHeaderParameters != null) {
+                        for (HeaderParameter parameter : mHeaderParameters) {
+                            if (parameter.key != null && parameter.value != null) {
+                                connection.setRequestProperty(parameter.key, parameter.value);
+                            }
+                        }
+                    }
                     connection.setConnectTimeout(CONNECTION_TIMEOUT);
                     int responseCode = connection.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -454,10 +493,12 @@ public final class HttpRequest {
             }
         };
 
-        private Get(@NonNull String url, @Nullable List<QueryParameter> queryParameterList,
+        private Get(@NonNull String url, @Nullable Collection<HeaderParameter> headerParameters,
+                @Nullable Collection<QueryParameter> queryParameters,
                 @NonNull ResultType resultType, @Nullable Callback callback) {
             mUrl = url;
-            mQueryParameterList = queryParameterList;
+            mHeaderParameters = headerParameters;
+            mQueryParameters = queryParameters;
             mCallback = callback;
             mResultType = resultType;
         }
@@ -507,12 +548,21 @@ public final class HttpRequest {
          */
         public static final class Builder {
             private final String mUrl;
-            private List<QueryParameter> mQueryParameters = null;
+            private ArrayList<HeaderParameter> mHeaderParameters = null;
+            private ArrayList<QueryParameter> mQueryParameters = null;
             private ResultType mResultType = ResultType.STRING;
             private Callback mCallback = null;
 
             private Builder(@NonNull String url) {
                 mUrl = url;
+            }
+
+            public Builder appendHeaderParameter(@NonNull String key, @NonNull String value) {
+                if (mHeaderParameters == null) {
+                    mHeaderParameters = new ArrayList<>();
+                }
+                mHeaderParameters.add(newHeaderParameter(key, value));
+                return this;
             }
 
             public Builder appendQueryParameter(@NonNull String key, @Nullable String value) {
@@ -535,7 +585,7 @@ public final class HttpRequest {
 
             @NonNull
             public Get build() {
-                return new Get(mUrl, mQueryParameters, mResultType, mCallback);
+                return new Get(mUrl, mHeaderParameters, mQueryParameters, mResultType, mCallback);
             }
         }
     }
@@ -564,8 +614,9 @@ public final class HttpRequest {
         private static final int BUFFER_SIZE = 4096;
         private final Object mResultLock = new Object();
         private final String mUrl;
-        private final List<QueryParameter> mQueryParameterList;
-        private final List<PostParameter> mPostParameterList;
+        private final Collection<HeaderParameter> mHeaderParameters;
+        private final Collection<QueryParameter> mQueryParameters;
+        private final Collection<PostParameter> mPostParameters;
         private final Callback mCallback;
         private final ResultType mResultType;
         private volatile Result mResult = null;
@@ -578,8 +629,8 @@ public final class HttpRequest {
                     mResult = null;
                     String boundary = "===" + System.currentTimeMillis() + "===";
                     String request = mUrl;
-                    if (mQueryParameterList != null && mQueryParameterList.size() > 0) {
-                        request += "?" + buildParamsUrlString(mQueryParameterList, UTF_8);
+                    if (mQueryParameters != null && mQueryParameters.size() > 0) {
+                        request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                     }
                     URL url = new URL(request);
                     connection = (HttpURLConnection) url.openConnection();
@@ -590,12 +641,19 @@ public final class HttpRequest {
                     connection.setRequestProperty(KEY_ACCEPT_CHARSET, UTF_8);
                     connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                     connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
+                    if (mHeaderParameters != null) {
+                        for (HeaderParameter parameter : mHeaderParameters) {
+                            if (parameter.key != null && parameter.value != null) {
+                                connection.setRequestProperty(parameter.key, parameter.value);
+                            }
+                        }
+                    }
                     connection.setConnectTimeout(CONNECTION_TIMEOUT);
                     OutputStream outputStream = connection.getOutputStream();
                     try (PrintWriter writer = new PrintWriter(
                             new OutputStreamWriter(outputStream, UTF_8), false)) {
-                        if (mPostParameterList != null && mPostParameterList.size() > 0) {
-                            for (PostParameter postParameter : mPostParameterList) {
+                        if (mPostParameters != null && mPostParameters.size() > 0) {
+                            for (PostParameter postParameter : mPostParameters) {
                                 if (postParameter.key != null) {
                                     if (postParameter.value != null) {
                                         writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
@@ -746,12 +804,14 @@ public final class HttpRequest {
             }
         };
 
-        private Post(@NonNull String url, @Nullable List<QueryParameter> queryParameterList,
-                @Nullable List<PostParameter> postParameterList, @NonNull ResultType resultType,
+        private Post(@NonNull String url, @Nullable Collection<HeaderParameter> headerParameters,
+                @Nullable Collection<QueryParameter> queryParameters,
+                @Nullable Collection<PostParameter> postParameters, @NonNull ResultType resultType,
                 @Nullable Callback callback) {
             mUrl = url;
-            mQueryParameterList = queryParameterList;
-            mPostParameterList = postParameterList;
+            mHeaderParameters = headerParameters;
+            mQueryParameters = queryParameters;
+            mPostParameters = postParameters;
             mCallback = callback;
             mResultType = resultType;
         }
@@ -801,13 +861,22 @@ public final class HttpRequest {
          */
         public static final class Builder {
             private final String mUrl;
-            private List<QueryParameter> mQueryParameters = null;
-            private List<PostParameter> mPostParameters = null;
+            private ArrayList<HeaderParameter> mHeaderParameters;
+            private ArrayList<QueryParameter> mQueryParameters;
+            private ArrayList<PostParameter> mPostParameters;
             private ResultType mResultType = ResultType.STRING;
             private Callback mCallback = null;
 
             private Builder(@NonNull String url) {
                 mUrl = url;
+            }
+
+            public Builder appendHeaderParameter(@NonNull String key, @NonNull String value) {
+                if (mHeaderParameters == null) {
+                    mHeaderParameters = new ArrayList<>();
+                }
+                mHeaderParameters.add(newHeaderParameter(key, value));
+                return this;
             }
 
             public Builder appendQueryParameter(@NonNull String key, @Nullable String value) {
@@ -856,7 +925,8 @@ public final class HttpRequest {
 
             @NonNull
             public Post build() {
-                return new Post(mUrl, mQueryParameters, mPostParameters, mResultType, mCallback);
+                return new Post(mUrl, mHeaderParameters, mQueryParameters, mPostParameters,
+                        mResultType, mCallback);
             }
         }
     }
