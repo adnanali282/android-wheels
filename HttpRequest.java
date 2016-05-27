@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  * <p/>
- * Copyright (c) 2016 Yuriy Budiyev
+ * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
  * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,10 +46,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
-/**
- * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/android-wheels
- */
 public final class HttpRequest {
     /**
      * Create new GET HTTP request

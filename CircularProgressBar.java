@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  * <p/>
- * Copyright (c) 2016 Yuriy Budiyev
+ * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
  * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,10 +39,6 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
-/**
- * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/android-wheels
- */
 public class CircularProgressBar extends View {
     private static final float DEFAULT_MAXIMUM = 100F;
     private static final float DEFAULT_PROGRESS = 0F;

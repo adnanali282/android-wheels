@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
- * Copyright (c) 2016 Yuriy Budiyev
- * <p>
+ * <p/>
+ * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * <p/>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,23 +35,19 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-/**
- * @author Yuriy Budiyev (yuriy.budiyev@yandex.ru)
- * @link https://github.com/yuriy-budiyev/android-wheels
- */
 public final class CsvParser {
     private static final String QUOTE_STRING = "\"";
     private static final String DOUBLE_QUOTE_STRING = "\"\"";
     private static final char QUOTE = '\"';
-    private static final char CR = '\r';
     private static final char LF = '\n';
 
     private CsvParser() {
     }
 
-    public static boolean encode(Table table, OutputStream outputStream, char separator) {
+    public static boolean encode(Table table, OutputStream outputStream, char separator,
+            String charset) {
         try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, "UTF-8"))) {
+                new OutputStreamWriter(outputStream, charset))) {
             for (Row row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
@@ -89,8 +85,8 @@ public final class CsvParser {
     }
 
     @NonNull
-    public static Table parse(InputStream inputStream, char separator) {
-        return new Table(inputStream, separator);
+    public static Table parse(InputStream inputStream, char separator, String charset) {
+        return new Table(inputStream, separator, charset);
     }
 
     @NonNull
@@ -110,30 +106,21 @@ public final class CsvParser {
                 if (current == LF && !inQuotes) {
                     mRows.add(new Row(row.toString(), separator));
                     row.delete(0, row.length());
-                } else if (current == QUOTE) {
-                    int n = i + 1;
-                    if (n < length && table.charAt(n) == QUOTE) {
-                        row.append(current).append(current);
-                        i++;
-                    } else {
+                } else {
+                    if (current == QUOTE) {
                         inQuotes = !inQuotes;
                     }
-                } else {
-                    if (current != CR) {
-                        row.append(current);
-                    }
+                    row.append(current);
                 }
             }
-            if (row.length() != 0) {
-                mRows.add(new Row(row.toString(), separator));
-            }
+            mRows.add(new Row(row.toString(), separator));
         }
 
-        private Table(InputStream table, char separator) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(table))) {
+        private Table(InputStream table, char separator, String charset) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(table, charset))) {
                 StringBuilder row = new StringBuilder();
                 boolean inQuotes = false;
-                int previous = -1;
                 for (; ; ) {
                     int c = reader.read();
                     char current;
@@ -145,25 +132,14 @@ public final class CsvParser {
                     if (current == LF && !inQuotes) {
                         mRows.add(new Row(row.toString(), separator));
                         row.delete(0, row.length());
-                        previous = -1;
-                    } else if (current == QUOTE) {
-                        if (previous != -1 && (char) previous == QUOTE) {
-                            row.append(current).append(current);
-                            previous = -1;
-                        } else {
-                            previous = (int) current;
-                        }
-                        inQuotes = !inQuotes;
                     } else {
-                        if (current != CR) {
-                            row.append(current);
-                            previous = (int) current;
+                        if (current == QUOTE) {
+                            inQuotes = !inQuotes;
                         }
+                        row.append(current);
                     }
                 }
-                if (row.length() != 0) {
-                    mRows.add(new Row(row.toString(), separator));
-                }
+                mRows.add(new Row(row.toString(), separator));
             } catch (IOException ignored) {
             }
         }
@@ -234,15 +210,22 @@ public final class CsvParser {
         private Row(String row, char separator) {
             StringBuilder cell = new StringBuilder();
             boolean inQuotes = false;
+            boolean inElementQuotes = false;
             int length = row.length();
             for (int i = 0; i < length; i++) {
                 char current = row.charAt(i);
-                if (current == separator && !inQuotes) {
+                if (current == separator && !inElementQuotes) {
                     mCells.add(cell.toString());
                     cell.delete(0, cell.length());
                 } else if (current == QUOTE) {
                     int n = i + 1;
-                    if (n < length && row.charAt(n) == QUOTE) {
+                    int p = i - 1;
+                    if ((p > -1 && row.charAt(p) == separator || i == 0) && !inElementQuotes) {
+                        inElementQuotes = true;
+                    } else if ((n < length && row.charAt(n) == separator || n == length) &&
+                            inElementQuotes) {
+                        inElementQuotes = false;
+                    } else if (n < length && row.charAt(n) == QUOTE) {
                         cell.append(current);
                         i++;
                     } else {
@@ -252,9 +235,7 @@ public final class CsvParser {
                     cell.append(current);
                 }
             }
-            if (cell.length() != 0) {
-                mCells.add(cell.toString());
-            }
+            mCells.add(cell.toString());
         }
 
         public Row() {
