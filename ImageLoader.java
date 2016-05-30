@@ -146,6 +146,7 @@ public class ImageLoader<T> {
         if (poolSize > 1) {
             poolSize--;
         }
+        INSTANCE_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
         mAsyncExecutor = Executors.newFixedThreadPool(poolSize,
                 new ImageLoaderThreadFactory(INSTANCE_COUNTER.getAndIncrement()));
     }
