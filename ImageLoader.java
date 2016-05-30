@@ -56,9 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.Callable;
@@ -538,24 +535,6 @@ public class ImageLoader<T> {
                         requiredHeight, ignoreTotalNumberOfPixels);
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
-    }
-
-    /**
-     * Helper method for generating MD5 hash strings
-     *
-     * @param data source data
-     * @return MD5 hash string
-     */
-    @NonNull
-    public static String generateMD5(byte[] data) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(data);
-            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
-            return bigInteger.toString(Character.MAX_RADIX);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
