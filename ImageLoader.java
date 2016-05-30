@@ -545,13 +545,15 @@ public class ImageLoader<T> {
      * @param uri       Source uri
      */
     public static void load(final Context context, final ImageView imageView, final Uri uri) {
-        new ImageLoader<>(context, new BitmapLoader<Uri>() {
+        ImageLoader<Uri> loader = new ImageLoader<>(context, new BitmapLoader<Uri>() {
             @Override
             public Bitmap load(Uri data) {
                 return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
-        }).loadImage(new ImageSource<Uri>() {
+        });
+        loader.setImageFadeIn(false);
+        loader.loadImage(new ImageSource<Uri>() {
             @Override
             public Uri getData() {
                 return uri;
@@ -572,12 +574,14 @@ public class ImageLoader<T> {
      * @param file      Source file
      */
     public static void load(final Context context, final ImageView imageView, final File file) {
-        new ImageLoader<>(context, new BitmapLoader<File>() {
+        ImageLoader<File> loader = new ImageLoader<>(context, new BitmapLoader<File>() {
             @Override
             public Bitmap load(File data) {
                 return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
-        }).loadImage(new ImageSource<File>() {
+        });
+        loader.setImageFadeIn(false);
+        loader.loadImage(new ImageSource<File>() {
             @Override
             public File getData() {
                 return file;
@@ -599,13 +603,16 @@ public class ImageLoader<T> {
      */
     public static void load(final Context context, final ImageView imageView,
             final FileDescriptor fileDescriptor) {
-        new ImageLoader<>(context, new BitmapLoader<FileDescriptor>() {
-            @Override
-            public Bitmap load(FileDescriptor data) {
-                return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
-                        Integer.MAX_VALUE, true);
-            }
-        }).loadImage(new ImageSource<FileDescriptor>() {
+        ImageLoader<FileDescriptor> loader =
+                new ImageLoader<>(context, new BitmapLoader<FileDescriptor>() {
+                    @Override
+                    public Bitmap load(FileDescriptor data) {
+                        return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
+                                Integer.MAX_VALUE, true);
+                    }
+                });
+        loader.setImageFadeIn(false);
+        loader.loadImage(new ImageSource<FileDescriptor>() {
             @Override
             public FileDescriptor getData() {
                 return fileDescriptor;
@@ -627,13 +634,15 @@ public class ImageLoader<T> {
      */
     public static void load(final Context context, final ImageView imageView,
             final int resourceId) {
-        new ImageLoader<>(context, new BitmapLoader<Integer>() {
+        ImageLoader<Integer> loader = new ImageLoader<>(context, new BitmapLoader<Integer>() {
             @Override
             public Bitmap load(Integer data) {
                 return loadSampledBitmapFromResource(context.getResources(), data,
                         Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
-        }).loadImage(new ImageSource<Integer>() {
+        });
+        loader.setImageFadeIn(false);
+        loader.loadImage(new ImageSource<Integer>() {
             @Override
             public Integer getData() {
                 return resourceId;
@@ -654,13 +663,15 @@ public class ImageLoader<T> {
      * @param bytes     Source bytes
      */
     public static void load(final Context context, final ImageView imageView, final byte[] bytes) {
-        new ImageLoader<>(context, new BitmapLoader<byte[]>() {
+        ImageLoader<byte[]> loader = new ImageLoader<>(context, new BitmapLoader<byte[]>() {
             @Override
             public Bitmap load(byte[] data) {
                 return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
-        }).loadImage(new ImageSource<byte[]>() {
+        });
+        loader.setImageFadeIn(false);
+        loader.loadImage(new ImageSource<byte[]>() {
             @Override
             public byte[] getData() {
                 return bytes;
