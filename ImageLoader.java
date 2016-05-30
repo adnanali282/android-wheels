@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -380,6 +380,101 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Helper method for loading sampled bitmaps from URIs
+     *
+     * @param context                   Context
+     * @param uri                       URI
+     * @param requiredWidth             Required width
+     * @param requiredHeight            Required height
+     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
+     *                                  (requiredWidth * requiredHeight)
+     * @return Loaded bitmap or null
+     */
+    @Nullable
+    public static Bitmap loadSampledBitmapFromUri(Context context, Uri uri, int requiredWidth,
+            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
+        ContentResolver resolver = context.getContentResolver();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        try (InputStream inputStream = resolver.openInputStream(uri)) {
+            BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+        options.inJustDecodeBounds = false;
+        options.inSampleSize =
+                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                        requiredHeight, ignoreTotalNumberOfPixels);
+        try (InputStream inputStream = resolver.openInputStream(uri)) {
+            return BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Helper method for loading sampled bitmaps from files
+     *
+     * @param file                      File
+     * @param requiredWidth             Required width
+     * @param requiredHeight            Required height
+     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
+     *                                  (requiredWidth * requiredHeight)
+     * @return Loaded bitmap or null
+     */
+    @Nullable
+    public static Bitmap loadSampledBitmapFromFile(File file, int requiredWidth, int requiredHeight,
+            boolean ignoreTotalNumberOfPixels) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        try (InputStream inputStream = new FileInputStream(file)) {
+            BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+        options.inJustDecodeBounds = false;
+        options.inSampleSize =
+                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                        requiredHeight, ignoreTotalNumberOfPixels);
+        try (InputStream inputStream = new FileInputStream(file)) {
+            return BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Helper method for loading sampled bitmaps from file descriptors
+     *
+     * @param fileDescriptor            File descriptor
+     * @param requiredWidth             Required width
+     * @param requiredHeight            Required height
+     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
+     *                                  (requiredWidth * requiredHeight)
+     * @return Loaded bitmap or null
+     */
+    @Nullable
+    public static Bitmap loadSampledBitmapFromFileDescriptor(FileDescriptor fileDescriptor,
+            int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
+            BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+        options.inJustDecodeBounds = false;
+        options.inSampleSize =
+                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                        requiredHeight, ignoreTotalNumberOfPixels);
+        try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
+            return BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
      * Helper method for loading sampled bitmaps from resources
      *
      * @param resources                 Resources
@@ -419,101 +514,6 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from files
-     *
-     * @param file                      File
-     * @param requiredWidth             Required width
-     * @param requiredHeight            Required height
-     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
-     *                                  (requiredWidth * requiredHeight)
-     * @return Loaded bitmap or null
-     */
-    @Nullable
-    public static Bitmap loadSampledBitmapFromFile(File file, int requiredWidth, int requiredHeight,
-            boolean ignoreTotalNumberOfPixels) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = new FileInputStream(file)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = new FileInputStream(file)) {
-            return BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Helper method for loading sampled bitmaps from URIs
-     *
-     * @param context                   Context
-     * @param uri                       URI
-     * @param requiredWidth             Required width
-     * @param requiredHeight            Required height
-     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
-     *                                  (requiredWidth * requiredHeight)
-     * @return Loaded bitmap or null
-     */
-    @Nullable
-    public static Bitmap loadSampledBitmapFromUri(Context context, Uri uri, int requiredWidth,
-            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        ContentResolver resolver = context.getContentResolver();
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = resolver.openInputStream(uri)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = resolver.openInputStream(uri)) {
-            return BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Helper method for loading sampled bitmaps from file descriptors
-     *
-     * @param fileDescriptor            File descriptor
-     * @param requiredWidth             Required width
-     * @param requiredHeight            Required height
-     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
-     *                                  (requiredWidth * requiredHeight)
-     * @return Loaded bitmap or null
-     */
-    @Nullable
-    public static Bitmap loadSampledBitmapFromFileDescriptor(FileDescriptor fileDescriptor,
-            int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
-            return BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    /**
      * Helper method for loading sampled bitmaps from byte arrays
      *
      * @param byteArray                 Byte array
@@ -534,6 +534,142 @@ public class ImageLoader<T> {
                         requiredHeight, ignoreTotalNumberOfPixels);
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
+    }
+
+    /**
+     * Load image
+     *
+     * @param context   Context
+     * @param imageView Image view
+     * @param uri       Source uri
+     */
+    public static void load(final Context context, final ImageView imageView, final Uri uri) {
+        new ImageLoader<>(context, new BitmapLoader<Uri>() {
+            @Override
+            public Bitmap load(Uri data) {
+                return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                        true);
+            }
+        }).loadImage(new ImageSource<Uri>() {
+            @Override
+            public Uri getData() {
+                return uri;
+            }
+
+            @Override
+            public String getKey() {
+                return null;
+            }
+        }, imageView);
+    }
+
+    /**
+     * Load image
+     *
+     * @param context   Context
+     * @param imageView Image view
+     * @param file      Source file
+     */
+    public static void load(final Context context, final ImageView imageView, final File file) {
+        new ImageLoader<>(context, new BitmapLoader<File>() {
+            @Override
+            public Bitmap load(File data) {
+                return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            }
+        }).loadImage(new ImageSource<File>() {
+            @Override
+            public File getData() {
+                return file;
+            }
+
+            @Override
+            public String getKey() {
+                return null;
+            }
+        }, imageView);
+    }
+
+    /**
+     * Load image
+     *
+     * @param context        Context
+     * @param imageView      Image view
+     * @param fileDescriptor Source file descriptor
+     */
+    public static void load(final Context context, final ImageView imageView,
+            final FileDescriptor fileDescriptor) {
+        new ImageLoader<>(context, new BitmapLoader<FileDescriptor>() {
+            @Override
+            public Bitmap load(FileDescriptor data) {
+                return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
+                        Integer.MAX_VALUE, true);
+            }
+        }).loadImage(new ImageSource<FileDescriptor>() {
+            @Override
+            public FileDescriptor getData() {
+                return fileDescriptor;
+            }
+
+            @Override
+            public String getKey() {
+                return null;
+            }
+        }, imageView);
+    }
+
+    /**
+     * Load image
+     *
+     * @param context    Context
+     * @param imageView  Image view
+     * @param resourceId Source resource identifier
+     */
+    public static void load(final Context context, final ImageView imageView,
+            final int resourceId) {
+        new ImageLoader<>(context, new BitmapLoader<Integer>() {
+            @Override
+            public Bitmap load(Integer data) {
+                return loadSampledBitmapFromResource(context.getResources(), data,
+                        Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            }
+        }).loadImage(new ImageSource<Integer>() {
+            @Override
+            public Integer getData() {
+                return resourceId;
+            }
+
+            @Override
+            public String getKey() {
+                return null;
+            }
+        }, imageView);
+    }
+
+    /**
+     * Load image
+     *
+     * @param context   Context
+     * @param imageView Image view
+     * @param bytes     Source bytes
+     */
+    public static void load(final Context context, final ImageView imageView, final byte[] bytes) {
+        new ImageLoader<>(context, new BitmapLoader<byte[]>() {
+            @Override
+            public Bitmap load(byte[] data) {
+                return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                        true);
+            }
+        }).loadImage(new ImageSource<byte[]>() {
+            @Override
+            public byte[] getData() {
+                return bytes;
+            }
+
+            @Override
+            public String getKey() {
+                return null;
+            }
+        }, imageView);
     }
 
     private static class ImageLoaderThreadFactory implements ThreadFactory {
