@@ -24,7 +24,6 @@
 package com.budiyev.android.wheels;
 
 import android.annotation.TargetApi;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -56,8 +55,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,6 +80,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ImageLoader<T> {
     private static final AtomicInteger INSTANCE_COUNTER = new AtomicInteger(1);
+    private static final String URI_SCHEME_HTTP = "http";
+    private static final String URI_SCHEME_HTTPS = "https";
+    private static final String URI_SCHEME_FTP = "ftp";
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private final Thread mMainThread;
@@ -381,6 +388,24 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Helper method for getting input stream from uris
+     *
+     * @param context Context
+     * @param uri     Uri
+     * @return stream
+     * @throws IOException
+     */
+    public static InputStream getStreamFromUri(Context context, Uri uri) throws IOException {
+        String scheme = uri.getScheme();
+        if (Objects.equals(scheme, URI_SCHEME_HTTP) || Objects.equals(scheme, URI_SCHEME_HTTPS) ||
+                Objects.equals(scheme, URI_SCHEME_FTP)) {
+            return new URL(uri.toString()).openConnection().getInputStream();
+        } else {
+            return context.getContentResolver().openInputStream(uri);
+        }
+    }
+
+    /**
      * Helper method for loading sampled bitmaps from URIs
      *
      * @param context                   Context
@@ -394,10 +419,9 @@ public class ImageLoader<T> {
     @Nullable
     public static Bitmap loadSampledBitmapFromUri(Context context, Uri uri, int requiredWidth,
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        ContentResolver resolver = context.getContentResolver();
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        try (InputStream inputStream = resolver.openInputStream(uri)) {
+        try (InputStream inputStream = getStreamFromUri(context, uri)) {
             BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -406,7 +430,7 @@ public class ImageLoader<T> {
         options.inSampleSize =
                 calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
                         requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = resolver.openInputStream(uri)) {
+        try (InputStream inputStream = getStreamFromUri(context, uri)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -538,20 +562,137 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Load image
+     * Creates new common bitmap loader for uris
      *
-     * @param context   Context
-     * @param imageView Image view
-     * @param uri       Source uri
+     * @param context Context
+     * @return bitmap loader
      */
-    public static void load(final Context context, final ImageView imageView, final Uri uri) {
-        ImageLoader<Uri> loader = new ImageLoader<>(context, new BitmapLoader<Uri>() {
+    @NonNull
+    public static BitmapLoader<Uri> newUriBitmapLoader(final Context context) {
+        return new BitmapLoader<Uri>() {
             @Override
             public Bitmap load(Uri data) {
                 return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
-        });
+        };
+    }
+
+    /**
+     * Creates new common bitmap loader for files
+     *
+     * @return bitmap loader
+     */
+    @NonNull
+    public static BitmapLoader<File> newFileBitmapLoader() {
+        return new BitmapLoader<File>() {
+            @Override
+            public Bitmap load(File data) {
+                return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            }
+        };
+    }
+
+    /**
+     * Creates new common bitmap loader for file descriptors
+     *
+     * @return bitmap loader
+     */
+    @NonNull
+    public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
+        return new BitmapLoader<FileDescriptor>() {
+            @Override
+            public Bitmap load(FileDescriptor data) {
+                return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
+                        Integer.MAX_VALUE, true);
+            }
+        };
+    }
+
+    /**
+     * Creates new common bitmap loader for resources
+     *
+     * @param context Context
+     * @return bitmap loader
+     */
+    @NonNull
+    public static BitmapLoader<Integer> newResourceBitmapLoader(final Context context) {
+        return new BitmapLoader<Integer>() {
+            @Override
+            public Bitmap load(Integer data) {
+                return loadSampledBitmapFromResource(context.getResources(), data,
+                        Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            }
+        };
+    }
+
+    /**
+     * Creates new common bitmap loader for byte arrays
+     *
+     * @return bitmap loader
+     */
+    @NonNull
+    public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
+        return new BitmapLoader<byte[]>() {
+            @Override
+            public Bitmap load(byte[] data) {
+                return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                        true);
+            }
+        };
+    }
+
+    /**
+     * Generates MD5 hash string for specified data
+     *
+     * @param data Data
+     * @return MD5 hash string
+     */
+    @NonNull
+    public static String generateMD5(byte[] data) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest.update(data);
+            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
+            return bigInteger.toString(Character.MAX_RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Creates new common image source that is usable in most cases
+     *
+     * @param data Source data
+     * @param <T>  Source data type
+     * @return image source
+     */
+    @NonNull
+    public static <T> ImageSource<T> newImageSource(final T data) {
+        final String key = generateMD5(String.valueOf(data).getBytes());
+        return new ImageSource<T>() {
+            @Override
+            public T getData() {
+                return data;
+            }
+
+            @Override
+            public String getKey() {
+                return key;
+            }
+        };
+    }
+
+    /**
+     * Load image from uri
+     *
+     * @param imageView Image view
+     * @param uri       Source uri
+     */
+    public static void load(final ImageView imageView, final Uri uri) {
+        Context context = imageView.getContext();
+        ImageLoader<Uri> loader = new ImageLoader<>(context);
+        loader.setBitmapLoader(newUriBitmapLoader(context));
         loader.setImageFadeIn(false);
         loader.loadImage(new ImageSource<Uri>() {
             @Override
@@ -567,19 +708,15 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Load image
+     * Load image from file
      *
-     * @param context   Context
      * @param imageView Image view
      * @param file      Source file
      */
-    public static void load(final Context context, final ImageView imageView, final File file) {
-        ImageLoader<File> loader = new ImageLoader<>(context, new BitmapLoader<File>() {
-            @Override
-            public Bitmap load(File data) {
-                return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
-            }
-        });
+    public static void load(final ImageView imageView, final File file) {
+        final Context context = imageView.getContext();
+        ImageLoader<File> loader = new ImageLoader<>(context);
+        loader.setBitmapLoader(newFileBitmapLoader());
         loader.setImageFadeIn(false);
         loader.loadImage(new ImageSource<File>() {
             @Override
@@ -595,22 +732,15 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Load image
+     * Load image file descriptor
      *
-     * @param context        Context
      * @param imageView      Image view
      * @param fileDescriptor Source file descriptor
      */
-    public static void load(final Context context, final ImageView imageView,
-            final FileDescriptor fileDescriptor) {
-        ImageLoader<FileDescriptor> loader =
-                new ImageLoader<>(context, new BitmapLoader<FileDescriptor>() {
-                    @Override
-                    public Bitmap load(FileDescriptor data) {
-                        return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
-                                Integer.MAX_VALUE, true);
-                    }
-                });
+    public static void load(final ImageView imageView, final FileDescriptor fileDescriptor) {
+        final Context context = imageView.getContext();
+        ImageLoader<FileDescriptor> loader = new ImageLoader<>(context);
+        loader.setBitmapLoader(newFileDescriptorBitmapLoader());
         loader.setImageFadeIn(false);
         loader.loadImage(new ImageSource<FileDescriptor>() {
             @Override
@@ -626,21 +756,15 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Load image
+     * Load image from resource
      *
-     * @param context    Context
      * @param imageView  Image view
      * @param resourceId Source resource identifier
      */
-    public static void load(final Context context, final ImageView imageView,
-            final int resourceId) {
-        ImageLoader<Integer> loader = new ImageLoader<>(context, new BitmapLoader<Integer>() {
-            @Override
-            public Bitmap load(Integer data) {
-                return loadSampledBitmapFromResource(context.getResources(), data,
-                        Integer.MAX_VALUE, Integer.MAX_VALUE, true);
-            }
-        });
+    public static void load(final ImageView imageView, final int resourceId) {
+        final Context context = imageView.getContext();
+        ImageLoader<Integer> loader = new ImageLoader<>(context);
+        loader.setBitmapLoader(newResourceBitmapLoader(context));
         loader.setImageFadeIn(false);
         loader.loadImage(new ImageSource<Integer>() {
             @Override
@@ -656,20 +780,15 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Load image
+     * Load image from byte array
      *
-     * @param context   Context
      * @param imageView Image view
      * @param bytes     Source bytes
      */
-    public static void load(final Context context, final ImageView imageView, final byte[] bytes) {
-        ImageLoader<byte[]> loader = new ImageLoader<>(context, new BitmapLoader<byte[]>() {
-            @Override
-            public Bitmap load(byte[] data) {
-                return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
-                        true);
-            }
-        });
+    public static void load(final ImageView imageView, final byte[] bytes) {
+        final Context context = imageView.getContext();
+        ImageLoader<byte[]> loader = new ImageLoader<>(context);
+        loader.setBitmapLoader(newByteArrayBitmapLoader());
         loader.setImageFadeIn(false);
         loader.loadImage(new ImageSource<byte[]>() {
             @Override
@@ -1346,6 +1465,9 @@ public class ImageLoader<T> {
         Bitmap load(T data);
     }
 
+    /**
+     * Callback for concrete image loading
+     */
     public interface Callback {
         void onImageLoaded(Bitmap image, boolean fromMemoryCache, boolean fromStorageCache);
 
