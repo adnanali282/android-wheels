@@ -107,32 +107,18 @@ public class ImageLoader<T> {
     }
 
     /**
-     * ImageLoader with default memory cache and without storage cache. ImageLoader
+     * ImageLoader with default memory and storage caches. ImageLoader
      * is usable without bitmapLoader (loading new bitmaps is not available in this case).
      *
      * @param context      Context
      * @param bitmapLoader Bitmap loader
      */
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader) {
-        this(context, bitmapLoader, new MemoryImageCache(), null);
+        this(context, bitmapLoader, newMemoryImageCache(), newStorageImageCache(context));
     }
 
     /**
-     * ImageLoader with default memory and storage caches. ImageLoader is usable without
-     * bitmapLoader (loading new bitmaps is not available in this case).
-     *
-     * @param context               Context
-     * @param bitmapLoader          Bitmap loader
-     * @param storageCacheDirectory Storage cache directory
-     */
-    public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader,
-            @NonNull File storageCacheDirectory) {
-        this(context, bitmapLoader, new MemoryImageCache(),
-                new StorageImageCache(storageCacheDirectory));
-    }
-
-    /**
-     * ImageLoader with defined bitmap loader, memory image cache and storage image cache
+     * ImageLoader with specified bitmap loader, memory image cache and storage image cache
      *
      * @param context           Context
      * @param bitmapLoader      Bitmap loader
@@ -352,7 +338,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Calculates sample size for required size from source size
+     * Calculate sample size for required size from source size
      * Sample size is the number of pixels in either dimension that
      * correspond to a single pixel
      *
@@ -388,7 +374,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for getting input stream from uris
+     * Get input stream from uri
      *
      * @param context Context
      * @param uri     Uri
@@ -406,10 +392,10 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from URIs
+     * Load sampled bitmap from uri
      *
      * @param context                   Context
-     * @param uri                       URI
+     * @param uri                       Uri
      * @param requiredWidth             Required width
      * @param requiredHeight            Required height
      * @param ignoreTotalNumberOfPixels Ignore total number of pixels
@@ -438,7 +424,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from files
+     * Loading sampled bitmap from file
      *
      * @param file                      File
      * @param requiredWidth             Required width
@@ -469,7 +455,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from file descriptors
+     * Load sampled bitmap from file descriptor
      *
      * @param fileDescriptor            File descriptor
      * @param requiredWidth             Required width
@@ -500,7 +486,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from resources
+     * Load sampled bitmap from resource
      *
      * @param resources                 Resources
      * @param resourceId                Resource id
@@ -539,7 +525,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Helper method for loading sampled bitmaps from byte arrays
+     * Load sampled bitmap from byte array
      *
      * @param byteArray                 Byte array
      * @param requiredWidth             Required width
@@ -562,7 +548,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common bitmap loader for uris
+     * Create new common bitmap loader for uris
      *
      * @param context Context
      * @return bitmap loader
@@ -579,7 +565,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common bitmap loader for files
+     * Create new common bitmap loader for files
      *
      * @return bitmap loader
      */
@@ -594,7 +580,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common bitmap loader for file descriptors
+     * Create new common bitmap loader for file descriptors
      *
      * @return bitmap loader
      */
@@ -610,7 +596,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common bitmap loader for resources
+     * Create new common bitmap loader for resources
      *
      * @param context Context
      * @return bitmap loader
@@ -627,7 +613,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common bitmap loader for byte arrays
+     * Create new common bitmap loader for byte arrays
      *
      * @return bitmap loader
      */
@@ -643,7 +629,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Generates MD5 hash string for specified data
+     * Generate MD5 hash string for specified data
      *
      * @param data Data
      * @return MD5 hash string
@@ -661,11 +647,11 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Creates new common image source that is usable in most cases
+     * Create new common image source that is usable in most cases
      *
      * @param data Source data
      * @param <T>  Source data type
-     * @return image source
+     * @return Image source
      */
     @NonNull
     public static <T> ImageSource<T> newImageSource(final T data) {
@@ -681,6 +667,59 @@ public class ImageLoader<T> {
                 return key;
             }
         };
+    }
+
+    /**
+     * Create memory image cache with maximum size equal to specified
+     * total available memory fraction
+     *
+     * @param totalMemoryFraction Fraction
+     * @return Memory image cache
+     */
+    @NonNull
+    public static MemoryImageCache newMemoryImageCache(float totalMemoryFraction) {
+        return new MemoryImageCache(MemoryImageCache.getMemoryFractionBytes(totalMemoryFraction));
+    }
+
+    /**
+     * Create memory image cache with maximum size 25% of
+     * total available memory fraction
+     *
+     * @return Memory image cache
+     */
+    @NonNull
+    public static MemoryImageCache newMemoryImageCache() {
+        return newMemoryImageCache(MemoryImageCache.DEFAULT_FRACTION);
+    }
+
+    /**
+     * Create storage image cache in specified directory with maximum size 10%
+     * of total storage size
+     *
+     * @param directory Cache directory
+     * @return Storage image cache
+     */
+    @NonNull
+    public static StorageImageCache newStorageImageCache(File directory) {
+        return new StorageImageCache(directory, StorageImageCache
+                .getStorageTotalFractionBytes(directory, StorageImageCache.DEFAULT_FRACTION),
+                StorageImageCache.DEFAULT_FORMAT, StorageImageCache.DEFAULT_QUALITY);
+    }
+
+    /**
+     * Create storage image cache in default application cache directory with maximum size 10%
+     * of total storage size
+     *
+     * @param context Context
+     * @return Storage image cache
+     */
+    @NonNull
+    public static StorageImageCache newStorageImageCache(Context context) {
+        File cacheDir = context.getExternalCacheDir();
+        if (cacheDir == null) {
+            cacheDir = context.getCacheDir();
+        }
+        return newStorageImageCache(new File(cacheDir, StorageImageCache.DEFAULT_DIRECTORY));
     }
 
     /**
@@ -988,12 +1027,8 @@ public class ImageLoader<T> {
     }
 
     public static class MemoryImageCache {
-        private static final float DEFAULT_MEMORY_PERCENT = 0.25F;
+        public static final float DEFAULT_FRACTION = 0.25F;
         private final LruCache<String, RecyclingBitmapDrawable> mCache;
-
-        public MemoryImageCache() {
-            this(getMemoryPercentBytes(DEFAULT_MEMORY_PERCENT));
-        }
 
         public MemoryImageCache(int size) {
             mCache = new LruCache<String, RecyclingBitmapDrawable>(size) {
@@ -1028,36 +1063,25 @@ public class ImageLoader<T> {
             mCache.evictAll();
         }
 
-        public static int getMemoryPercentBytes(float percent) {
-            if (percent < 0.1F || percent > 0.8F) {
+        public static int getMemoryFractionBytes(float fraction) {
+            if (fraction < 0.1F || fraction > 0.8F) {
                 throw new IllegalArgumentException(
-                        "Argument \"percent\" must be between 0.1 and 0.8 (inclusive)");
+                        "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)");
             }
-            return Math.round(percent * Runtime.getRuntime().maxMemory());
+            return Math.round(fraction * Runtime.getRuntime().maxMemory());
         }
     }
 
     public static class StorageImageCache {
-        private static final double DEFAULT_STORAGE_PERCENT = 0.25D;
-        private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT =
-                Bitmap.CompressFormat.JPEG;
-        private static final int DEFAULT_COMPRESS_QUALITY = 90;
         private final Object mCacheSizeLock = new Object();
         private final File mDirectory;
         private final long mMaxSize;
         private final Bitmap.CompressFormat mCompressFormat;
         private final int mCompressQuality;
-
-        public StorageImageCache(@NonNull File directory) {
-            this(directory, getStorageFreePercentBytes(directory, DEFAULT_STORAGE_PERCENT),
-                    DEFAULT_COMPRESS_FORMAT, DEFAULT_COMPRESS_QUALITY);
-        }
-
-        public StorageImageCache(@NonNull File directory,
-                @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
-            this(directory, getStorageFreePercentBytes(directory, DEFAULT_STORAGE_PERCENT),
-                    compressFormat, compressQuality);
-        }
+        private static final String DEFAULT_DIRECTORY = "image_loader_cache";
+        public static final double DEFAULT_FRACTION = 0.1D;
+        public static final Bitmap.CompressFormat DEFAULT_FORMAT = Bitmap.CompressFormat.JPEG;
+        public static final int DEFAULT_QUALITY = 80;
 
         public StorageImageCache(@NonNull File directory, long maxSize,
                 @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
@@ -1136,23 +1160,23 @@ public class ImageLoader<T> {
             }
         }
 
-        public static long getStorageFreePercentBytes(@NonNull File path, double percent) {
-            if (percent < 0.01D || percent > 1.0D) {
+        public static long getStorageFreeFractionBytes(@NonNull File path, double fraction) {
+            if (fraction < 0.01D || fraction > 1.0D) {
                 throw new IllegalArgumentException(
-                        "Argument \"percent\" must be between 0.01 and 1.0 (inclusive)");
+                        "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
             }
             StatFs stat = new StatFs(path.getAbsolutePath());
             double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
-            return Math.round(bytesAvailable * percent);
+            return Math.round(bytesAvailable * fraction);
         }
 
-        public static long getStorageTotalPercentBytes(@NonNull File path, double percent) {
-            if (percent < 0.01D || percent > 1.0D) {
+        public static long getStorageTotalFractionBytes(@NonNull File path, double fraction) {
+            if (fraction < 0.01D || fraction > 1.0D) {
                 throw new IllegalArgumentException(
-                        "Argument \"percent\" must be between 0.01 and 1.0 (inclusive)");
+                        "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
             }
             StatFs stat = new StatFs(path.getAbsolutePath());
-            return Math.round(stat.getTotalBytes() * percent);
+            return Math.round(stat.getTotalBytes() * fraction);
         }
     }
 
