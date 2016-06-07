@@ -689,22 +689,12 @@ public class ImageLoader<T> {
      * @param imageView Image view
      * @param uri       Source uri
      */
-    public static void load(final ImageView imageView, final Uri uri) {
+    public static void load(ImageView imageView, Uri uri) {
         Context context = imageView.getContext();
         ImageLoader<Uri> loader = new ImageLoader<>(context);
         loader.setBitmapLoader(newUriBitmapLoader(context));
         loader.setImageFadeIn(false);
-        loader.loadImage(new ImageSource<Uri>() {
-            @Override
-            public Uri getData() {
-                return uri;
-            }
-
-            @Override
-            public String getKey() {
-                return null;
-            }
-        }, imageView);
+        loader.loadImage(newImageSource(uri), imageView);
     }
 
     /**
@@ -713,22 +703,12 @@ public class ImageLoader<T> {
      * @param imageView Image view
      * @param file      Source file
      */
-    public static void load(final ImageView imageView, final File file) {
+    public static void load(ImageView imageView, File file) {
         final Context context = imageView.getContext();
         ImageLoader<File> loader = new ImageLoader<>(context);
         loader.setBitmapLoader(newFileBitmapLoader());
         loader.setImageFadeIn(false);
-        loader.loadImage(new ImageSource<File>() {
-            @Override
-            public File getData() {
-                return file;
-            }
-
-            @Override
-            public String getKey() {
-                return null;
-            }
-        }, imageView);
+        loader.loadImage(newImageSource(file), imageView);
     }
 
     /**
@@ -737,22 +717,12 @@ public class ImageLoader<T> {
      * @param imageView      Image view
      * @param fileDescriptor Source file descriptor
      */
-    public static void load(final ImageView imageView, final FileDescriptor fileDescriptor) {
+    public static void load(ImageView imageView, FileDescriptor fileDescriptor) {
         final Context context = imageView.getContext();
         ImageLoader<FileDescriptor> loader = new ImageLoader<>(context);
         loader.setBitmapLoader(newFileDescriptorBitmapLoader());
         loader.setImageFadeIn(false);
-        loader.loadImage(new ImageSource<FileDescriptor>() {
-            @Override
-            public FileDescriptor getData() {
-                return fileDescriptor;
-            }
-
-            @Override
-            public String getKey() {
-                return null;
-            }
-        }, imageView);
+        loader.loadImage(newImageSource(fileDescriptor), imageView);
     }
 
     /**
@@ -766,17 +736,7 @@ public class ImageLoader<T> {
         ImageLoader<Integer> loader = new ImageLoader<>(context);
         loader.setBitmapLoader(newResourceBitmapLoader(context));
         loader.setImageFadeIn(false);
-        loader.loadImage(new ImageSource<Integer>() {
-            @Override
-            public Integer getData() {
-                return resourceId;
-            }
-
-            @Override
-            public String getKey() {
-                return null;
-            }
-        }, imageView);
+        loader.loadImage(newImageSource(resourceId), imageView);
     }
 
     /**
@@ -790,17 +750,7 @@ public class ImageLoader<T> {
         ImageLoader<byte[]> loader = new ImageLoader<>(context);
         loader.setBitmapLoader(newByteArrayBitmapLoader());
         loader.setImageFadeIn(false);
-        loader.loadImage(new ImageSource<byte[]>() {
-            @Override
-            public byte[] getData() {
-                return bytes;
-            }
-
-            @Override
-            public String getKey() {
-                return null;
-            }
-        }, imageView);
+        loader.loadImage(newImageSource(bytes), imageView);
     }
 
     private static class ImageLoaderThreadFactory implements ThreadFactory {
