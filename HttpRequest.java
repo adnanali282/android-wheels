@@ -44,9 +44,36 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executor;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public final class HttpRequest {
+    private HttpRequest() {
+    }
+
+    @NonNull
+    private static String buildParamsUrlString(@NonNull Collection<QueryParameter> params,
+            @NonNull String charset) throws UnsupportedEncodingException {
+        StringBuilder dataBuilder = new StringBuilder();
+        boolean firstEntry = true;
+        for (QueryParameter queryParameter : params) {
+            if (firstEntry) {
+                firstEntry = false;
+            } else {
+                dataBuilder.append("&");
+            }
+            if (queryParameter.key != null) {
+                dataBuilder.append(URLEncoder.encode(queryParameter.key, charset));
+                if (queryParameter.value != null) {
+                    dataBuilder.append("=");
+                    dataBuilder.append(URLEncoder.encode(queryParameter.value, charset));
+                }
+            }
+        }
+        return dataBuilder.toString();
+    }
+
     /**
      * Create new GET HTTP request
      *
@@ -189,37 +216,12 @@ public final class HttpRequest {
         return postParameter;
     }
 
-    @NonNull
-    private static String buildParamsUrlString(@NonNull Collection<QueryParameter> params,
-            @NonNull String charset) throws UnsupportedEncodingException {
-        StringBuilder dataBuilder = new StringBuilder();
-        boolean firstEntry = true;
-        for (QueryParameter queryParameter : params) {
-            if (firstEntry) {
-                firstEntry = false;
-            } else {
-                dataBuilder.append("&");
-            }
-            if (queryParameter.key != null) {
-                dataBuilder.append(URLEncoder.encode(queryParameter.key, charset));
-                if (queryParameter.value != null) {
-                    dataBuilder.append("=");
-                    dataBuilder.append(URLEncoder.encode(queryParameter.value, charset));
-                }
-            }
-        }
-        return dataBuilder.toString();
-    }
-
-    private HttpRequest() {
-    }
-
     /**
      * Query header request parameter
      */
     public static final class HeaderParameter {
-        private String key = null;
-        private String value = null;
+        private String key;
+        private String value;
 
         private HeaderParameter() {
         }
@@ -229,8 +231,8 @@ public final class HttpRequest {
      * Query string request parameter
      */
     public static final class QueryParameter {
-        private String key = null;
-        private String value = null;
+        private String key;
+        private String value;
 
         private QueryParameter() {
         }
@@ -240,12 +242,12 @@ public final class HttpRequest {
      * Parameter of HTTP request (multipart/form-data)
      */
     public static final class PostParameter {
-        private String key = null;
-        private String value = null;
-        private File file = null;
-        private InputStream stream = null;
-        private String fileName = null;
-        private String contentType = null;
+        private String key;
+        private String value;
+        private File file;
+        private InputStream stream;
+        private String fileName;
+        private String contentType;
 
         private PostParameter() {
         }
@@ -264,24 +266,17 @@ public final class HttpRequest {
         ERROR_UNEXPECTED;
 
         private int mHttpCode = -1;
-        private Exception mException = null;
-        private String mDataString = null;
-        private InputStream mDataStream = null;
-        private HttpURLConnection mConnection = null;
+        private Exception mException;
+        private String mDataString;
+        private InputStream mDataStream;
+        private HttpURLConnection mConnection;
 
-        /**
-         * Releases this connection so that its resources may be either reused or closed
-         */
-        public void disconnect() {
-            if (mConnection != null) {
-                try {
-                    mConnection.disconnect();
-                } catch (Exception ignored) {
-                }
-            }
+        @NonNull
+        public HttpURLConnection getConnection() {
+            return mConnection;
         }
 
-        private void setConnection(HttpURLConnection connection) {
+        private void setConnection(@NonNull HttpURLConnection connection) {
             mConnection = connection;
         }
 
@@ -352,11 +347,9 @@ public final class HttpRequest {
     public interface Request {
         Result execute();
 
-        void executeOnNewThread();
+        Future<Result> execute(ExecutorService executor);
 
-        void executeOnExecutor(Executor executor);
-
-        Runnable getAction();
+        Callable<Result> getAction();
 
         Result getResult();
     }
@@ -375,12 +368,13 @@ public final class HttpRequest {
         private final Collection<QueryParameter> mQueryParameters;
         private final Callback mCallback;
         private final ResultType mResultType;
-        private volatile Result mResult = null;
+        private volatile Result mResult;
 
-        private final Runnable mRequestAction = new Runnable() {
+        private final Callable<Result> mRequestAction = new Callable<Result>() {
             @Override
-            public void run() {
+            public Result call() throws Exception {
                 HttpURLConnection connection = null;
+                Result result = null;
                 try {
                     mResult = null;
                     String request = mUrl;
@@ -403,14 +397,12 @@ public final class HttpRequest {
                     if (responseCode == HttpURLConnection.HTTP_OK) {
                         switch (mResultType) {
                             case STREAM: {
-                                Result result = Result.SUCCESS;
+                                result = Result.SUCCESS;
                                 result.setConnection(connection);
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
                                 setResult(result);
-                                if (mCallback != null) {
-                                    mCallback.onResult(result);
-                                }
+                                callback(result);
                                 break;
                             }
                             case STRING: {
@@ -424,68 +416,55 @@ public final class HttpRequest {
                                         }
                                         responseBuilder.append(line);
                                     }
-                                    Result result = Result.SUCCESS;
+                                    result = Result.SUCCESS;
                                     result.setConnection(connection);
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
                                     setResult(result);
-                                    if (mCallback != null) {
-                                        mCallback.onResult(result);
-                                    }
+                                    callback(result);
                                 }
                                 break;
                             }
                         }
                     } else {
-                        Result result = Result.ERROR_HTTP;
+                        result = Result.ERROR_HTTP;
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
                         setResult(result);
-                        if (mCallback != null) {
-                            mCallback.onResult(result);
-                        }
+                        callback(result);
                     }
                 } catch (MalformedURLException e) {
-                    Result result = Result.ERROR_MALFORMED_URL;
+                    result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (UnsupportedEncodingException e) {
-                    Result result = Result.ERROR_UNSUPPORTED_ENCODING;
+                    result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (ProtocolException e) {
-                    Result result = Result.ERROR_PROTOCOL;
+                    result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (IOException e) {
-                    Result result = Result.ERROR_IO;
+                    result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (Exception e) {
-                    Result result = Result.ERROR_UNEXPECTED;
+                    result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 }
+                return result;
             }
         };
 
@@ -506,25 +485,30 @@ public final class HttpRequest {
             }
         }
 
+        private void callback(Result result) {
+            if (mCallback != null) {
+                mCallback.onResult(result);
+            }
+        }
+
         @Override
         public Result execute() {
-            mRequestAction.run();
-            return mResult;
-        }
-
-        @Override
-        public void executeOnNewThread() {
-            new Thread(mRequestAction).start();
-        }
-
-        @Override
-        public void executeOnExecutor(@NonNull Executor executor) {
-            executor.execute(mRequestAction);
+            try {
+                return mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @NonNull
         @Override
-        public Runnable getAction() {
+        public Future<Result> execute(@NonNull ExecutorService executor) {
+            return executor.submit(mRequestAction);
+        }
+
+        @NonNull
+        @Override
+        public Callable<Result> getAction() {
             return mRequestAction;
         }
 
@@ -544,10 +528,10 @@ public final class HttpRequest {
          */
         public static final class Builder {
             private final String mUrl;
-            private ArrayList<HeaderParameter> mHeaderParameters = null;
-            private ArrayList<QueryParameter> mQueryParameters = null;
+            private ArrayList<HeaderParameter> mHeaderParameters;
+            private ArrayList<QueryParameter> mQueryParameters;
             private ResultType mResultType = ResultType.STRING;
-            private Callback mCallback = null;
+            private Callback mCallback;
 
             private Builder(@NonNull String url) {
                 mUrl = url;
@@ -615,12 +599,13 @@ public final class HttpRequest {
         private final Collection<PostParameter> mPostParameters;
         private final Callback mCallback;
         private final ResultType mResultType;
-        private volatile Result mResult = null;
+        private volatile Result mResult;
 
-        private final Runnable mRequestAction = new Runnable() {
+        private final Callable<Result> mRequestAction = new Callable<Result>() {
             @Override
-            public void run() {
+            public Result call() throws Exception {
                 HttpURLConnection connection = null;
+                Result result = null;
                 try {
                     mResult = null;
                     String boundary = "===" + System.currentTimeMillis() + "===";
@@ -714,14 +699,12 @@ public final class HttpRequest {
                     if (responseCode == HttpURLConnection.HTTP_OK) {
                         switch (mResultType) {
                             case STREAM: {
-                                Result result = Result.SUCCESS;
+                                result = Result.SUCCESS;
                                 result.setConnection(connection);
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
                                 setResult(result);
-                                if (mCallback != null) {
-                                    mCallback.onResult(result);
-                                }
+                                callback(result);
                                 break;
                             }
                             case STRING: {
@@ -735,68 +718,55 @@ public final class HttpRequest {
                                         }
                                         responseBuilder.append(line);
                                     }
-                                    Result result = Result.SUCCESS;
+                                    result = Result.SUCCESS;
                                     result.setConnection(connection);
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
                                     setResult(result);
-                                    if (mCallback != null) {
-                                        mCallback.onResult(result);
-                                    }
+                                    callback(result);
                                 }
                                 break;
                             }
                         }
                     } else {
-                        Result result = Result.ERROR_HTTP;
+                        result = Result.ERROR_HTTP;
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
                         setResult(result);
-                        if (mCallback != null) {
-                            mCallback.onResult(result);
-                        }
+                        callback(result);
                     }
                 } catch (MalformedURLException e) {
-                    Result result = Result.ERROR_MALFORMED_URL;
+                    result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (UnsupportedEncodingException e) {
-                    Result result = Result.ERROR_UNSUPPORTED_ENCODING;
+                    result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (ProtocolException e) {
-                    Result result = Result.ERROR_PROTOCOL;
+                    result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (IOException e) {
-                    Result result = Result.ERROR_IO;
+                    result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 } catch (Exception e) {
-                    Result result = Result.ERROR_UNEXPECTED;
+                    result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    if (mCallback != null) {
-                        mCallback.onResult(result);
-                    }
+                    callback(result);
                 }
+                return result;
             }
         };
 
@@ -819,25 +789,30 @@ public final class HttpRequest {
             }
         }
 
+        private void callback(Result result) {
+            if (mCallback != null) {
+                mCallback.onResult(result);
+            }
+        }
+
         @Override
         public Result execute() {
-            mRequestAction.run();
-            return mResult;
-        }
-
-        @Override
-        public void executeOnNewThread() {
-            new Thread(mRequestAction).start();
-        }
-
-        @Override
-        public void executeOnExecutor(@NonNull Executor executor) {
-            executor.execute(mRequestAction);
+            try {
+                return mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @NonNull
         @Override
-        public Runnable getAction() {
+        public Future<Result> execute(@NonNull ExecutorService executor) {
+            return executor.submit(mRequestAction);
+        }
+
+        @NonNull
+        @Override
+        public Callable<Result> getAction() {
             return mRequestAction;
         }
 
@@ -861,7 +836,7 @@ public final class HttpRequest {
             private ArrayList<QueryParameter> mQueryParameters;
             private ArrayList<PostParameter> mPostParameters;
             private ResultType mResultType = ResultType.STRING;
-            private Callback mCallback = null;
+            private Callback mCallback;
 
             private Builder(@NonNull String url) {
                 mUrl = url;
