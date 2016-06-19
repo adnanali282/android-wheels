@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -257,6 +257,7 @@ public final class HttpRequest {
      * Result of HTTP request
      */
     public enum Result {
+        NONE,
         SUCCESS,
         ERROR_HTTP,
         ERROR_MALFORMED_URL,
@@ -374,9 +375,9 @@ public final class HttpRequest {
             @Override
             public Result call() throws Exception {
                 HttpURLConnection connection = null;
-                Result result = null;
+                Result result = Result.NONE;
+                mResult = null;
                 try {
-                    mResult = null;
                     String request = mUrl;
                     if (mQueryParameters != null && mQueryParameters.size() > 0) {
                         request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
@@ -401,7 +402,6 @@ public final class HttpRequest {
                                 result.setConnection(connection);
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
-                                setResult(result);
                                 break;
                             }
                             case STRING: {
@@ -419,7 +419,6 @@ public final class HttpRequest {
                                     result.setConnection(connection);
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
-                                    setResult(result);
                                 }
                                 break;
                             }
@@ -428,33 +427,31 @@ public final class HttpRequest {
                         result = Result.ERROR_HTTP;
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
-                        setResult(result);
                     }
                 } catch (MalformedURLException e) {
                     result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (UnsupportedEncodingException e) {
                     result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (ProtocolException e) {
                     result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (IOException e) {
                     result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (Exception e) {
                     result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
+                }
+                mResult = result;
+                synchronized (mResultLock) {
+                    mResultLock.notifyAll();
                 }
                 if (mCallback != null) {
                     mCallback.onResult(result);
@@ -471,13 +468,6 @@ public final class HttpRequest {
             mQueryParameters = queryParameters;
             mCallback = callback;
             mResultType = resultType;
-        }
-
-        private void setResult(Result result) {
-            mResult = result;
-            synchronized (mResultLock) {
-                mResultLock.notifyAll();
-            }
         }
 
         @Override
@@ -594,9 +584,9 @@ public final class HttpRequest {
             @Override
             public Result call() throws Exception {
                 HttpURLConnection connection = null;
-                Result result = null;
+                Result result = Result.NONE;
+                mResult = null;
                 try {
-                    mResult = null;
                     String boundary = "===" + System.currentTimeMillis() + "===";
                     String request = mUrl;
                     if (mQueryParameters != null && mQueryParameters.size() > 0) {
@@ -692,7 +682,6 @@ public final class HttpRequest {
                                 result.setConnection(connection);
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
-                                setResult(result);
                                 break;
                             }
                             case STRING: {
@@ -710,7 +699,6 @@ public final class HttpRequest {
                                     result.setConnection(connection);
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
-                                    setResult(result);
                                 }
                                 break;
                             }
@@ -719,33 +707,31 @@ public final class HttpRequest {
                         result = Result.ERROR_HTTP;
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
-                        setResult(result);
                     }
                 } catch (MalformedURLException e) {
                     result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (UnsupportedEncodingException e) {
                     result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (ProtocolException e) {
                     result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (IOException e) {
                     result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
                 } catch (Exception e) {
                     result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
-                    setResult(result);
+                }
+                mResult = result;
+                synchronized (mResultLock) {
+                    mResultLock.notifyAll();
                 }
                 if (mCallback != null) {
                     mCallback.onResult(result);
@@ -764,13 +750,6 @@ public final class HttpRequest {
             mPostParameters = postParameters;
             mCallback = callback;
             mResultType = resultType;
-        }
-
-        private void setResult(Result result) {
-            mResult = result;
-            synchronized (mResultLock) {
-                mResultLock.notifyAll();
-            }
         }
 
         @Override
@@ -794,6 +773,7 @@ public final class HttpRequest {
             return mRequestAction;
         }
 
+        @NonNull
         @Override
         public Result getResult() {
             for (; mResult == null; ) {
