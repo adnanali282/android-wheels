@@ -271,12 +271,12 @@ public final class HttpRequest {
         private InputStream mDataStream;
         private HttpURLConnection mConnection;
 
-        @NonNull
+        @Nullable
         public HttpURLConnection getConnection() {
             return mConnection;
         }
 
-        private void setConnection(@NonNull HttpURLConnection connection) {
+        private void setConnection(@Nullable HttpURLConnection connection) {
             mConnection = connection;
         }
 
@@ -402,7 +402,6 @@ public final class HttpRequest {
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
                                 setResult(result);
-                                callback(result);
                                 break;
                             }
                             case STRING: {
@@ -421,7 +420,6 @@ public final class HttpRequest {
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
                                     setResult(result);
-                                    callback(result);
                                 }
                                 break;
                             }
@@ -431,38 +429,35 @@ public final class HttpRequest {
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
                         setResult(result);
-                        callback(result);
                     }
                 } catch (MalformedURLException e) {
                     result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (UnsupportedEncodingException e) {
                     result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (ProtocolException e) {
                     result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (IOException e) {
                     result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (Exception e) {
                     result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
+                }
+                if (mCallback != null) {
+                    mCallback.onResult(result);
                 }
                 return result;
             }
@@ -482,12 +477,6 @@ public final class HttpRequest {
             mResult = result;
             synchronized (mResultLock) {
                 mResultLock.notifyAll();
-            }
-        }
-
-        private void callback(Result result) {
-            if (mCallback != null) {
-                mCallback.onResult(result);
             }
         }
 
@@ -704,7 +693,6 @@ public final class HttpRequest {
                                 result.setHttpCode(responseCode);
                                 result.setDataStream(connection.getInputStream());
                                 setResult(result);
-                                callback(result);
                                 break;
                             }
                             case STRING: {
@@ -723,7 +711,6 @@ public final class HttpRequest {
                                     result.setHttpCode(responseCode);
                                     result.setDataString(responseBuilder.toString());
                                     setResult(result);
-                                    callback(result);
                                 }
                                 break;
                             }
@@ -733,38 +720,35 @@ public final class HttpRequest {
                         result.setConnection(connection);
                         result.setHttpCode(responseCode);
                         setResult(result);
-                        callback(result);
                     }
                 } catch (MalformedURLException e) {
                     result = Result.ERROR_MALFORMED_URL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (UnsupportedEncodingException e) {
                     result = Result.ERROR_UNSUPPORTED_ENCODING;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (ProtocolException e) {
                     result = Result.ERROR_PROTOCOL;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (IOException e) {
                     result = Result.ERROR_IO;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
                 } catch (Exception e) {
                     result = Result.ERROR_UNEXPECTED;
                     result.setConnection(connection);
                     result.setException(e);
                     setResult(result);
-                    callback(result);
+                }
+                if (mCallback != null) {
+                    mCallback.onResult(result);
                 }
                 return result;
             }
@@ -786,12 +770,6 @@ public final class HttpRequest {
             mResult = result;
             synchronized (mResultLock) {
                 mResultLock.notifyAll();
-            }
-        }
-
-        private void callback(Result result) {
-            if (mCallback != null) {
-                mCallback.onResult(result);
             }
         }
 
