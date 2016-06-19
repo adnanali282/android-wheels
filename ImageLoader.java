@@ -550,14 +550,13 @@ public class ImageLoader<T> {
     /**
      * Create new common bitmap loader for uris
      *
-     * @param context Context
      * @return bitmap loader
      */
     @NonNull
-    public static BitmapLoader<Uri> newUriBitmapLoader(final Context context) {
+    public static BitmapLoader<Uri> newUriBitmapLoader() {
         return new BitmapLoader<Uri>() {
             @Override
-            public Bitmap load(Uri data) {
+            public Bitmap load(Context context, Uri data) {
                 return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
@@ -573,7 +572,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<File> newFileBitmapLoader() {
         return new BitmapLoader<File>() {
             @Override
-            public Bitmap load(File data) {
+            public Bitmap load(Context context, File data) {
                 return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
         };
@@ -588,7 +587,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
         return new BitmapLoader<FileDescriptor>() {
             @Override
-            public Bitmap load(FileDescriptor data) {
+            public Bitmap load(Context context, FileDescriptor data) {
                 return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
                         Integer.MAX_VALUE, true);
             }
@@ -598,14 +597,13 @@ public class ImageLoader<T> {
     /**
      * Create new common bitmap loader for resources
      *
-     * @param context Context
      * @return bitmap loader
      */
     @NonNull
-    public static BitmapLoader<Integer> newResourceBitmapLoader(final Context context) {
+    public static BitmapLoader<Integer> newResourceBitmapLoader() {
         return new BitmapLoader<Integer>() {
             @Override
-            public Bitmap load(Integer data) {
+            public Bitmap load(Context context, Integer data) {
                 return loadSampledBitmapFromResource(context.getResources(), data,
                         Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
@@ -621,7 +619,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
         return new BitmapLoader<byte[]>() {
             @Override
-            public Bitmap load(byte[] data) {
+            public Bitmap load(Context context, byte[] data) {
                 return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
@@ -731,7 +729,7 @@ public class ImageLoader<T> {
     public static void load(ImageView imageView, Uri uri) {
         Context context = imageView.getContext();
         ImageLoader<Uri> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newUriBitmapLoader(context));
+        loader.setBitmapLoader(newUriBitmapLoader());
         loader.setImageFadeIn(false);
         loader.loadImage(newImageSource(uri), imageView);
     }
@@ -773,7 +771,7 @@ public class ImageLoader<T> {
     public static void load(final ImageView imageView, final int resourceId) {
         final Context context = imageView.getContext();
         ImageLoader<Integer> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newResourceBitmapLoader(context));
+        loader.setBitmapLoader(newResourceBitmapLoader());
         loader.setImageFadeIn(false);
         loader.loadImage(newImageSource(resourceId), imageView);
     }
@@ -854,7 +852,8 @@ public class ImageLoader<T> {
                 if (image == null) {
                     BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
                     if (bitmapLoader != null) {
-                        image = bitmapLoader.load(mImageSource.getData());
+                        image = bitmapLoader
+                                .load(mImageLoader.getContext(), mImageSource.getData());
                     }
                     if (image != null) {
                         if (mCallback != null) {
@@ -1436,7 +1435,7 @@ public class ImageLoader<T> {
          * @param data Source data
          * @return Loaded bitmap
          */
-        Bitmap load(T data);
+        Bitmap load(Context context, T data);
     }
 
     /**
