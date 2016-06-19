@@ -495,13 +495,18 @@ public final class HttpRequest {
         @NonNull
         @Override
         public Result getResult() {
-            for (; mResult == null; ) {
+            Result result;
+            for (; ; ) {
+                result = mResult;
+                if (result != null) {
+                    break;
+                }
                 try {
                     mResultLock.wait();
                 } catch (InterruptedException ignored) {
                 }
             }
-            return mResult;
+            return result;
         }
 
         /**
@@ -779,13 +784,18 @@ public final class HttpRequest {
         @NonNull
         @Override
         public Result getResult() {
-            for (; mResult == null; ) {
+            Result result;
+            for (; ; ) {
+                result = mResult;
+                if (result != null) {
+                    break;
+                }
                 try {
                     mResultLock.wait();
                 } catch (InterruptedException ignored) {
                 }
             }
-            return mResult;
+            return result;
         }
 
         /**
