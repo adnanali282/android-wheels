@@ -470,6 +470,7 @@ public final class HttpRequest {
             mResultType = resultType;
         }
 
+        @NonNull
         @Override
         public Result execute() {
             try {
@@ -491,6 +492,7 @@ public final class HttpRequest {
             return mRequestAction;
         }
 
+        @NonNull
         @Override
         public Result getResult() {
             for (; mResult == null; ) {
@@ -752,6 +754,7 @@ public final class HttpRequest {
             mResultType = resultType;
         }
 
+        @NonNull
         @Override
         public Result execute() {
             try {
