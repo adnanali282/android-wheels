@@ -47,8 +47,24 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 public final class HttpRequest {
+    private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
+        @NonNull
+        @Override
+        public Thread newThread(@NonNull Runnable runnable) {
+            Thread thread = new Thread(runnable, "HttpRequest background thread");
+            if (thread.isDaemon()) {
+                thread.setDaemon(false);
+            }
+            if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                thread.setPriority(Thread.NORM_PRIORITY);
+            }
+            return thread;
+        }
+    };
+
     private HttpRequest() {
     }
 
@@ -339,19 +355,25 @@ public final class HttpRequest {
      * HTTP request callback.
      */
     public interface Callback {
-        void onResult(Result requestResult);
+        void onResult(@NonNull Result requestResult);
     }
 
     /**
      * Common interface of HTTP requests.
      */
     public interface Request {
+        @NonNull
         Result execute();
 
-        Future<Result> execute(ExecutorService executor);
+        @NonNull
+        Future<Result> execute(@NonNull ExecutorService executor);
 
+        void executeOnNewThread();
+
+        @NonNull
         Callable<Result> getAction();
 
+        @NonNull
         Result getResult();
     }
 
@@ -484,6 +506,16 @@ public final class HttpRequest {
         @Override
         public Future<Result> execute(@NonNull ExecutorService executor) {
             return executor.submit(mRequestAction);
+        }
+
+        @Override
+        public void executeOnNewThread() {
+            THREAD_FACTORY.newThread(new Runnable() {
+                @Override
+                public void run() {
+                    execute();
+                }
+            }).start();
         }
 
         @NonNull
@@ -773,6 +805,16 @@ public final class HttpRequest {
         @Override
         public Future<Result> execute(@NonNull ExecutorService executor) {
             return executor.submit(mRequestAction);
+        }
+
+        @Override
+        public void executeOnNewThread() {
+            THREAD_FACTORY.newThread(new Runnable() {
+                @Override
+                public void run() {
+                    execute();
+                }
+            }).start();
         }
 
         @NonNull
