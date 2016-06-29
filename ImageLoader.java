@@ -999,7 +999,7 @@ public class ImageLoader<T> {
         public static final double DEFAULT_FRACTION = 0.1D;
         public static final Bitmap.CompressFormat DEFAULT_FORMAT = Bitmap.CompressFormat.JPEG;
         public static final int DEFAULT_QUALITY = 80;
-        private final Object mLock = new Object();
+        private final Object mCacheSizeLock = new Object();
         private final File mDirectory;
         private final long mMaxSize;
         private final Bitmap.CompressFormat mCompressFormat;
@@ -1024,7 +1024,7 @@ public class ImageLoader<T> {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void fitCacheSize() {
-            synchronized (mLock) {
+            synchronized (mCacheSizeLock) {
                 File[] files = mDirectory.listFiles();
                 if (files.length < 2) {
                     return;
