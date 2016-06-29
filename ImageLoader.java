@@ -61,7 +61,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -394,15 +393,15 @@ public class ImageLoader<T> {
      *
      * @param context Context
      * @param uri     Uri
-     * @return stream
+     * @return Data stream
      * @throws IOException
      */
     @Nullable
     protected static InputStream getDataStreamFromUri(@NonNull Context context,
             @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
-        if (Objects.equals(scheme, URI_SCHEME_HTTP) || Objects.equals(scheme, URI_SCHEME_HTTPS) ||
-                Objects.equals(scheme, URI_SCHEME_FTP)) {
+        if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) || URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+                URI_SCHEME_FTP.equalsIgnoreCase(scheme)) {
             return new URL(uri.toString()).openConnection().getInputStream();
         } else {
             return context.getContentResolver().openInputStream(uri);
