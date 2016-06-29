@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
+ * <p/>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p>
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * <p/>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -68,7 +68,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ImageLoader is a universal tool for loading bitmaps efficiently in Android which
@@ -79,7 +78,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <T> Source data type
  */
 public class ImageLoader<T> {
-    private static final AtomicInteger INSTANCE_COUNTER = new AtomicInteger(1);
     private static final String URI_SCHEME_HTTP = "http";
     private static final String URI_SCHEME_HTTPS = "https";
     private static final String URI_SCHEME_FTP = "ftp";
@@ -139,9 +137,7 @@ public class ImageLoader<T> {
         if (poolSize > 1) {
             poolSize--;
         }
-        INSTANCE_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
-        mAsyncExecutor = Executors.newFixedThreadPool(poolSize,
-                new ImageLoaderThreadFactory(INSTANCE_COUNTER.getAndIncrement()));
+        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ImageLoaderThreadFactory());
     }
 
     protected void cancelWork(@Nullable ImageView imageView) {
@@ -338,6 +334,24 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Generate MD5 hash string for specified data
+     *
+     * @param data Data
+     * @return MD5 hash string
+     */
+    @NonNull
+    protected static String generateMD5(byte[] data) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest.update(data);
+            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
+            return bigInteger.toString(Character.MAX_RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Calculate sample size for required size from source size
      * Sample size is the number of pixels in either dimension that
      * correspond to a single pixel
@@ -356,8 +370,8 @@ public class ImageLoader<T> {
         if (sourceWidth > requiredWidth || sourceHeight > requiredHeight) {
             int halfWidth = sourceWidth / 2;
             int halfHeight = sourceHeight / 2;
-            for (; (halfWidth / sampleSize) > requiredWidth &&
-                    (halfHeight / sampleSize) > requiredHeight; ) {
+            while ((halfWidth / sampleSize) > requiredWidth &&
+                    (halfHeight / sampleSize) > requiredHeight) {
                 sampleSize *= 2;
             }
             if (ignoreTotalNumberOfPixels) {
@@ -365,7 +379,7 @@ public class ImageLoader<T> {
             }
             long totalPixels = (sourceWidth * sourceHeight) / (sampleSize * sampleSize);
             long totalRequiredPixels = requiredWidth * requiredHeight;
-            for (; totalPixels > totalRequiredPixels; ) {
+            while (totalPixels > totalRequiredPixels) {
                 sampleSize *= 2;
                 totalPixels /= 4L;
             }
@@ -381,7 +395,7 @@ public class ImageLoader<T> {
      * @return stream
      * @throws IOException
      */
-    public static InputStream getStreamFromUri(Context context, Uri uri) throws IOException {
+    protected static InputStream getDataStreamFromUri(Context context, Uri uri) throws IOException {
         String scheme = uri.getScheme();
         if (Objects.equals(scheme, URI_SCHEME_HTTP) || Objects.equals(scheme, URI_SCHEME_HTTPS) ||
                 Objects.equals(scheme, URI_SCHEME_FTP)) {
@@ -407,7 +421,7 @@ public class ImageLoader<T> {
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        try (InputStream inputStream = getStreamFromUri(context, uri)) {
+        try (InputStream inputStream = getDataStreamFromUri(context, uri)) {
             BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -416,7 +430,7 @@ public class ImageLoader<T> {
         options.inSampleSize =
                 calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
                         requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = getStreamFromUri(context, uri)) {
+        try (InputStream inputStream = getDataStreamFromUri(context, uri)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -627,24 +641,6 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Generate MD5 hash string for specified data
-     *
-     * @param data Data
-     * @return MD5 hash string
-     */
-    @NonNull
-    public static String generateMD5(byte[] data) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(data);
-            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
-            return bigInteger.toString(Character.MAX_RADIX);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Create new common image source that is usable in most cases
      *
      * @param data Source data
@@ -720,88 +716,10 @@ public class ImageLoader<T> {
         return newStorageImageCache(new File(cacheDir, StorageImageCache.DEFAULT_DIRECTORY));
     }
 
-    /**
-     * Load image from uri
-     *
-     * @param imageView Image view
-     * @param uri       Source uri
-     */
-    public static void load(ImageView imageView, Uri uri) {
-        Context context = imageView.getContext();
-        ImageLoader<Uri> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newUriBitmapLoader());
-        loader.setImageFadeIn(false);
-        loader.loadImage(newImageSource(uri), imageView);
-    }
-
-    /**
-     * Load image from file
-     *
-     * @param imageView Image view
-     * @param file      Source file
-     */
-    public static void load(ImageView imageView, File file) {
-        final Context context = imageView.getContext();
-        ImageLoader<File> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newFileBitmapLoader());
-        loader.setImageFadeIn(false);
-        loader.loadImage(newImageSource(file), imageView);
-    }
-
-    /**
-     * Load image file descriptor
-     *
-     * @param imageView      Image view
-     * @param fileDescriptor Source file descriptor
-     */
-    public static void load(ImageView imageView, FileDescriptor fileDescriptor) {
-        final Context context = imageView.getContext();
-        ImageLoader<FileDescriptor> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newFileDescriptorBitmapLoader());
-        loader.setImageFadeIn(false);
-        loader.loadImage(newImageSource(fileDescriptor), imageView);
-    }
-
-    /**
-     * Load image from resource
-     *
-     * @param imageView  Image view
-     * @param resourceId Source resource identifier
-     */
-    public static void load(final ImageView imageView, final int resourceId) {
-        final Context context = imageView.getContext();
-        ImageLoader<Integer> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newResourceBitmapLoader());
-        loader.setImageFadeIn(false);
-        loader.loadImage(newImageSource(resourceId), imageView);
-    }
-
-    /**
-     * Load image from byte array
-     *
-     * @param imageView Image view
-     * @param bytes     Source bytes
-     */
-    public static void load(final ImageView imageView, final byte[] bytes) {
-        final Context context = imageView.getContext();
-        ImageLoader<byte[]> loader = new ImageLoader<>(context);
-        loader.setBitmapLoader(newByteArrayBitmapLoader());
-        loader.setImageFadeIn(false);
-        loader.loadImage(newImageSource(bytes), imageView);
-    }
-
     private static class ImageLoaderThreadFactory implements ThreadFactory {
-        private final AtomicInteger mThreadCounter = new AtomicInteger(1);
-        private final int mIndex;
-
-        public ImageLoaderThreadFactory(int index) {
-            mIndex = index;
-        }
-
         @Override
         public Thread newThread(@NonNull Runnable runnable) {
-            Thread thread = new Thread(runnable,
-                    "ImageLoader-" + mIndex + "-thread-" + mThreadCounter.getAndIncrement());
+            Thread thread = new Thread(runnable, "ImageLoader-background-thread");
             if (thread.isDaemon()) {
                 thread.setDaemon(false);
             }
@@ -833,7 +751,7 @@ public class ImageLoader<T> {
         private void loadImage() {
             Bitmap image = null;
             synchronized (mImageLoader.mPauseWorkLock) {
-                for (; mImageLoader.isPauseWork() && !isCancelled(); ) {
+                while (mImageLoader.isPauseWork() && !isCancelled()) {
                     try {
                         mImageLoader.mPauseWorkLock.wait();
                     } catch (InterruptedException ignored) {
@@ -1029,6 +947,11 @@ public class ImageLoader<T> {
         public static final float DEFAULT_FRACTION = 0.25F;
         private final LruCache<String, RecyclingBitmapDrawable> mCache;
 
+        /**
+         * Memory image cache
+         *
+         * @param size Size in bytes
+         */
         public MemoryImageCache(int size) {
             mCache = new LruCache<String, RecyclingBitmapDrawable>(size) {
                 @Override
@@ -1077,11 +1000,19 @@ public class ImageLoader<T> {
         private final long mMaxSize;
         private final Bitmap.CompressFormat mCompressFormat;
         private final int mCompressQuality;
-        private static final String DEFAULT_DIRECTORY = "image_loader_cache";
+        public static final String DEFAULT_DIRECTORY = "image_loader_cache";
         public static final double DEFAULT_FRACTION = 0.1D;
         public static final Bitmap.CompressFormat DEFAULT_FORMAT = Bitmap.CompressFormat.JPEG;
         public static final int DEFAULT_QUALITY = 80;
 
+        /**
+         * Storage image cache
+         *
+         * @param directory       Cache directory
+         * @param maxSize         Maximum size in bytes
+         * @param compressFormat  Bitmap compress format
+         * @param compressQuality Bitmap compress quality
+         */
         public StorageImageCache(@NonNull File directory, long maxSize,
                 @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
             mDirectory = directory;
@@ -1191,6 +1122,12 @@ public class ImageLoader<T> {
         private long mDuration;
         private FadeCallback mFadeCallback;
 
+        /**
+         * Fade drawable
+         *
+         * @param startDrawable start drawable
+         * @param endDrawable   end drawable
+         */
         public FadeDrawable(@Nullable Drawable startDrawable, @Nullable Drawable endDrawable) {
             super(new Drawable[]{startDrawable, endDrawable});
             setId(START_DRAWABLE, START_DRAWABLE);
@@ -1240,6 +1177,11 @@ public class ImageLoader<T> {
             }
         }
 
+        /**
+         * Start fade
+         *
+         * @param duration Fade duration
+         */
         public void startFade(int duration) {
             mDuration = duration;
             mStartTime = System.currentTimeMillis();
