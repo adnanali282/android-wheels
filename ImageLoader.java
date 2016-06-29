@@ -395,7 +395,9 @@ public class ImageLoader<T> {
      * @return stream
      * @throws IOException
      */
-    protected static InputStream getDataStreamFromUri(Context context, Uri uri) throws IOException {
+    @Nullable
+    protected static InputStream getDataStreamFromUri(@NonNull Context context,
+            @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
         if (Objects.equals(scheme, URI_SCHEME_HTTP) || Objects.equals(scheme, URI_SCHEME_HTTPS) ||
                 Objects.equals(scheme, URI_SCHEME_FTP)) {
@@ -417,8 +419,8 @@ public class ImageLoader<T> {
      * @return Loaded bitmap or null
      */
     @Nullable
-    public static Bitmap loadSampledBitmapFromUri(Context context, Uri uri, int requiredWidth,
-            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
+    public static Bitmap loadSampledBitmapFromUri(@NonNull Context context, @NonNull Uri uri,
+            int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         try (InputStream inputStream = getDataStreamFromUri(context, uri)) {
@@ -448,8 +450,8 @@ public class ImageLoader<T> {
      * @return Loaded bitmap or null
      */
     @Nullable
-    public static Bitmap loadSampledBitmapFromFile(File file, int requiredWidth, int requiredHeight,
-            boolean ignoreTotalNumberOfPixels) {
+    public static Bitmap loadSampledBitmapFromFile(@NonNull File file, int requiredWidth,
+            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         try (InputStream inputStream = new FileInputStream(file)) {
@@ -479,7 +481,7 @@ public class ImageLoader<T> {
      * @return Loaded bitmap or null
      */
     @Nullable
-    public static Bitmap loadSampledBitmapFromFileDescriptor(FileDescriptor fileDescriptor,
+    public static Bitmap loadSampledBitmapFromFileDescriptor(@NonNull FileDescriptor fileDescriptor,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -511,7 +513,7 @@ public class ImageLoader<T> {
      * @return Loaded bitmap or null
      */
     @Nullable
-    public static Bitmap loadSampledBitmapFromResource(Resources resources, int resourceId,
+    public static Bitmap loadSampledBitmapFromResource(@NonNull Resources resources, int resourceId,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         TypedValue typedValue = new TypedValue();
@@ -549,8 +551,8 @@ public class ImageLoader<T> {
      * @return Loaded bitmap or null
      */
     @Nullable
-    public static Bitmap loadSampledBitmapFromByteArray(byte[] byteArray, int requiredWidth,
-            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
+    public static Bitmap loadSampledBitmapFromByteArray(@NonNull byte[] byteArray,
+            int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
@@ -648,7 +650,7 @@ public class ImageLoader<T> {
      * @return Image source
      */
     @NonNull
-    public static <T> ImageSource<T> newImageSource(final T data) {
+    public static <T> ImageSource<T> newImageSource(@NonNull final T data) {
         final String key = generateMD5(String.valueOf(data).getBytes());
         return new ImageSource<T>() {
             @Override
@@ -694,7 +696,7 @@ public class ImageLoader<T> {
      * @return Storage image cache
      */
     @NonNull
-    public static StorageImageCache newStorageImageCache(File directory) {
+    public static StorageImageCache newStorageImageCache(@NonNull File directory) {
         return new StorageImageCache(directory, StorageImageCache
                 .getStorageTotalFractionBytes(directory, StorageImageCache.DEFAULT_FRACTION),
                 StorageImageCache.DEFAULT_FORMAT, StorageImageCache.DEFAULT_QUALITY);
@@ -708,7 +710,7 @@ public class ImageLoader<T> {
      * @return Storage image cache
      */
     @NonNull
-    public static StorageImageCache newStorageImageCache(Context context) {
+    public static StorageImageCache newStorageImageCache(@NonNull Context context) {
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
@@ -860,8 +862,9 @@ public class ImageLoader<T> {
         private final LoadImageAction<?> mLoadImageAction;
         private final Callback mCallback;
 
-        public SetImageAction(BitmapDrawable bitmapDrawable, ImageLoader<?> imageLoader,
-                Callback callback, LoadImageAction<?> loadImageAction) {
+        public SetImageAction(@Nullable BitmapDrawable bitmapDrawable,
+                @NonNull ImageLoader<?> imageLoader, @Nullable Callback callback,
+                @NonNull LoadImageAction<?> loadImageAction) {
             mBitmapDrawable = bitmapDrawable;
             mImageLoader = imageLoader;
             mCallback = callback;
@@ -910,8 +913,8 @@ public class ImageLoader<T> {
         private final BitmapDrawable mBitmapDrawable;
         private final Callback mCallback;
 
-        public SimpleSetImageAction(ImageView imageView, BitmapDrawable bitmapDrawable,
-                Callback callback) {
+        public SimpleSetImageAction(@Nullable ImageView imageView,
+                @Nullable BitmapDrawable bitmapDrawable, @Nullable Callback callback) {
             mImageView = imageView;
             mBitmapDrawable = bitmapDrawable;
             mCallback = callback;
@@ -930,10 +933,10 @@ public class ImageLoader<T> {
     }
 
     protected static class AsyncBitmapDrawable extends BitmapDrawable {
-        private WeakReference<LoadImageAction<?>> mLoadImageActionReference;
+        private final WeakReference<LoadImageAction<?>> mLoadImageActionReference;
 
-        public AsyncBitmapDrawable(Resources res, Bitmap bitmap,
-                LoadImageAction<?> loadImageAction) {
+        public AsyncBitmapDrawable(@Nullable Resources res, @Nullable Bitmap bitmap,
+                @NonNull LoadImageAction<?> loadImageAction) {
             super(res, bitmap);
             mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
         }
