@@ -140,39 +140,6 @@ public class ImageLoader<T> {
         mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ImageLoaderThreadFactory());
     }
 
-    protected void cancelWork(@Nullable ImageView imageView) {
-        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
-        if (loadImageAction != null) {
-            loadImageAction.cancel();
-        }
-    }
-
-    protected boolean cancelPotentialWork(@NonNull ImageSource<?> imageSource,
-            @Nullable ImageView imageView) {
-        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
-        if (loadImageAction != null) {
-            ImageSource<?> actionImageSource = loadImageAction.mImageSource;
-            if (actionImageSource == null || !actionImageSource.equals(imageSource)) {
-                loadImageAction.cancel();
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Nullable
-    protected LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
-        if (imageView != null) {
-            Drawable drawable = imageView.getDrawable();
-            if (drawable instanceof AsyncBitmapDrawable) {
-                AsyncBitmapDrawable asyncBitmapDrawable = (AsyncBitmapDrawable) drawable;
-                return asyncBitmapDrawable.getLoadImageAction();
-            }
-        }
-        return null;
-    }
-
     protected void runOnMainThread(@NonNull Runnable runnable) {
         if (Thread.currentThread() == mMainThread) {
             runnable.run();
@@ -185,10 +152,12 @@ public class ImageLoader<T> {
         mMainThreadHandler.postDelayed(runnable, delay);
     }
 
+    @NonNull
     protected ExecutorService getAsyncExecutor() {
         return mAsyncExecutor;
     }
 
+    @NonNull
     protected Context getContext() {
         return mContext;
     }
@@ -331,6 +300,39 @@ public class ImageLoader<T> {
         if (storageImageCache != null) {
             storageImageCache.clear();
         }
+    }
+
+    protected static void cancelWork(@Nullable ImageView imageView) {
+        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
+        if (loadImageAction != null) {
+            loadImageAction.cancel();
+        }
+    }
+
+    protected static boolean cancelPotentialWork(@NonNull ImageSource<?> imageSource,
+            @Nullable ImageView imageView) {
+        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
+        if (loadImageAction != null) {
+            ImageSource<?> actionImageSource = loadImageAction.mImageSource;
+            if (actionImageSource == null || !actionImageSource.equals(imageSource)) {
+                loadImageAction.cancel();
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Nullable
+    protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
+        if (imageView != null) {
+            Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof AsyncBitmapDrawable) {
+                AsyncBitmapDrawable asyncBitmapDrawable = (AsyncBitmapDrawable) drawable;
+                return asyncBitmapDrawable.getLoadImageAction();
+            }
+        }
+        return null;
     }
 
     /**
@@ -801,7 +803,7 @@ public class ImageLoader<T> {
         @Nullable
         public ImageView getAttachedImageView() {
             ImageView imageView = mImageViewReference.get();
-            LoadImageAction<?> loadImageAction = mImageLoader.getLoadImageAction(imageView);
+            LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
             if (this == loadImageAction) {
                 return imageView;
             }
