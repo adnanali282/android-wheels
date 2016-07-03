@@ -815,7 +815,7 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static class LoadImageAction<T> {
+    protected static final class LoadImageAction<T> {
         private final ImageSource<T> mImageSource;
         private final WeakReference<ImageView> mImageViewReference;
         private final ImageLoader<T> mImageLoader;
@@ -939,7 +939,7 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static class SetImageAction implements Runnable {
+    protected static final class SetImageAction implements Runnable {
         private final BitmapDrawable mBitmapDrawable;
         private final ImageLoader<?> mImageLoader;
         private final LoadImageAction<?> mLoadImageAction;
@@ -991,7 +991,7 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static class SimpleSetImageAction implements Runnable {
+    protected static final class SimpleSetImageAction implements Runnable {
         private final ImageView mImageView;
         private final BitmapDrawable mBitmapDrawable;
         private final Callback mCallback;
@@ -1015,7 +1015,7 @@ public class ImageLoader<T> {
         }
     }
 
-    protected static class AsyncBitmapDrawable extends BitmapDrawable {
+    protected static final class AsyncBitmapDrawable extends BitmapDrawable {
         private final WeakReference<LoadImageAction<?>> mLoadImageActionReference;
 
         public AsyncBitmapDrawable(@Nullable Resources res, @Nullable Bitmap bitmap,
