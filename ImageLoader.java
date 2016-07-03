@@ -77,9 +77,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <T> Source data type
  */
 public class ImageLoader<T> {
-    private static final String URI_SCHEME_HTTP = "http";
-    private static final String URI_SCHEME_HTTPS = "https";
-    private static final String URI_SCHEME_FTP = "ftp";
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private final Thread mMainThread;
@@ -136,7 +133,19 @@ public class ImageLoader<T> {
         if (poolSize > 1) {
             poolSize--;
         }
-        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ImageLoaderThreadFactory());
+        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ThreadFactory() {
+            @Override
+            public Thread newThread(@NonNull Runnable runnable) {
+                Thread thread = new Thread(runnable, "ImageLoader-background-thread");
+                if (thread.isDaemon()) {
+                    thread.setDaemon(false);
+                }
+                if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                    thread.setPriority(Thread.NORM_PRIORITY);
+                }
+                return thread;
+            }
+        });
     }
 
     protected void runOnMainThread(@NonNull Runnable runnable) {
@@ -353,6 +362,53 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Fraction of maximum number of bytes heap can expand to
+     *
+     * @param fraction Fraction
+     * @return Number of bytes
+     */
+    protected static int getMaxMemoryFraction(float fraction) {
+        if (fraction < 0.1F || fraction > 0.8F) {
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)");
+        }
+        return Math.round(fraction * Runtime.getRuntime().maxMemory());
+    }
+
+    /**
+     * Fraction of free storage space in specified path
+     *
+     * @param path     Path
+     * @param fraction Fraction
+     * @return Number of free bytes
+     */
+    protected static long getFreeStorageFraction(@NonNull File path, double fraction) {
+        if (fraction < 0.01D || fraction > 1.0D) {
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
+        }
+        StatFs stat = new StatFs(path.getAbsolutePath());
+        double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
+        return Math.round(bytesAvailable * fraction);
+    }
+
+    /**
+     * Fraction of total storage space in specified path
+     *
+     * @param path     Path
+     * @param fraction Fraction
+     * @return Number of free bytes
+     */
+    protected static long getTotalStorageFraction(@NonNull File path, double fraction) {
+        if (fraction < 0.01D || fraction > 1.0D) {
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
+        }
+        StatFs stat = new StatFs(path.getAbsolutePath());
+        return Math.round(stat.getTotalBytes() * fraction);
+    }
+
+    /**
      * Calculate sample size for required size from source size
      * Sample size is the number of pixels in either dimension that
      * correspond to a single pixel
@@ -400,8 +456,9 @@ public class ImageLoader<T> {
     protected static InputStream getDataStreamFromUri(@NonNull Context context,
             @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
-        if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) || URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
-                URI_SCHEME_FTP.equalsIgnoreCase(scheme)) {
+        if (Constants.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
+                Constants.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+                Constants.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
             return new URL(uri.toString()).openConnection().getInputStream();
         } else {
             return context.getContentResolver().openInputStream(uri);
@@ -659,6 +716,7 @@ public class ImageLoader<T> {
                 return data;
             }
 
+            @NonNull
             @Override
             public String getKey() {
                 return key;
@@ -675,7 +733,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static MemoryImageCache newMemoryImageCache(float totalMemoryFraction) {
-        return new MemoryImageCache(MemoryImageCache.getMaxMemoryFraction(totalMemoryFraction));
+        return new MemoryImageCacheImplementation(getMaxMemoryFraction(totalMemoryFraction));
     }
 
     /**
@@ -686,7 +744,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static MemoryImageCache newMemoryImageCache() {
-        return newMemoryImageCache(MemoryImageCache.DEFAULT_FRACTION);
+        return newMemoryImageCache(Constants.MemoryImageCache.DEFAULT_FRACTION);
     }
 
     /**
@@ -698,9 +756,10 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static StorageImageCache newStorageImageCache(@NonNull File directory) {
-        return new StorageImageCache(directory, StorageImageCache
-                .getTotalStorageFraction(directory, StorageImageCache.DEFAULT_FRACTION),
-                StorageImageCache.DEFAULT_FORMAT, StorageImageCache.DEFAULT_QUALITY);
+        return new StorageImageCacheImplementation(directory,
+                getTotalStorageFraction(directory, Constants.StorageImageCache.DEFAULT_FRACTION),
+                Constants.StorageImageCache.DEFAULT_FORMAT,
+                Constants.StorageImageCache.DEFAULT_QUALITY);
     }
 
     /**
@@ -716,20 +775,38 @@ public class ImageLoader<T> {
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
-        return newStorageImageCache(new File(cacheDir, StorageImageCache.DEFAULT_DIRECTORY));
+        return newStorageImageCache(
+                new File(cacheDir, Constants.StorageImageCache.DEFAULT_DIRECTORY));
     }
 
-    private static class ImageLoaderThreadFactory implements ThreadFactory {
-        @Override
-        public Thread newThread(@NonNull Runnable runnable) {
-            Thread thread = new Thread(runnable, "ImageLoader-background-thread");
-            if (thread.isDaemon()) {
-                thread.setDaemon(false);
+    protected static final class Constants {
+        private Constants() {
+        }
+
+        public static final class Uri {
+            public static final String SCHEME_HTTP = "http";
+            public static final String SCHEME_HTTPS = "https";
+            public static final String SCHEME_FTP = "ftp";
+
+            private Uri() {
             }
-            if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                thread.setPriority(Thread.NORM_PRIORITY);
+        }
+
+        public static final class MemoryImageCache {
+            public static final float DEFAULT_FRACTION = 0.25F;
+
+            private MemoryImageCache() {
             }
-            return thread;
+        }
+
+        public static final class StorageImageCache {
+            public static final String DEFAULT_DIRECTORY = "image_loader_cache";
+            public static final double DEFAULT_FRACTION = 0.1D;
+            public static final Bitmap.CompressFormat DEFAULT_FORMAT = Bitmap.CompressFormat.JPEG;
+            public static final int DEFAULT_QUALITY = 80;
+
+            private StorageImageCache() {
+            }
         }
     }
 
@@ -947,68 +1024,57 @@ public class ImageLoader<T> {
         }
     }
 
-    public static class MemoryImageCache {
-        public static final float DEFAULT_FRACTION = 0.25F;
-        private final LruCache<String, RecyclingBitmapDrawable> mCache;
+    protected static class MemoryImageCacheImplementation implements MemoryImageCache {
+        private final LruCache<String, BitmapDrawable> mCache;
 
         /**
          * Memory image cache
          *
          * @param size Size in bytes
          */
-        public MemoryImageCache(int size) {
-            mCache = new LruCache<String, RecyclingBitmapDrawable>(size) {
+        public MemoryImageCacheImplementation(int size) {
+            mCache = new LruCache<String, BitmapDrawable>(size) {
                 @Override
-                protected void entryRemoved(boolean evicted, String key,
-                        RecyclingBitmapDrawable oldValue, RecyclingBitmapDrawable newValue) {
-                    oldValue.setCached(false);
+                protected void entryRemoved(boolean evicted, String key, BitmapDrawable oldValue,
+                        BitmapDrawable newValue) {
+                    if (oldValue instanceof RecyclingBitmapDrawable) {
+                        ((RecyclingBitmapDrawable) oldValue).setCached(false);
+                    }
                 }
 
                 @Override
-                protected int sizeOf(String key, RecyclingBitmapDrawable value) {
+                protected int sizeOf(String key, BitmapDrawable value) {
                     return value.getBitmap().getAllocationByteCount();
                 }
             };
         }
 
-        public void put(@NonNull String key, @NonNull RecyclingBitmapDrawable value) {
-            value.setCached(true);
+        @Override
+        public void put(@NonNull String key, @NonNull BitmapDrawable value) {
+            if (value instanceof RecyclingBitmapDrawable) {
+                ((RecyclingBitmapDrawable) value).setCached(true);
+            }
             mCache.put(key, value);
         }
 
         @Nullable
-        public RecyclingBitmapDrawable get(@NonNull String key) {
+        @Override
+        public BitmapDrawable get(@NonNull String key) {
             return mCache.get(key);
         }
 
+        @Override
         public void remove(@NonNull String key) {
             mCache.remove(key);
         }
 
+        @Override
         public void clear() {
             mCache.evictAll();
         }
-
-        /**
-         * Fraction of maximum number of bytes heap can expand to
-         *
-         * @param fraction Fraction
-         * @return Number of bytes
-         */
-        public static int getMaxMemoryFraction(float fraction) {
-            if (fraction < 0.1F || fraction > 0.8F) {
-                throw new IllegalArgumentException(
-                        "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)");
-            }
-            return Math.round(fraction * Runtime.getRuntime().maxMemory());
-        }
     }
 
-    public static class StorageImageCache {
-        public static final String DEFAULT_DIRECTORY = "image_loader_cache";
-        public static final double DEFAULT_FRACTION = 0.1D;
-        public static final Bitmap.CompressFormat DEFAULT_FORMAT = Bitmap.CompressFormat.JPEG;
-        public static final int DEFAULT_QUALITY = 80;
+    protected static class StorageImageCacheImplementation implements StorageImageCache {
         private final Object mCacheSizeLock = new Object();
         private final File mDirectory;
         private final long mMaxSize;
@@ -1023,7 +1089,7 @@ public class ImageLoader<T> {
          * @param compressFormat  Bitmap compress format
          * @param compressQuality Bitmap compress quality
          */
-        public StorageImageCache(@NonNull File directory, long maxSize,
+        public StorageImageCacheImplementation(@NonNull File directory, long maxSize,
                 @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
             mDirectory = directory;
             mMaxSize = maxSize;
@@ -1058,6 +1124,7 @@ public class ImageLoader<T> {
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
+        @Override
         public void put(@NonNull String key, @NonNull Bitmap value) {
             if (!mDirectory.exists()) {
                 mDirectory.mkdirs();
@@ -1072,6 +1139,7 @@ public class ImageLoader<T> {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         @Nullable
+        @Override
         public Bitmap get(@NonNull String key) {
             File file = new File(mDirectory, key);
             if (!file.exists()) {
@@ -1086,6 +1154,7 @@ public class ImageLoader<T> {
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
+        @Override
         public void remove(@NonNull String key) {
             File file = new File(mDirectory, key);
             if (file.exists()) {
@@ -1094,44 +1163,12 @@ public class ImageLoader<T> {
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
-        public synchronized void clear() {
+        @Override
+        public void clear() {
             File[] files = mDirectory.listFiles();
             for (File file : files) {
                 file.delete();
             }
-        }
-
-        /**
-         * Fraction of free storage space in specified path
-         *
-         * @param path     Path
-         * @param fraction Fraction
-         * @return Number of free bytes
-         */
-        public static long getFreeStorageFraction(@NonNull File path, double fraction) {
-            if (fraction < 0.01D || fraction > 1.0D) {
-                throw new IllegalArgumentException(
-                        "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
-            }
-            StatFs stat = new StatFs(path.getAbsolutePath());
-            double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
-            return Math.round(bytesAvailable * fraction);
-        }
-
-        /**
-         * Fraction of total storage space in specified path
-         *
-         * @param path     Path
-         * @param fraction Fraction
-         * @return Number of free bytes
-         */
-        public static long getTotalStorageFraction(@NonNull File path, double fraction) {
-            if (fraction < 0.01D || fraction > 1.0D) {
-                throw new IllegalArgumentException(
-                        "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
-            }
-            StatFs stat = new StatFs(path.getAbsolutePath());
-            return Math.round(stat.getTotalBytes() * fraction);
         }
     }
 
@@ -1368,7 +1405,35 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Represents source data and key to cache loaded bitmaps
+     * Memory image cache
+     */
+    public interface MemoryImageCache {
+        void put(@NonNull String key, @NonNull BitmapDrawable value);
+
+        @Nullable
+        BitmapDrawable get(@NonNull String key);
+
+        void remove(@NonNull String key);
+
+        void clear();
+    }
+
+    /**
+     * Storage image cache
+     */
+    public interface StorageImageCache {
+        void put(@NonNull String key, @NonNull Bitmap value);
+
+        @Nullable
+        Bitmap get(@NonNull String key);
+
+        void remove(@NonNull String key);
+
+        void clear();
+    }
+
+    /**
+     * Source data and key to cache loaded bitmaps
      *
      * @param <T> Type of source data
      */
@@ -1387,11 +1452,12 @@ public class ImageLoader<T> {
          *
          * @return Unique key
          */
+        @NonNull
         String getKey();
     }
 
     /**
-     * Represents bitmap loader from concrete source data type
+     * Bitmap loader from concrete source data type
      *
      * @param <T> Source data type
      */
@@ -1406,11 +1472,12 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Callback for concrete image loading
+     * Callback of image loading
      */
     public interface Callback {
-        void onImageLoaded(Bitmap image, boolean fromMemoryCache, boolean fromStorageCache);
+        void onImageLoaded(@Nullable Bitmap image, boolean fromMemoryCache,
+                boolean fromStorageCache);
 
-        void onImageDisplayed(ImageView imageView);
+        void onImageDisplayed(@NonNull ImageView imageView);
     }
 }
