@@ -315,6 +315,17 @@ public class ImageLoader<T> {
         }
     }
 
+    @Nullable
+    protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
+        if (imageView != null) {
+            Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof AsyncBitmapDrawable) {
+                return ((AsyncBitmapDrawable) drawable).getLoadImageAction();
+            }
+        }
+        return null;
+    }
+
     protected static void cancelWork(@Nullable ImageView imageView) {
         LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
         if (loadImageAction != null) {
@@ -327,25 +338,14 @@ public class ImageLoader<T> {
         LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
         if (loadImageAction != null) {
             ImageSource<?> actionImageSource = loadImageAction.mImageSource;
-            if (actionImageSource == null || !actionImageSource.equals(imageSource)) {
+            if (actionImageSource == null ||
+                    !Objects.equals(actionImageSource.getKey(), imageSource.getKey())) {
                 loadImageAction.cancel();
             } else {
                 return false;
             }
         }
         return true;
-    }
-
-    @Nullable
-    protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
-        if (imageView != null) {
-            Drawable drawable = imageView.getDrawable();
-            if (drawable instanceof AsyncBitmapDrawable) {
-                AsyncBitmapDrawable asyncBitmapDrawable = (AsyncBitmapDrawable) drawable;
-                return asyncBitmapDrawable.getLoadImageAction();
-            }
-        }
-        return null;
     }
 
     /**
