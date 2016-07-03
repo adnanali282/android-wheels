@@ -61,6 +61,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -122,7 +123,7 @@ public class ImageLoader<T> {
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader,
             @Nullable MemoryImageCache memoryImageCache,
             @Nullable StorageImageCache storageImageCache) {
-        mContext = context;
+        mContext = Objects.requireNonNull(context);
         mBitmapLoader = bitmapLoader;
         mMemoryImageCache = memoryImageCache;
         mStorageImageCache = storageImageCache;
