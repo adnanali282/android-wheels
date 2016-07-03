@@ -157,7 +157,7 @@ public class ImageLoader<T> {
         }
     }
 
-    protected void runOnMainThread(@NonNull Runnable runnable, int delay) {
+    protected void runOnMainThread(@NonNull Runnable runnable, long delay) {
         mMainThreadHandler.postDelayed(runnable, delay);
     }
 
@@ -169,6 +169,19 @@ public class ImageLoader<T> {
     @NonNull
     protected Context getContext() {
         return mContext;
+    }
+
+    protected boolean isPauseWork() {
+        return mPauseWork;
+    }
+
+    protected void setPauseWork(boolean pauseWork) {
+        synchronized (mPauseWorkLock) {
+            mPauseWork = pauseWork;
+            if (!isPauseWork()) {
+                mPauseWorkLock.notifyAll();
+            }
+        }
     }
 
     /**
@@ -226,6 +239,7 @@ public class ImageLoader<T> {
         }
     }
 
+    @Nullable
     public Bitmap getPlaceholderImage() {
         return mPlaceholderBitmap;
     }
@@ -234,10 +248,11 @@ public class ImageLoader<T> {
         mPlaceholderBitmap = bitmap;
     }
 
-    public void setPlaceholderImage(int resId) {
-        mPlaceholderBitmap = BitmapFactory.decodeResource(getContext().getResources(), resId);
+    public void setPlaceholderImage(int resourceId) {
+        mPlaceholderBitmap = BitmapFactory.decodeResource(getContext().getResources(), resourceId);
     }
 
+    @Nullable
     public BitmapLoader<T> getBitmapLoader() {
         return mBitmapLoader;
     }
@@ -246,6 +261,7 @@ public class ImageLoader<T> {
         mBitmapLoader = bitmapLoader;
     }
 
+    @Nullable
     public MemoryImageCache getMemoryImageCache() {
         return mMemoryImageCache;
     }
@@ -254,6 +270,7 @@ public class ImageLoader<T> {
         mMemoryImageCache = memoryImageCache;
     }
 
+    @Nullable
     public StorageImageCache getStorageImageCache() {
         return mStorageImageCache;
     }
@@ -285,19 +302,6 @@ public class ImageLoader<T> {
 
     public void setImageFadeInTime(int imageFadeInTime) {
         mImageFadeInTime = imageFadeInTime;
-    }
-
-    public boolean isPauseWork() {
-        return mPauseWork;
-    }
-
-    public void setPauseWork(boolean pauseWork) {
-        synchronized (mPauseWorkLock) {
-            mPauseWork = pauseWork;
-            if (!isPauseWork()) {
-                mPauseWorkLock.notifyAll();
-            }
-        }
     }
 
     public void clearCache() {
