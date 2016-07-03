@@ -82,9 +82,9 @@ public class ImageLoader<T> {
     private final Thread mMainThread;
     private final Handler mMainThreadHandler;
     private final ExecutorService mAsyncExecutor;
-    private volatile boolean mExitTasksEarly = false;
     private volatile boolean mImageFadeIn = true;
-    private volatile boolean mPauseWork = false;
+    private volatile boolean mExitTasksEarly;
+    private volatile boolean mPauseWork;
     private volatile int mImageFadeInTime = 200;
     private volatile BitmapLoader<T> mBitmapLoader;
     private volatile MemoryImageCache mMemoryImageCache;
