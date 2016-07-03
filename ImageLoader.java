@@ -631,7 +631,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<Uri> newUriBitmapLoader() {
         return new BitmapLoader<Uri>() {
             @Override
-            public Bitmap load(Context context, Uri data) {
+            public Bitmap load(@NonNull Context context, Uri data) {
                 return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
@@ -647,7 +647,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<File> newFileBitmapLoader() {
         return new BitmapLoader<File>() {
             @Override
-            public Bitmap load(Context context, File data) {
+            public Bitmap load(@NonNull Context context, File data) {
                 return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
         };
@@ -662,7 +662,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
         return new BitmapLoader<FileDescriptor>() {
             @Override
-            public Bitmap load(Context context, FileDescriptor data) {
+            public Bitmap load(@NonNull Context context, FileDescriptor data) {
                 return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
                         Integer.MAX_VALUE, true);
             }
@@ -678,7 +678,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<Integer> newResourceBitmapLoader() {
         return new BitmapLoader<Integer>() {
             @Override
-            public Bitmap load(Context context, Integer data) {
+            public Bitmap load(@NonNull Context context, Integer data) {
                 return loadSampledBitmapFromResource(context.getResources(), data,
                         Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
@@ -694,7 +694,7 @@ public class ImageLoader<T> {
     public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
         return new BitmapLoader<byte[]>() {
             @Override
-            public Bitmap load(Context context, byte[] data) {
+            public Bitmap load(@NonNull Context context, byte[] data) {
                 return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
                         true);
             }
@@ -1469,7 +1469,7 @@ public class ImageLoader<T> {
          * @param data Source data
          * @return Loaded bitmap
          */
-        Bitmap load(Context context, T data);
+        Bitmap load(@NonNull Context context, T data);
     }
 
     /**
