@@ -89,7 +89,7 @@ public class ImageLoader<T> {
     private volatile BitmapLoader<T> mBitmapLoader;
     private volatile MemoryImageCache mMemoryImageCache;
     private volatile StorageImageCache mStorageImageCache;
-    private volatile Bitmap mPlaceholderBitmap = null;
+    private volatile Bitmap mPlaceholderBitmap;
 
     /**
      * ImageLoader without any cache or bitmap loader
@@ -815,10 +815,10 @@ public class ImageLoader<T> {
         private final WeakReference<ImageView> mImageViewReference;
         private final ImageLoader<T> mImageLoader;
         private final Callback mCallback;
-        private final AtomicBoolean mSubmitted = new AtomicBoolean(false);
-        private volatile boolean mFinished = false;
-        private volatile boolean mCancelled = false;
-        private volatile Future<Void> mFuture = null;
+        private final AtomicBoolean mSubmitted = new AtomicBoolean();
+        private volatile boolean mFinished;
+        private volatile boolean mCancelled;
+        private volatile Future<Void> mFuture;
 
         public LoadImageAction(ImageSource<T> imageSource, ImageView imageView, Callback callback,
                 ImageLoader<T> imageLoader) {
