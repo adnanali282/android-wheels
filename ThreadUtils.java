@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,7 +32,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class ThreadUtils {
+/**
+ * Tools for asynchronous tasks in Android
+ */
+public final class ThreadUtils {
     private static final Thread MAIN_THREAD;
     private static final Handler MAIN_THREAD_HANDLER;
     private static final ExecutorService ASYNC_EXECUTOR = Executors.newCachedThreadPool();
@@ -43,6 +46,15 @@ public class ThreadUtils {
         MAIN_THREAD_HANDLER = new Handler(mainLooper);
     }
 
+    private ThreadUtils() {
+    }
+
+    /**
+     * Wrap Callable into Runnable
+     *
+     * @param callable Callable
+     * @return Runnable
+     */
     @NonNull
     private static Runnable wrapCallable(@NonNull final Callable<?> callable) {
         return new Runnable() {
@@ -57,46 +69,93 @@ public class ThreadUtils {
         };
     }
 
+    /**
+     * Run task asynchronous
+     *
+     * @param task Task
+     * @return a Future representing pending completion of the task
+     */
     @NonNull
-    public static Future<?> runAsync(@NonNull Runnable runnable) {
-        return ASYNC_EXECUTOR.submit(runnable);
+    public static Future<?> runAsync(@NonNull Runnable task) {
+        return ASYNC_EXECUTOR.submit(task);
     }
 
-    public static void runAsync(@NonNull final Runnable runnable, long delay) {
+    /**
+     * Run task asynchronous
+     *
+     * @param task Task
+     * @param <T>  Result type
+     * @return a Future representing pending completion of the task
+     */
+    @NonNull
+    public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
+        return ASYNC_EXECUTOR.submit(task);
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runAsync(@NonNull final Runnable task, long delay) {
         runOnMainThread(new Runnable() {
             @Override
             public void run() {
-                runAsync(runnable);
+                runAsync(task);
             }
         }, delay);
     }
 
-    @NonNull
-    public static <T> Future<T> callAsync(@NonNull Callable<T> callable) {
-        return ASYNC_EXECUTOR.submit(callable);
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runAsync(@NonNull Callable<?> task, long delay) {
+        runAsync(wrapCallable(task), delay);
     }
 
-    public static void callAsync(@NonNull Callable<?> callable, long delay) {
-        runAsync(wrapCallable(callable), delay);
-    }
-
-    public static void runOnMainThread(@NonNull Runnable runnable, long delay) {
-        MAIN_THREAD_HANDLER.postDelayed(runnable, delay);
-    }
-
-    public static void runOnMainThread(@NonNull Runnable runnable) {
+    /**
+     * Run task on main (UI) thread
+     *
+     * @param task Task
+     */
+    public static void runOnMainThread(@NonNull Runnable task) {
         if (Thread.currentThread() == MAIN_THREAD) {
-            runnable.run();
+            task.run();
         } else {
-            runOnMainThread(runnable, 0);
+            runOnMainThread(task, 0);
         }
     }
 
-    public static void callOnMainThread(@NonNull Callable<?> callable) {
-        runOnMainThread(wrapCallable(callable));
+    /**
+     * Run task on main (UI) thread
+     *
+     * @param task Task
+     */
+    public static void runOnMainThread(@NonNull Callable<?> task) {
+        runOnMainThread(wrapCallable(task));
     }
 
-    public static void callOnMainThread(@NonNull Callable<?> callable, long delay) {
-        runOnMainThread(wrapCallable(callable), delay);
+    /**
+     * Run task on main (UI) thread with specified delay
+     *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runOnMainThread(@NonNull Runnable task, long delay) {
+        MAIN_THREAD_HANDLER.postDelayed(task, delay);
+    }
+
+    /**
+     * Run task on main (UI) thread with specified delay
+     *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runOnMainThread(@NonNull Callable<?> task, long delay) {
+        runOnMainThread(wrapCallable(task), delay);
     }
 }
