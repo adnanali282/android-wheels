@@ -759,8 +759,12 @@ public class ImageLoader<T> {
      * @param directory Cache directory
      * @return Storage image cache
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @NonNull
     public static StorageImageCache newStorageImageCache(@NonNull File directory) {
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
         return new StorageImageCacheImplementation(directory,
                 getTotalStorageFraction(directory, Constants.StorageImageCache.DEFAULT_FRACTION),
                 Constants.StorageImageCache.DEFAULT_FORMAT,
