@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -92,6 +93,20 @@ public final class ThreadUtils {
     }
 
     /**
+     * Run task asynchronous
+     *
+     * @param task       Task
+     * @param parameters Parameters
+     * @return Task
+     */
+    @SafeVarargs
+    @NonNull
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+            @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
+        return task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
+    }
+
+    /**
      * Run task asynchronous with specified delay
      *
      * @param task  Task
@@ -104,6 +119,28 @@ public final class ThreadUtils {
                 runAsync(task);
             }
         }, delay);
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task       Task
+     * @param delay      Delay
+     * @param parameters Parameters
+     * @return Task
+     */
+    @SafeVarargs
+    @NonNull
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+            @NonNull final AsyncTask<Parameters, Progress, Result> task, long delay,
+            final Parameters... parameters) {
+        runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
+            }
+        }, delay);
+        return task;
     }
 
     /**
