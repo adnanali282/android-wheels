@@ -97,11 +97,9 @@ public final class ThreadUtils {
      *
      * @param task       Task
      * @param parameters Parameters
-     * @return Task
      */
     @SafeVarargs
-    @NonNull
-    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+    public static <Parameters, Progress, Result> void runAsync(
             @NonNull final AsyncTask<Parameters, Progress, Result> task,
             final Parameters... parameters) {
         runOnMainThread(new Runnable() {
@@ -110,7 +108,6 @@ public final class ThreadUtils {
                 task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
             }
         });
-        return task;
     }
 
     /**
@@ -134,11 +131,9 @@ public final class ThreadUtils {
      * @param task       Task
      * @param delay      Delay
      * @param parameters Parameters
-     * @return Task
      */
     @SafeVarargs
-    @NonNull
-    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+    public static <Parameters, Progress, Result> void runAsync(
             @NonNull final AsyncTask<Parameters, Progress, Result> task, long delay,
             final Parameters... parameters) {
         runOnMainThread(new Runnable() {
@@ -147,7 +142,6 @@ public final class ThreadUtils {
                 task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
             }
         }, delay);
-        return task;
     }
 
     /**
