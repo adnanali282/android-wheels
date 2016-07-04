@@ -1129,6 +1129,9 @@ public class ImageLoader<T> {
         private void fitCacheSize() {
             synchronized (mCacheSizeLock) {
                 File[] files = mDirectory.listFiles();
+                if (files == null) {
+                    return;
+                }
                 if (files.length < 2) {
                     return;
                 }
@@ -1193,6 +1196,9 @@ public class ImageLoader<T> {
         @Override
         public void clear() {
             File[] files = mDirectory.listFiles();
+            if (files == null) {
+                return;
+            }
             for (File file : files) {
                 file.delete();
             }
