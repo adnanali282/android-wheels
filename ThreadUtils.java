@@ -102,8 +102,15 @@ public final class ThreadUtils {
     @SafeVarargs
     @NonNull
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
-            @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
-        return task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
+            @NonNull final AsyncTask<Parameters, Progress, Result> task,
+            final Parameters... parameters) {
+        runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
+            }
+        });
+        return task;
     }
 
     /**
