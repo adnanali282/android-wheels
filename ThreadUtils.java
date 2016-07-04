@@ -84,7 +84,6 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @param <T>  Result type
      * @return a Future representing pending completion of the task
      */
     @NonNull
