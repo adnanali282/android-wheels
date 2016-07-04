@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,7 +38,20 @@ import android.widget.TextView;
 
 import java.util.LinkedList;
 
+/**
+ * Tools for Snackbar
+ */
 public final class SnackbarUtils {
+    private SnackbarUtils() {
+    }
+
+    /**
+     * Wrap Action into OnClickListener
+     *
+     * @param action   Action
+     * @param snackbar Snackbar
+     * @return OnClickListener
+     */
     @NonNull
     private static View.OnClickListener wrapAction(@NonNull final Action action,
             @NonNull final Snackbar snackbar) {
@@ -50,6 +63,12 @@ public final class SnackbarUtils {
         };
     }
 
+    /**
+     * Find suitable view for Snackbar
+     *
+     * @param view View
+     * @return Best suitable view
+     */
     @NonNull
     private static View findSuitableView(@NonNull View view) {
         if (view instanceof CoordinatorLayout) {
@@ -78,6 +97,17 @@ public final class SnackbarUtils {
         return view;
     }
 
+    /**
+     * Show snackbar
+     *
+     * @param view            View
+     * @param messageText     Message text
+     * @param backgroundColor Background color
+     * @param textColor       Text color
+     * @param duration        Duration
+     * @param action          Action
+     * @param actionText      Action text
+     */
     public static void show(@NonNull View view, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable Action action, @Nullable CharSequence actionText) {
@@ -97,6 +127,17 @@ public final class SnackbarUtils {
         snackbar.show();
     }
 
+    /**
+     * Show snackbar
+     *
+     * @param window          Window
+     * @param messageText     Message text
+     * @param backgroundColor Background color
+     * @param textColor       Text color
+     * @param duration        Duration
+     * @param action          Action
+     * @param actionText      Action text
+     */
     public static void show(@NonNull Window window, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable Action action, @Nullable CharSequence actionText) {
@@ -111,6 +152,17 @@ public final class SnackbarUtils {
         show(view, messageText, backgroundColor, textColor, duration, action, actionText);
     }
 
+    /**
+     * Show snackbar
+     *
+     * @param activity        Activity
+     * @param messageText     Message text
+     * @param backgroundColor Background color
+     * @param textColor       Text color
+     * @param duration        Duration
+     * @param action          Action
+     * @param actionText      Action text
+     */
     public static void show(@NonNull Activity activity, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable Action action, @Nullable CharSequence actionText) {
@@ -121,6 +173,17 @@ public final class SnackbarUtils {
         show(window, messageText, backgroundColor, textColor, duration, action, actionText);
     }
 
+    /**
+     * Show snackbar
+     *
+     * @param fragment        Fragment
+     * @param messageText     Message text
+     * @param backgroundColor Background color
+     * @param textColor       Text color
+     * @param duration        Duration
+     * @param action          Action
+     * @param actionText      Action text
+     */
     public static void show(@NonNull Fragment fragment, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable Action action, @Nullable CharSequence actionText) {
@@ -131,9 +194,9 @@ public final class SnackbarUtils {
         show(activity, messageText, backgroundColor, textColor, duration, action, actionText);
     }
 
-    private SnackbarUtils() {
-    }
-
+    /**
+     * Action button click
+     */
     public interface Action {
         void onClick(View button, Snackbar snackbar);
     }
