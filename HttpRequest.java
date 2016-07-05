@@ -359,7 +359,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Common interface of HTTP requests.
+     * Common interface of HTTP requests
      */
     public interface Request {
         @NonNull
@@ -378,7 +378,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Instance class for GET requests.
+     * Instance class for GET requests
      */
     public static final class Get implements Request {
         private static final String UTF_8 = "UTF-8";
@@ -471,12 +471,12 @@ public final class HttpRequest {
                     result.setConnection(connection);
                     result.setException(e);
                 }
+                if (mCallback != null) {
+                    mCallback.onResult(result);
+                }
                 mResult = result;
                 synchronized (mResultLock) {
                     mResultLock.notifyAll();
-                }
-                if (mCallback != null) {
-                    mCallback.onResult(result);
                 }
                 return result;
             }
@@ -542,7 +542,7 @@ public final class HttpRequest {
         }
 
         /**
-         * Builder for GET requests.
+         * Builder for GET requests
          */
         public static final class Builder {
             private final String mUrl;
@@ -589,7 +589,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Instance class for POST requests.
+     * Instance class for POST requests
      */
     public static final class Post implements Request {
         private static final String UTF_8 = "UTF-8";
@@ -768,12 +768,12 @@ public final class HttpRequest {
                     result.setConnection(connection);
                     result.setException(e);
                 }
+                if (mCallback != null) {
+                    mCallback.onResult(result);
+                }
                 mResult = result;
                 synchronized (mResultLock) {
                     mResultLock.notifyAll();
-                }
-                if (mCallback != null) {
-                    mCallback.onResult(result);
                 }
                 return result;
             }
@@ -841,7 +841,7 @@ public final class HttpRequest {
         }
 
         /**
-         * Builder for POST requests.
+         * Builder for POST requests
          */
         public static final class Builder {
             private final String mUrl;
