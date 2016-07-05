@@ -1129,10 +1129,7 @@ public class ImageLoader<T> {
         private void fitCacheSize() {
             synchronized (mCacheSizeLock) {
                 File[] files = mDirectory.listFiles();
-                if (files == null) {
-                    return;
-                }
-                if (files.length < 2) {
+                if (files == null || files.length < 2) {
                     return;
                 }
                 Arrays.sort(files, new Comparator<File>() {
