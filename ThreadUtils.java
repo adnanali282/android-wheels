@@ -32,19 +32,39 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tools for asynchronous tasks in Android
  */
 public final class ThreadUtils {
-    private static final Thread MAIN_THREAD;
+    private static final String BACKGROUND_THREAD_NAME_PREFIX = "ThreadUtils-background-thread-";
+    private static final AtomicInteger BACKGROUND_THREAD_COUNTER = new AtomicInteger(1);
+    private static final ThreadFactory BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
+        @Override
+        public Thread newThread(@NonNull Runnable runnable) {
+            BACKGROUND_THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
+            Thread thread = new Thread(runnable,
+                    BACKGROUND_THREAD_NAME_PREFIX + BACKGROUND_THREAD_COUNTER.getAndIncrement());
+            if (thread.isDaemon()) {
+                thread.setDaemon(false);
+            }
+            if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                thread.setPriority(Thread.NORM_PRIORITY);
+            }
+            return thread;
+        }
+    };
+    private static final ExecutorService ASYNC_EXECUTOR =
+            Executors.newCachedThreadPool(BACKGROUND_THREAD_FACTORY);
     private static final Handler MAIN_THREAD_HANDLER;
-    private static final ExecutorService ASYNC_EXECUTOR = Executors.newCachedThreadPool();
+    private static final Thread MAIN_THREAD;
 
     static {
         Looper mainLooper = Looper.getMainLooper();
-        MAIN_THREAD = mainLooper.getThread();
         MAIN_THREAD_HANDLER = new Handler(mainLooper);
+        MAIN_THREAD = mainLooper.getThread();
     }
 
     private ThreadUtils() {
@@ -66,6 +86,26 @@ public final class ThreadUtils {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }
+        };
+    }
+
+    /**
+     * Wrap AsyncTask into Runnable
+     *
+     * @param asyncTask  AsyncTask
+     * @param parameters AsyncTask parameters
+     * @return Runnable
+     */
+    @SafeVarargs
+    @NonNull
+    private static <Parameters, Progress, Result> Runnable wrapAsyncTask(
+            @NonNull final AsyncTask<Parameters, Progress, Result> asyncTask,
+            final Parameters... parameters) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                asyncTask.executeOnExecutor(ASYNC_EXECUTOR, parameters);
             }
         };
     }
@@ -100,14 +140,8 @@ public final class ThreadUtils {
      */
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
-            @NonNull final AsyncTask<Parameters, Progress, Result> task,
-            final Parameters... parameters) {
-        runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
-            }
-        });
+            @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
+        runOnMainThread(wrapAsyncTask(task, parameters));
     }
 
     /**
@@ -134,14 +168,9 @@ public final class ThreadUtils {
      */
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
-            @NonNull final AsyncTask<Parameters, Progress, Result> task, long delay,
-            final Parameters... parameters) {
-        runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                task.executeOnExecutor(ASYNC_EXECUTOR, parameters);
-            }
-        }, delay);
+            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
+            Parameters... parameters) {
+        runOnMainThread(wrapAsyncTask(task, parameters), delay);
     }
 
     /**
