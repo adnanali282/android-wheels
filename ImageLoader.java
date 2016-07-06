@@ -68,6 +68,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ImageLoader is a universal tool for loading bitmaps efficiently in Android which
@@ -80,8 +81,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ImageLoader<T> {
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
-    private final Thread mMainThread;
-    private final Handler mMainThreadHandler;
     private final ExecutorService mAsyncExecutor;
     private volatile boolean mImageFadeIn = true;
     private volatile boolean mExitTasksEarly;
@@ -127,30 +126,15 @@ public class ImageLoader<T> {
         mBitmapLoader = bitmapLoader;
         mMemoryImageCache = memoryImageCache;
         mStorageImageCache = storageImageCache;
-        Looper mainLooper = Looper.getMainLooper();
-        mMainThread = mainLooper.getThread();
-        mMainThreadHandler = new Handler(mainLooper);
         int poolSize = Runtime.getRuntime().availableProcessors();
         if (poolSize > 1) {
             poolSize--;
         }
-        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ThreadFactory() {
-            @Override
-            public Thread newThread(@NonNull Runnable runnable) {
-                Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
-                if (thread.isDaemon()) {
-                    thread.setDaemon(false);
-                }
-                if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                    thread.setPriority(Thread.NORM_PRIORITY);
-                }
-                return thread;
-            }
-        });
+        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, Constants.Threads.FACTORY);
     }
 
     protected void runOnMainThread(@NonNull Runnable runnable) {
-        if (Thread.currentThread() == mMainThread) {
+        if (Thread.currentThread() == Constants.Threads.MAIN_THREAD) {
             runnable.run();
         } else {
             runOnMainThread(runnable, 0);
@@ -158,7 +142,7 @@ public class ImageLoader<T> {
     }
 
     protected void runOnMainThread(@NonNull Runnable runnable, long delay) {
-        mMainThreadHandler.postDelayed(runnable, delay);
+        Constants.Threads.MAIN_HANDLER.postDelayed(runnable, delay);
     }
 
     @NonNull
@@ -793,7 +777,30 @@ public class ImageLoader<T> {
         }
 
         public static final class Threads {
-            public static final String BACKGROUND_THREAD_NAME = "ImageLoader-background-thread";
+            public static final String NAME_PREFIX = "ImageLoader-background-thread-";
+            public static final AtomicInteger COUNTER = new AtomicInteger(1);
+            public static final ThreadFactory FACTORY = new ThreadFactory() {
+                @Override
+                public Thread newThread(@NonNull Runnable runnable) {
+                    COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
+                    Thread thread = new Thread(runnable, NAME_PREFIX + COUNTER.getAndIncrement());
+                    if (thread.isDaemon()) {
+                        thread.setDaemon(false);
+                    }
+                    if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                        thread.setPriority(Thread.NORM_PRIORITY);
+                    }
+                    return thread;
+                }
+            };
+            public static final Handler MAIN_HANDLER;
+            public static final Thread MAIN_THREAD;
+
+            static {
+                Looper mainLooper = Looper.getMainLooper();
+                MAIN_HANDLER = new Handler(mainLooper);
+                MAIN_THREAD = mainLooper.getThread();
+            }
 
             private Threads() {
             }
