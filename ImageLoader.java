@@ -81,7 +81,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ImageLoader<T> {
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
-    private final ExecutorService mAsyncExecutor;
     private volatile boolean mImageFadeIn = true;
     private volatile boolean mExitTasksEarly;
     private volatile boolean mPauseWork;
@@ -126,28 +125,6 @@ public class ImageLoader<T> {
         mBitmapLoader = bitmapLoader;
         mMemoryImageCache = memoryImageCache;
         mStorageImageCache = storageImageCache;
-        int poolSize = Runtime.getRuntime().availableProcessors();
-        if (poolSize > 1) {
-            poolSize--;
-        }
-        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, Constants.Threads.FACTORY);
-    }
-
-    protected void runOnMainThread(@NonNull Runnable runnable) {
-        if (Thread.currentThread() == Constants.Threads.MAIN_THREAD) {
-            runnable.run();
-        } else {
-            runOnMainThread(runnable, 0);
-        }
-    }
-
-    protected void runOnMainThread(@NonNull Runnable runnable, long delay) {
-        Constants.Threads.MAIN_HANDLER.postDelayed(runnable, delay);
-    }
-
-    @NonNull
-    protected ExecutorService getAsyncExecutor() {
-        return mAsyncExecutor;
     }
 
     @NonNull
@@ -189,15 +166,16 @@ public class ImageLoader<T> {
                     callback.onImageLoaded(image, true, false);
                 }
             }
-            runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
+            Utils.Threads.runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
                     new LoadImageAction<>(imageSource, imageView, callback, this);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
-            runOnMainThread(new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
-            loadAction.execute(getAsyncExecutor());
+            Utils.Threads.runOnMainThread(
+                    new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
+            loadAction.execute(Utils.Threads.ASYNC_EXECUTOR);
         }
     }
 
@@ -341,7 +319,7 @@ public class ImageLoader<T> {
     @NonNull
     protected static String generateMD5(byte[] data) {
         try {
-            MessageDigest messageDigest = MessageDigest.getInstance(Constants.MessageDigest.MD5);
+            MessageDigest messageDigest = MessageDigest.getInstance(Utils.MessageDigest.MD5);
             messageDigest.update(data);
             BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
             return bigInteger.toString(Character.MAX_RADIX);
@@ -358,8 +336,7 @@ public class ImageLoader<T> {
      */
     protected static int getMaxMemoryFraction(float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
-            throw new IllegalArgumentException(
-                    Constants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+            throw new IllegalArgumentException(Utils.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         return Math.round(fraction * Runtime.getRuntime().maxMemory());
     }
@@ -374,7 +351,7 @@ public class ImageLoader<T> {
     protected static long getFreeStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+                    Utils.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         StatFs stat = new StatFs(path.getAbsolutePath());
         double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
@@ -391,7 +368,7 @@ public class ImageLoader<T> {
     protected static long getTotalStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+                    Utils.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         StatFs stat = new StatFs(path.getAbsolutePath());
         return Math.round(stat.getTotalBytes() * fraction);
@@ -445,9 +422,9 @@ public class ImageLoader<T> {
     protected static InputStream getDataStreamFromUri(@NonNull Context context,
             @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
-        if (Constants.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
-                Constants.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
-                Constants.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
+        if (Utils.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
+                Utils.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+                Utils.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
             return new URL(uri.toString()).openConnection().getInputStream();
         } else {
             return context.getContentResolver().openInputStream(uri);
@@ -733,7 +710,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static MemoryImageCache newMemoryImageCache() {
-        return newMemoryImageCache(Constants.MemoryImageCache.DEFAULT_FRACTION);
+        return newMemoryImageCache(Utils.MemoryImageCache.DEFAULT_FRACTION);
     }
 
     /**
@@ -750,9 +727,8 @@ public class ImageLoader<T> {
             directory.mkdirs();
         }
         return new StorageImageCacheImplementation(directory,
-                getTotalStorageFraction(directory, Constants.StorageImageCache.DEFAULT_FRACTION),
-                Constants.StorageImageCache.DEFAULT_FORMAT,
-                Constants.StorageImageCache.DEFAULT_QUALITY);
+                getTotalStorageFraction(directory, Utils.StorageImageCache.DEFAULT_FRACTION),
+                Utils.StorageImageCache.DEFAULT_FORMAT, Utils.StorageImageCache.DEFAULT_QUALITY);
     }
 
     /**
@@ -768,22 +744,23 @@ public class ImageLoader<T> {
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
-        return newStorageImageCache(
-                new File(cacheDir, Constants.StorageImageCache.DEFAULT_DIRECTORY));
+        return newStorageImageCache(new File(cacheDir, Utils.StorageImageCache.DEFAULT_DIRECTORY));
     }
 
-    protected static final class Constants {
-        private Constants() {
+    protected static final class Utils {
+        private Utils() {
         }
 
         public static final class Threads {
-            public static final String NAME_PREFIX = "ImageLoader-background-thread-";
-            public static final AtomicInteger COUNTER = new AtomicInteger(1);
-            public static final ThreadFactory FACTORY = new ThreadFactory() {
+            public static final String BACKGROUND_THREAD_NAME_PREFIX =
+                    "ImageLoader-background-thread-";
+            public static final AtomicInteger BACKGROUND_THREAD_COUNTER = new AtomicInteger(1);
+            public static final ThreadFactory BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
                 @Override
                 public Thread newThread(@NonNull Runnable runnable) {
-                    COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
-                    Thread thread = new Thread(runnable, NAME_PREFIX + COUNTER.getAndIncrement());
+                    BACKGROUND_THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
+                    Thread thread = new Thread(runnable, BACKGROUND_THREAD_NAME_PREFIX +
+                            BACKGROUND_THREAD_COUNTER.getAndIncrement());
                     if (thread.isDaemon()) {
                         thread.setDaemon(false);
                     }
@@ -793,16 +770,34 @@ public class ImageLoader<T> {
                     return thread;
                 }
             };
-            public static final Handler MAIN_HANDLER;
+            public static final ExecutorService ASYNC_EXECUTOR;
+            public static final Handler MAIN_THREAD_HANDLER;
             public static final Thread MAIN_THREAD;
 
             static {
                 Looper mainLooper = Looper.getMainLooper();
-                MAIN_HANDLER = new Handler(mainLooper);
+                MAIN_THREAD_HANDLER = new Handler(mainLooper);
                 MAIN_THREAD = mainLooper.getThread();
+                int poolSize = Runtime.getRuntime().availableProcessors();
+                if (poolSize > 1) {
+                    poolSize--;
+                }
+                ASYNC_EXECUTOR = Executors.newFixedThreadPool(poolSize, BACKGROUND_THREAD_FACTORY);
             }
 
             private Threads() {
+            }
+
+            public static void runOnMainThread(@NonNull Runnable runnable) {
+                if (Thread.currentThread() == MAIN_THREAD) {
+                    runnable.run();
+                } else {
+                    runOnMainThread(runnable, 0);
+                }
+            }
+
+            public static void runOnMainThread(@NonNull Runnable runnable, long delay) {
+                MAIN_THREAD_HANDLER.postDelayed(runnable, delay);
             }
         }
 
@@ -906,7 +901,7 @@ public class ImageLoader<T> {
                     memoryImageCache.put(mImageSource.getKey(), drawable);
                 }
             }
-            mImageLoader
+            Utils.Threads
                     .runOnMainThread(new SetImageAction(drawable, mImageLoader, mCallback, this));
         }
 
