@@ -187,28 +187,28 @@ public class ImageLoader<T> {
     /**
      * Load image to imageView from imageSource
      *
-     * @param imageSource Image source
-     * @param imageView   Image view
-     * @param callback    Optional callback
+     * @param imageSource  Image source
+     * @param imageView    Image view
+     * @param loadCallback Optional callback
      */
     public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @Nullable Callback callback) {
+            @Nullable LoadCallback loadCallback) {
         BitmapDrawable drawable = null;
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
             drawable = memoryImageCache.get(imageSource.getKey());
         }
         if (drawable != null) {
-            if (callback != null) {
+            if (loadCallback != null) {
                 Bitmap image = drawable.getBitmap();
                 if (image != null) {
-                    callback.onImageLoaded(image, true, false);
+                    loadCallback.onImageLoaded(image, true, false);
                 }
             }
-            runOnMainThread(new SimpleSetImageAction(imageView, drawable, callback));
+            runOnMainThread(new SimpleSetImageAction(imageView, drawable, loadCallback));
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
-                    new LoadImageAction<>(imageSource, imageView, callback, this);
+                    new LoadImageAction<>(imageSource, imageView, loadCallback, this);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
@@ -841,17 +841,17 @@ public class ImageLoader<T> {
         private final ImageSource<T> mImageSource;
         private final WeakReference<ImageView> mImageViewReference;
         private final ImageLoader<T> mImageLoader;
-        private final Callback mCallback;
+        private final LoadCallback mLoadCallback;
         private final AtomicBoolean mSubmitted = new AtomicBoolean();
         private volatile boolean mFinished;
         private volatile boolean mCancelled;
         private volatile Future<Void> mFuture;
 
-        public LoadImageAction(ImageSource<T> imageSource, ImageView imageView, Callback callback,
-                ImageLoader<T> imageLoader) {
+        public LoadImageAction(ImageSource<T> imageSource, ImageView imageView,
+                LoadCallback loadCallback, ImageLoader<T> imageLoader) {
             mImageSource = imageSource;
             mImageViewReference = new WeakReference<>(imageView);
-            mCallback = callback;
+            mLoadCallback = loadCallback;
             mImageLoader = imageLoader;
         }
 
@@ -870,8 +870,8 @@ public class ImageLoader<T> {
                 StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
                 if (storageImageCache != null) {
                     image = storageImageCache.get(mImageSource.getKey());
-                    if (image != null && mCallback != null) {
-                        mCallback.onImageLoaded(image, false, true);
+                    if (image != null && mLoadCallback != null) {
+                        mLoadCallback.onImageLoaded(image, false, true);
                     }
                 }
                 if (image == null) {
@@ -881,8 +881,8 @@ public class ImageLoader<T> {
                                 .load(mImageLoader.getContext(), mImageSource.getData());
                     }
                     if (image != null) {
-                        if (mCallback != null) {
-                            mCallback.onImageLoaded(image, false, false);
+                        if (mLoadCallback != null) {
+                            mLoadCallback.onImageLoaded(image, false, false);
                         }
                         if (storageImageCache != null) {
                             storageImageCache.put(mImageSource.getKey(), image);
@@ -899,8 +899,8 @@ public class ImageLoader<T> {
                     memoryImageCache.put(mImageSource.getKey(), drawable);
                 }
             }
-            mImageLoader
-                    .runOnMainThread(new SetImageAction(drawable, mImageLoader, mCallback, this));
+            mImageLoader.runOnMainThread(
+                    new SetImageAction(drawable, mImageLoader, mLoadCallback, this));
         }
 
         @Nullable
@@ -965,14 +965,14 @@ public class ImageLoader<T> {
         private final BitmapDrawable mBitmapDrawable;
         private final ImageLoader<?> mImageLoader;
         private final LoadImageAction<?> mLoadImageAction;
-        private final Callback mCallback;
+        private final LoadCallback mLoadCallback;
 
         public SetImageAction(@Nullable BitmapDrawable bitmapDrawable,
-                @NonNull ImageLoader<?> imageLoader, @Nullable Callback callback,
+                @NonNull ImageLoader<?> imageLoader, @Nullable LoadCallback loadCallback,
                 @NonNull LoadImageAction<?> loadImageAction) {
             mBitmapDrawable = bitmapDrawable;
             mImageLoader = imageLoader;
-            mCallback = callback;
+            mLoadCallback = loadCallback;
             mLoadImageAction = loadImageAction;
         }
 
@@ -997,16 +997,16 @@ public class ImageLoader<T> {
 
                         @Override
                         public void onEnd(FadeDrawable drawable) {
-                            if (mCallback != null) {
-                                mCallback.onImageDisplayed(imageView);
+                            if (mLoadCallback != null) {
+                                mLoadCallback.onImageDisplayed(imageView);
                             }
                         }
                     });
                     fadeDrawable.startFade(mImageLoader.getImageFadeInTime());
                 } else {
                     imageView.setImageDrawable(mBitmapDrawable);
-                    if (mCallback != null) {
-                        mCallback.onImageDisplayed(imageView);
+                    if (mLoadCallback != null) {
+                        mLoadCallback.onImageDisplayed(imageView);
                     }
                 }
             }
@@ -1016,13 +1016,13 @@ public class ImageLoader<T> {
     protected static final class SimpleSetImageAction implements Runnable {
         private final ImageView mImageView;
         private final BitmapDrawable mBitmapDrawable;
-        private final Callback mCallback;
+        private final LoadCallback mLoadCallback;
 
         public SimpleSetImageAction(@Nullable ImageView imageView,
-                @Nullable BitmapDrawable bitmapDrawable, @Nullable Callback callback) {
+                @Nullable BitmapDrawable bitmapDrawable, @Nullable LoadCallback loadCallback) {
             mImageView = imageView;
             mBitmapDrawable = bitmapDrawable;
-            mCallback = callback;
+            mLoadCallback = loadCallback;
         }
 
         @Override
@@ -1031,8 +1031,8 @@ public class ImageLoader<T> {
                 return;
             }
             mImageView.setImageDrawable(mBitmapDrawable);
-            if (mCallback != null) {
-                mCallback.onImageDisplayed(mImageView);
+            if (mLoadCallback != null) {
+                mLoadCallback.onImageDisplayed(mImageView);
             }
         }
     }
@@ -1504,7 +1504,7 @@ public class ImageLoader<T> {
     /**
      * Callback of image loading
      */
-    public interface Callback {
+    public interface LoadCallback {
         /**
          * Called when image is loaded and ready to be displayed
          *
