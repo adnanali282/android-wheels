@@ -349,71 +349,6 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Generate MD5 hash string for specified data
-     *
-     * @param data Data
-     * @return MD5 hash string
-     */
-    @NonNull
-    protected static String generateMD5(byte[] data) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance(Constants.MessageDigest.MD5);
-            messageDigest.update(data);
-            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
-            return bigInteger.toString(Character.MAX_RADIX);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Fraction of maximum number of bytes heap can expand to
-     *
-     * @param fraction Fraction
-     * @return Number of bytes
-     */
-    protected static int getMaxMemoryFraction(float fraction) {
-        if (fraction < 0.1F || fraction > 0.8F) {
-            throw new IllegalArgumentException(
-                    Constants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
-        }
-        return Math.round(fraction * Runtime.getRuntime().maxMemory());
-    }
-
-    /**
-     * Fraction of free storage space in specified path
-     *
-     * @param path     Path
-     * @param fraction Fraction
-     * @return Number of free bytes
-     */
-    protected static long getFreeStorageFraction(@NonNull File path, double fraction) {
-        if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
-        }
-        StatFs stat = new StatFs(path.getAbsolutePath());
-        double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
-        return Math.round(bytesAvailable * fraction);
-    }
-
-    /**
-     * Fraction of total storage space in specified path
-     *
-     * @param path     Path
-     * @param fraction Fraction
-     * @return Number of free bytes
-     */
-    protected static long getTotalStorageFraction(@NonNull File path, double fraction) {
-        if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
-        }
-        StatFs stat = new StatFs(path.getAbsolutePath());
-        return Math.round(stat.getTotalBytes() * fraction);
-    }
-
-    /**
      * Calculate sample size for required size from source size
      * Sample size is the number of pixels in either dimension that
      * correspond to a single pixel
@@ -468,6 +403,71 @@ public class ImageLoader<T> {
         } else {
             return context.getContentResolver().openInputStream(uri);
         }
+    }
+
+    /**
+     * Generate MD5 hash string for specified data
+     *
+     * @param data Data
+     * @return MD5 hash string
+     */
+    @NonNull
+    public static String generateMD5(byte[] data) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(Constants.MessageDigest.MD5);
+            messageDigest.update(data);
+            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
+            return bigInteger.toString(Character.MAX_RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Fraction of maximum number of bytes heap can expand to
+     *
+     * @param fraction Fraction
+     * @return Number of bytes
+     */
+    public static int getMaxMemoryFraction(float fraction) {
+        if (fraction < 0.1F || fraction > 0.8F) {
+            throw new IllegalArgumentException(
+                    Constants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+        }
+        return Math.round(fraction * Runtime.getRuntime().maxMemory());
+    }
+
+    /**
+     * Fraction of free storage space in specified path
+     *
+     * @param path     Path
+     * @param fraction Fraction
+     * @return Number of free bytes
+     */
+    public static long getFreeStorageFraction(@NonNull File path, double fraction) {
+        if (fraction < 0.01D || fraction > 1.0D) {
+            throw new IllegalArgumentException(
+                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+        }
+        StatFs stat = new StatFs(path.getAbsolutePath());
+        double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
+        return Math.round(bytesAvailable * fraction);
+    }
+
+    /**
+     * Fraction of total storage space in specified path
+     *
+     * @param path     Path
+     * @param fraction Fraction
+     * @return Number of free bytes
+     */
+    public static long getTotalStorageFraction(@NonNull File path, double fraction) {
+        if (fraction < 0.01D || fraction > 1.0D) {
+            throw new IllegalArgumentException(
+                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+        }
+        StatFs stat = new StatFs(path.getAbsolutePath());
+        return Math.round(stat.getTotalBytes() * fraction);
     }
 
     /**
@@ -753,6 +753,26 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Create storage image cache with specified parameters
+     *
+     * @param directory       Directory
+     * @param maxSize         Maximum size
+     * @param compressFormat  Compress format
+     * @param compressQuality Compress quality
+     * @return Storage image cache
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @NonNull
+    public static StorageImageCache newStorageImageCache(@NonNull File directory, long maxSize,
+            @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        return new StorageImageCacheImplementation(directory, maxSize, compressFormat,
+                compressQuality);
+    }
+
+    /**
      * Create storage image cache in specified directory with maximum size 10%
      * of total storage size
      *
@@ -762,10 +782,7 @@ public class ImageLoader<T> {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @NonNull
     public static StorageImageCache newStorageImageCache(@NonNull File directory) {
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        return new StorageImageCacheImplementation(directory,
+        return newStorageImageCache(directory,
                 getTotalStorageFraction(directory, Constants.StorageImageCache.DEFAULT_FRACTION),
                 Constants.StorageImageCache.DEFAULT_FORMAT,
                 Constants.StorageImageCache.DEFAULT_QUALITY);
