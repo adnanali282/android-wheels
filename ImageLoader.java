@@ -797,12 +797,22 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static StorageImageCache newStorageImageCache(@NonNull Context context) {
+        return newStorageImageCache(getDefaultStorageCacheDirectory(context));
+    }
+
+    /**
+     * Default storage image cache directory
+     *
+     * @param context Context
+     * @return Cache directory
+     */
+    @NonNull
+    public static File getDefaultStorageCacheDirectory(@NonNull Context context) {
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
-        return newStorageImageCache(
-                new File(cacheDir, Constants.StorageImageCache.DEFAULT_DIRECTORY));
+        return new File(cacheDir, Constants.StorageImageCache.DEFAULT_DIRECTORY);
     }
 
     protected static final class Constants {
