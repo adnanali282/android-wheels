@@ -730,15 +730,14 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Create memory image cache with maximum size equal to specified
-     * total available memory fraction
+     * Create memory image cache with specified maximum size
      *
-     * @param totalMemoryFraction Fraction
+     * @param maxSize Maximum size in bytes
      * @return Memory image cache
      */
     @NonNull
-    public static MemoryImageCache newMemoryImageCache(float totalMemoryFraction) {
-        return new MemoryImageCacheImplementation(getMaxMemoryFraction(totalMemoryFraction));
+    public static MemoryImageCache newMemoryImageCache(int maxSize) {
+        return new MemoryImageCacheImplementation(maxSize);
     }
 
     /**
@@ -749,7 +748,8 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static MemoryImageCache newMemoryImageCache() {
-        return newMemoryImageCache(Constants.MemoryImageCache.DEFAULT_FRACTION);
+        return newMemoryImageCache(
+                getMaxMemoryFraction(Constants.MemoryImageCache.DEFAULT_FRACTION));
     }
 
     /**
