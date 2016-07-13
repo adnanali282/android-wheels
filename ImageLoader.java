@@ -144,7 +144,7 @@ public class ImageLoader<T> {
         mMainThread = mainLooper.getThread();
         mMainThreadHandler = new Handler(mainLooper);
         mAsyncExecutor = Executors
-                .newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2,
+                .newFixedThreadPool(Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
                         BACKGROUND_THREAD_FACTORY);
     }
 
