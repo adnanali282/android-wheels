@@ -78,6 +78,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <T> Source data type
  */
 public class ImageLoader<T> {
+    protected static final ThreadFactory BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
+        @Override
+        public Thread newThread(@NonNull Runnable runnable) {
+            Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
+            if (thread.isDaemon()) {
+                thread.setDaemon(false);
+            }
+            if (thread.getPriority() != Thread.MIN_PRIORITY) {
+                thread.setPriority(Thread.MIN_PRIORITY);
+            }
+            return thread;
+        }
+    };
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private final Thread mMainThread;
@@ -130,23 +143,9 @@ public class ImageLoader<T> {
         Looper mainLooper = Looper.getMainLooper();
         mMainThread = mainLooper.getThread();
         mMainThreadHandler = new Handler(mainLooper);
-        int poolSize = Runtime.getRuntime().availableProcessors();
-        if (poolSize > 1) {
-            poolSize--;
-        }
-        mAsyncExecutor = Executors.newFixedThreadPool(poolSize, new ThreadFactory() {
-            @Override
-            public Thread newThread(@NonNull Runnable runnable) {
-                Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
-                if (thread.isDaemon()) {
-                    thread.setDaemon(false);
-                }
-                if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                    thread.setPriority(Thread.NORM_PRIORITY);
-                }
-                return thread;
-            }
-        });
+        mAsyncExecutor = Executors
+                .newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2,
+                        BACKGROUND_THREAD_FACTORY);
     }
 
     protected void runOnMainThread(@NonNull Runnable runnable) {
@@ -1157,27 +1156,35 @@ public class ImageLoader<T> {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void fitCacheSize() {
-            synchronized (mCacheSizeLock) {
-                File[] files = mDirectory.listFiles();
-                if (files == null || files.length < 2) {
-                    return;
-                }
-                Arrays.sort(files, new Comparator<File>() {
-                    @Override
-                    public int compare(File lhs, File rhs) {
-                        return Long.signum(rhs.lastModified() - lhs.lastModified());
+            BACKGROUND_THREAD_FACTORY.newThread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mCacheSizeLock) {
+                        try {
+                            File[] files = mDirectory.listFiles();
+                            if (files == null || files.length < 2) {
+                                return;
+                            }
+                            Arrays.sort(files, new Comparator<File>() {
+                                @Override
+                                public int compare(File lhs, File rhs) {
+                                    return Long.signum(rhs.lastModified() - lhs.lastModified());
+                                }
+                            });
+                            long size = 0;
+                            for (File file : files) {
+                                size += file.length();
+                            }
+                            for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
+                                File removing = files[i];
+                                size -= removing.length();
+                                removing.delete();
+                            }
+                        } catch (Exception ignored) {
+                        }
                     }
-                });
-                long size = 0;
-                for (File file : files) {
-                    size += file.length();
                 }
-                for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
-                    File removing = files[i];
-                    size -= removing.length();
-                    removing.delete();
-                }
-            }
+            }).start();
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
