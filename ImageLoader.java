@@ -49,6 +49,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1157,7 +1158,8 @@ public class ImageLoader<T> {
     }
 
     protected static class StorageImageCacheImplementation implements StorageImageCache {
-        private final Object mCacheSizeLock = new Object();
+        private final AtomicBoolean mCacheSizeFitting = new AtomicBoolean();
+        private final AtomicBoolean mCacheSizeFitRequested = new AtomicBoolean();
         private final File mDirectory;
         private final long mMaxSize;
         private final Bitmap.CompressFormat mCompressFormat;
@@ -1180,37 +1182,52 @@ public class ImageLoader<T> {
             fitCacheSize();
         }
 
-        @SuppressWarnings("ResultOfMethodCallIgnored")
-        private void fitCacheSize() {
-            BACKGROUND_THREAD_FACTORY.newThread(new Runnable() {
+        public void fitCacheSize() {
+            BACKGROUND_EXECUTOR.submit(new Runnable() {
                 @Override
                 public void run() {
-                    synchronized (mCacheSizeLock) {
-                        try {
-                            File[] files = mDirectory.listFiles();
-                            if (files == null || files.length < 2) {
-                                return;
-                            }
-                            Arrays.sort(files, new Comparator<File>() {
-                                @Override
-                                public int compare(File lhs, File rhs) {
-                                    return Long.signum(rhs.lastModified() - lhs.lastModified());
-                                }
-                            });
-                            long size = 0;
-                            for (File file : files) {
-                                size += file.length();
-                            }
-                            for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
-                                File removing = files[i];
-                                size -= removing.length();
-                                removing.delete();
-                            }
-                        } catch (Exception ignored) {
-                        }
-                    }
+                    doFitCacheSize();
                 }
-            }).start();
+            });
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        private void doFitCacheSize() {
+            if (mCacheSizeFitting.compareAndSet(false, true)) {
+                try {
+                    File[] files = mDirectory.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File pathname) {
+                            return !pathname.isDirectory();
+                        }
+                    });
+                    if (files == null || files.length < 2) {
+                        return;
+                    }
+                    Arrays.sort(files, new Comparator<File>() {
+                        @Override
+                        public int compare(File lhs, File rhs) {
+                            return Long.signum(rhs.lastModified() - lhs.lastModified());
+                        }
+                    });
+                    long size = 0;
+                    for (File file : files) {
+                        size += file.length();
+                    }
+                    for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
+                        File removing = files[i];
+                        size -= removing.length();
+                        removing.delete();
+                    }
+                } catch (Exception ignored) {
+                }
+                mCacheSizeFitting.set(false);
+                if (mCacheSizeFitRequested.compareAndSet(true, false)) {
+                    doFitCacheSize();
+                }
+            } else {
+                mCacheSizeFitRequested.set(true);
+            }
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
