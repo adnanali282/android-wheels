@@ -78,24 +78,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <T> Source data type
  */
 public class ImageLoader<T> {
-    protected static final ThreadFactory BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
-        @Override
-        public Thread newThread(@NonNull Runnable runnable) {
-            Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
-            if (thread.isDaemon()) {
-                thread.setDaemon(false);
+    private static final ThreadFactory BACKGROUND_THREAD_FACTORY;
+    private static final ExecutorService BACKGROUND_EXECUTOR;
+    private static final Handler MAIN_THREAD_HANDLER;
+    private static final Thread MAIN_THREAD;
+
+    static {
+        BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
+            @Override
+            public Thread newThread(@NonNull Runnable runnable) {
+                Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
+                if (thread.isDaemon()) {
+                    thread.setDaemon(false);
+                }
+                if (thread.getPriority() != Thread.MIN_PRIORITY) {
+                    thread.setPriority(Thread.MIN_PRIORITY);
+                }
+                return thread;
             }
-            if (thread.getPriority() != Thread.MIN_PRIORITY) {
-                thread.setPriority(Thread.MIN_PRIORITY);
-            }
-            return thread;
-        }
-    };
+        };
+        BACKGROUND_EXECUTOR = Executors
+                .newFixedThreadPool(Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
+                        BACKGROUND_THREAD_FACTORY);
+        Looper mainLooper = Looper.getMainLooper();
+        MAIN_THREAD_HANDLER = new Handler(mainLooper);
+        MAIN_THREAD = mainLooper.getThread();
+    }
+
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
-    private final Thread mMainThread;
-    private final Handler mMainThreadHandler;
-    private final ExecutorService mAsyncExecutor;
     private volatile boolean mImageFadeIn = true;
     private volatile boolean mExitTasksEarly;
     private volatile boolean mPauseWork;
@@ -140,29 +151,6 @@ public class ImageLoader<T> {
         mBitmapLoader = bitmapLoader;
         mMemoryImageCache = memoryImageCache;
         mStorageImageCache = storageImageCache;
-        Looper mainLooper = Looper.getMainLooper();
-        mMainThread = mainLooper.getThread();
-        mMainThreadHandler = new Handler(mainLooper);
-        mAsyncExecutor = Executors
-                .newFixedThreadPool(Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
-                        BACKGROUND_THREAD_FACTORY);
-    }
-
-    protected void runOnMainThread(@NonNull Runnable runnable) {
-        if (Thread.currentThread() == mMainThread) {
-            runnable.run();
-        } else {
-            runOnMainThread(runnable, 0);
-        }
-    }
-
-    protected void runOnMainThread(@NonNull Runnable runnable, long delay) {
-        mMainThreadHandler.postDelayed(runnable, delay);
-    }
-
-    @NonNull
-    protected ExecutorService getAsyncExecutor() {
-        return mAsyncExecutor;
     }
 
     @NonNull
@@ -212,7 +200,7 @@ public class ImageLoader<T> {
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
             runOnMainThread(new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
-            loadAction.execute(getAsyncExecutor());
+            loadAction.execute(BACKGROUND_EXECUTOR);
         }
     }
 
@@ -402,6 +390,45 @@ public class ImageLoader<T> {
         } else {
             return context.getContentResolver().openInputStream(uri);
         }
+    }
+
+    /**
+     * Run tank on main (UI) thread
+     *
+     * @param task Task
+     */
+    public static void runOnMainThread(@NonNull Runnable task) {
+        if (Thread.currentThread() == MAIN_THREAD) {
+            task.run();
+        } else {
+            runOnMainThread(task, 0);
+        }
+    }
+
+    /**
+     * Run task on main (UI) thread with specified delay
+     *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runOnMainThread(@NonNull Runnable task, long delay) {
+        MAIN_THREAD_HANDLER.postDelayed(task, delay);
+    }
+
+    /**
+     * ImageLoader background thread factory
+     */
+    @NonNull
+    public static ThreadFactory getBackgroundThreadFactory() {
+        return BACKGROUND_THREAD_FACTORY;
+    }
+
+    /**
+     * ImageLoader background executor
+     */
+    @NonNull
+    public static ExecutorService getBackgroundExecutor() {
+        return BACKGROUND_EXECUTOR;
     }
 
     /**
@@ -928,8 +955,7 @@ public class ImageLoader<T> {
                     memoryImageCache.put(mImageSource.getKey(), drawable);
                 }
             }
-            mImageLoader.runOnMainThread(
-                    new SetImageAction(drawable, mImageLoader, mLoadCallback, this));
+            runOnMainThread(new SetImageAction(drawable, mImageLoader, mLoadCallback, this));
         }
 
         @Nullable
