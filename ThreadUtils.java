@@ -228,7 +228,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Throws {@code RuntimeException} if current thread is not main (UI) thread
+     * Throws {@code RuntimeException} if current thread is not the main (UI) thread
      */
     public static void requireMainThread() {
         if (Thread.currentThread() != MAIN_THREAD) {
