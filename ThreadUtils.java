@@ -40,28 +40,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class ThreadUtils {
     private static final String BACKGROUND_THREAD_NAME_PREFIX = "ThreadUtils-background-thread-";
+    private static final String NOT_MAIN_THREAD_MESSAGE = "Not main thread";
     private static final AtomicInteger BACKGROUND_THREAD_COUNTER = new AtomicInteger(1);
-    private static final ThreadFactory BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
-        @Override
-        public Thread newThread(@NonNull Runnable runnable) {
-            BACKGROUND_THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
-            Thread thread = new Thread(runnable,
-                    BACKGROUND_THREAD_NAME_PREFIX + BACKGROUND_THREAD_COUNTER.getAndIncrement());
-            if (thread.isDaemon()) {
-                thread.setDaemon(false);
-            }
-            if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                thread.setPriority(Thread.NORM_PRIORITY);
-            }
-            return thread;
-        }
-    };
-    private static final ExecutorService ASYNC_EXECUTOR =
-            Executors.newCachedThreadPool(BACKGROUND_THREAD_FACTORY);
+    private static final ThreadFactory BACKGROUND_THREAD_FACTORY;
+    private static final ExecutorService BACKGROUND_EXECUTOR;
     private static final Handler MAIN_THREAD_HANDLER;
     private static final Thread MAIN_THREAD;
 
     static {
+        BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
+            @Override
+            public Thread newThread(@NonNull Runnable runnable) {
+                BACKGROUND_THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
+                Thread thread = new Thread(runnable, BACKGROUND_THREAD_NAME_PREFIX +
+                        BACKGROUND_THREAD_COUNTER.getAndIncrement());
+                if (thread.isDaemon()) {
+                    thread.setDaemon(false);
+                }
+                if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                    thread.setPriority(Thread.NORM_PRIORITY);
+                }
+                return thread;
+            }
+        };
+        BACKGROUND_EXECUTOR = Executors.newCachedThreadPool(BACKGROUND_THREAD_FACTORY);
         Looper mainLooper = Looper.getMainLooper();
         MAIN_THREAD_HANDLER = new Handler(mainLooper);
         MAIN_THREAD = mainLooper.getThread();
@@ -105,7 +107,7 @@ public final class ThreadUtils {
         return new Runnable() {
             @Override
             public void run() {
-                asyncTask.executeOnExecutor(ASYNC_EXECUTOR, parameters);
+                asyncTask.executeOnExecutor(BACKGROUND_EXECUTOR, parameters);
             }
         };
     }
@@ -118,7 +120,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
-        return ASYNC_EXECUTOR.submit(task);
+        return BACKGROUND_EXECUTOR.submit(task);
     }
 
     /**
@@ -129,7 +131,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
-        return ASYNC_EXECUTOR.submit(task);
+        return BACKGROUND_EXECUTOR.submit(task);
     }
 
     /**
@@ -223,5 +225,14 @@ public final class ThreadUtils {
      */
     public static void runOnMainThread(@NonNull Callable<?> task, long delay) {
         runOnMainThread(wrapCallable(task), delay);
+    }
+
+    /**
+     * Throws {@code RuntimeException} if current thread is not main (UI) thread
+     */
+    public static void requireMainThread() {
+        if (Thread.currentThread() != MAIN_THREAD) {
+            throw new RuntimeException(NOT_MAIN_THREAD_MESSAGE);
+        }
     }
 }
