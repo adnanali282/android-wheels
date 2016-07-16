@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -1182,25 +1182,28 @@ public class ImageLoader<T> {
             fitCacheSize();
         }
 
-        public void fitCacheSize() {
-            BACKGROUND_EXECUTOR.submit(new Runnable() {
+        @Nullable
+        private File[] getCacheFiles() {
+            return mDirectory.listFiles(new FileFilter() {
                 @Override
-                public void run() {
-                    doFitCacheSize();
+                public boolean accept(File pathname) {
+                    return pathname.isFile();
                 }
             });
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        private void deleteCacheFile(@NonNull File file) {
+            if (file.exists() && file.isFile()) {
+                file.delete();
+            }
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void doFitCacheSize() {
             if (mCacheSizeFitting.compareAndSet(false, true)) {
                 try {
-                    File[] files = mDirectory.listFiles(new FileFilter() {
-                        @Override
-                        public boolean accept(File pathname) {
-                            return !pathname.isDirectory();
-                        }
-                    });
+                    File[] files = getCacheFiles();
                     if (files == null || files.length < 2) {
                         return;
                     }
@@ -1230,16 +1233,27 @@ public class ImageLoader<T> {
             }
         }
 
+        public void fitCacheSize() {
+            BACKGROUND_EXECUTOR.submit(new Runnable() {
+                @Override
+                public void run() {
+                    doFitCacheSize();
+                }
+            });
+        }
+
         @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         public void put(@NonNull String key, @NonNull Bitmap value) {
             if (!mDirectory.exists()) {
                 mDirectory.mkdirs();
             }
-            try (OutputStream outputStream = new FileOutputStream(new File(mDirectory, key))) {
+            File file = new File(mDirectory, key);
+            deleteCacheFile(file);
+            try (OutputStream outputStream = new FileOutputStream(file)) {
                 value.compress(mCompressFormat, mCompressQuality, outputStream);
             } catch (IOException e) {
-                clear();
+                deleteCacheFile(file);
             }
             fitCacheSize();
         }
@@ -1249,7 +1263,7 @@ public class ImageLoader<T> {
         @Override
         public Bitmap get(@NonNull String key) {
             File file = new File(mDirectory, key);
-            if (!file.exists()) {
+            if (!file.exists() && !file.isFile()) {
                 return null;
             }
             file.setLastModified(System.currentTimeMillis());
@@ -1263,16 +1277,13 @@ public class ImageLoader<T> {
         @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         public void remove(@NonNull String key) {
-            File file = new File(mDirectory, key);
-            if (file.exists()) {
-                file.delete();
-            }
+            deleteCacheFile(new File(mDirectory, key));
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         public void clear() {
-            File[] files = mDirectory.listFiles();
+            File[] files = getCacheFiles();
             if (files == null) {
                 return;
             }
