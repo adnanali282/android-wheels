@@ -73,7 +73,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Wrap {@code Callable} into {@code Runnable}
+     * Wrap {@link Callable} into {@link Runnable}
      *
      * @param callable Callable
      * @return Runnable
@@ -93,7 +93,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Wrap {@code AsyncTask} into {@code Runnable}
+     * Wrap {@link AsyncTask} into {@link Runnable}
      *
      * @param asyncTask  AsyncTask
      * @param parameters AsyncTask parameters
@@ -116,7 +116,7 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @return a {@code Future} representing pending completion of the task
+     * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
@@ -127,7 +127,7 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @return a {@code Future} representing pending completion of the task
+     * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
@@ -228,7 +228,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Throws {@code RuntimeException} if current thread is not the main (UI) thread
+     * Throws {@link RuntimeException} if current thread is not the main (UI) thread
      */
     public static void requireMainThread() {
         if (Thread.currentThread() != MAIN_THREAD) {
