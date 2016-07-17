@@ -1232,7 +1232,7 @@ public class ImageLoader<T> {
 
         public void fitCacheSize() {
             if (mCacheSizeFitting.compareAndSet(false, true)) {
-                BACKGROUND_EXECUTOR.submit(new Runnable() {
+                BACKGROUND_EXECUTOR.execute(new Runnable() {
                     @Override
                     public void run() {
                         doFitCacheSize();
