@@ -146,7 +146,7 @@ public final class ThreadUtils {
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
-        runOnMainThread(wrapAsyncTask(task, parameters));
+        MAIN_THREAD_EXECUTOR.execute(wrapAsyncTask(task, parameters));
     }
 
     /**
@@ -156,7 +156,7 @@ public final class ThreadUtils {
      * @param delay Delay
      */
     public static void runAsync(@NonNull final Runnable task, long delay) {
-        runOnMainThread(new Runnable() {
+        MAIN_THREAD_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
                 runAsync(task);
@@ -185,7 +185,7 @@ public final class ThreadUtils {
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
-        runOnMainThread(wrapAsyncTask(task, parameters), delay);
+        MAIN_THREAD_EXECUTOR.execute(wrapAsyncTask(task, parameters), delay);
     }
 
     /**
