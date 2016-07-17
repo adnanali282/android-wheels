@@ -29,11 +29,16 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,8 +50,7 @@ public final class ThreadUtils {
     private static final AtomicInteger BACKGROUND_THREAD_COUNTER = new AtomicInteger(1);
     private static final ThreadFactory BACKGROUND_THREAD_FACTORY;
     private static final ExecutorService BACKGROUND_EXECUTOR;
-    private static final Handler MAIN_THREAD_HANDLER;
-    private static final Thread MAIN_THREAD;
+    private static final MainThreadExecutor MAIN_THREAD_EXECUTOR;
 
     static {
         BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
@@ -65,9 +69,7 @@ public final class ThreadUtils {
             }
         };
         BACKGROUND_EXECUTOR = Executors.newCachedThreadPool(BACKGROUND_THREAD_FACTORY);
-        Looper mainLooper = Looper.getMainLooper();
-        MAIN_THREAD_HANDLER = new Handler(mainLooper);
-        MAIN_THREAD = mainLooper.getThread();
+        MAIN_THREAD_EXECUTOR = new MainThreadExecutor();
     }
 
     private ThreadUtils() {
@@ -190,22 +192,22 @@ public final class ThreadUtils {
      * Run task on the main (UI) thread
      *
      * @param task Task
+     * @return a {@link Future} representing pending completion of the task
      */
-    public static void runOnMainThread(@NonNull Runnable task) {
-        if (Thread.currentThread() == MAIN_THREAD) {
-            task.run();
-        } else {
-            runOnMainThread(task, 0);
-        }
+    @NonNull
+    public static Future<?> runOnMainThread(@NonNull Runnable task) {
+        return MAIN_THREAD_EXECUTOR.submit(task);
     }
 
     /**
      * Run task on the main (UI) thread
      *
      * @param task Task
+     * @return a {@link Future} representing pending completion of the task
      */
-    public static void runOnMainThread(@NonNull Callable<?> task) {
-        runOnMainThread(wrapCallable(task));
+    @NonNull
+    public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task) {
+        return MAIN_THREAD_EXECUTOR.submit(task);
     }
 
     /**
@@ -213,9 +215,11 @@ public final class ThreadUtils {
      *
      * @param task  Task
      * @param delay Delay
+     * @return a {@link Future} representing pending completion of the task
      */
-    public static void runOnMainThread(@NonNull Runnable task, long delay) {
-        MAIN_THREAD_HANDLER.postDelayed(task, delay);
+    @NonNull
+    public static Future<?> runOnMainThread(@NonNull Runnable task, long delay) {
+        return MAIN_THREAD_EXECUTOR.submit(task, delay);
     }
 
     /**
@@ -223,9 +227,11 @@ public final class ThreadUtils {
      *
      * @param task  Task
      * @param delay Delay
+     * @return a {@link Future} representing pending completion of the task
      */
-    public static void runOnMainThread(@NonNull Callable<?> task, long delay) {
-        runOnMainThread(wrapCallable(task), delay);
+    @NonNull
+    public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
+        return MAIN_THREAD_EXECUTOR.submit(task, delay);
     }
 
     /**
@@ -235,7 +241,7 @@ public final class ThreadUtils {
      * @param message Message
      */
     public static void requireMainThread(@Nullable String message) {
-        if (Thread.currentThread() != MAIN_THREAD) {
+        if (Thread.currentThread() != MAIN_THREAD_EXECUTOR.getThread()) {
             throw new RuntimeException(message);
         }
     }
@@ -245,5 +251,80 @@ public final class ThreadUtils {
      */
     public static void requireMainThread() {
         requireMainThread(NOT_MAIN_THREAD_MESSAGE);
+    }
+
+    private static class MainThreadExecutor extends AbstractExecutorService {
+        private final Handler mHandler;
+        private final Thread mThread;
+
+        public MainThreadExecutor() {
+            Looper mainLooper = Looper.getMainLooper();
+            mHandler = new Handler(mainLooper);
+            mThread = mainLooper.getThread();
+        }
+
+        @NonNull
+        public Handler getHandler() {
+            return mHandler;
+        }
+
+        @NonNull
+        public Thread getThread() {
+            return mThread;
+        }
+
+        @Override
+        public void execute(@NonNull Runnable command) {
+            if (Thread.currentThread() == mThread) {
+                command.run();
+            } else {
+                execute(command, 0);
+            }
+        }
+
+        public void execute(@NonNull Runnable command, long delay) {
+            mHandler.postDelayed(command, delay);
+        }
+
+        @NonNull
+        public Future<?> submit(@NonNull Runnable task, long delay) {
+            RunnableFuture<Void> future = newTaskFor(Objects.requireNonNull(task), null);
+            execute(future, delay);
+            return future;
+        }
+
+        @NonNull
+        public <T> Future<T> submit(@NonNull Callable<T> task, long delay) {
+            RunnableFuture<T> future = newTaskFor(Objects.requireNonNull(task));
+            execute(future, delay);
+            return future;
+        }
+
+        @Override
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        @NonNull
+        @Override
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isShutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isTerminated() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws
+                InterruptedException {
+            throw new UnsupportedOperationException();
+        }
     }
 }
