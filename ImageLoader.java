@@ -1422,7 +1422,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * {@code BitmapDrawable} that recycles it's bitmap.
+     * {@link BitmapDrawable} that recycles it's bitmap.
      */
     public static class RecyclingBitmapDrawable extends BitmapDrawable {
         private int mDisplayReferencesCount;
@@ -1470,7 +1470,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * {@code ImageView} that notifies {@code RecyclingBitmapDrawable}
+     * {@link ImageView} that notifies {@link RecyclingBitmapDrawable}
      * when image drawable is changed.
      */
     public static class RecyclingImageView extends ImageView {
@@ -1522,7 +1522,7 @@ public class ImageLoader<T> {
         }
 
         /**
-         * Clear image drawable when detached from window. Set true if {@code RecyclingImageView}
+         * Clear image drawable when detached from window. Set true if {@link RecyclingImageView}
          * is used with component that doesn't reuse views.
          *
          * @param clearDrawableOnDetach Clear drawable on detach
@@ -1567,8 +1567,8 @@ public class ImageLoader<T> {
      */
     public interface ImageSource<T> {
         /**
-         * Source data from which {@code Bitmap} should be loaded
-         * in load method of {@code BitmapLoader}
+         * Source data from which {@link Bitmap} should be loaded
+         * in load method of {@link BitmapLoader}
          *
          * @return Source data
          */
@@ -1585,13 +1585,13 @@ public class ImageLoader<T> {
     }
 
     /**
-     * {@code Bitmap} loader from source data
+     * {@link Bitmap} loader from source data
      *
      * @param <T> Source data type
      */
     public interface BitmapLoader<T> {
         /**
-         * Load {@code Bitmap} from source data
+         * Load {@link Bitmap} from source data
          *
          * @param data Source data
          * @return Loaded bitmap
