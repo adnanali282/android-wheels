@@ -46,7 +46,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Wrap Action into OnClickListener
+     * Wrap {@code Action} into {@code OnClickListener}
      *
      * @param action   Action
      * @param snackbar Snackbar
@@ -64,7 +64,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Find suitable view for Snackbar
+     * Find suitable view for {@code Snackbar}
      *
      * @param view View
      * @return Best suitable view
