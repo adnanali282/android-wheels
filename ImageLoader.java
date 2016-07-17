@@ -394,7 +394,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Run tank on main (UI) thread
+     * Run tank on the main (UI) thread
      *
      * @param task Task
      */
@@ -407,7 +407,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Run task on main (UI) thread with specified delay
+     * Run task on the main (UI) thread with specified delay
      *
      * @param task  Task
      * @param delay Delay
@@ -1201,45 +1201,46 @@ public class ImageLoader<T> {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void doFitCacheSize() {
-            if (mCacheSizeFitting.compareAndSet(false, true)) {
-                try {
-                    File[] files = getCacheFiles();
-                    if (files == null || files.length < 2) {
-                        return;
-                    }
-                    Arrays.sort(files, new Comparator<File>() {
-                        @Override
-                        public int compare(File lhs, File rhs) {
-                            return Long.signum(rhs.lastModified() - lhs.lastModified());
-                        }
-                    });
-                    long size = 0;
-                    for (File file : files) {
-                        size += file.length();
-                    }
-                    for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
-                        File removing = files[i];
-                        size -= removing.length();
-                        removing.delete();
-                    }
-                } catch (Exception ignored) {
+            try {
+                File[] files = getCacheFiles();
+                if (files == null || files.length < 2) {
+                    return;
                 }
-                mCacheSizeFitting.set(false);
-                if (mCacheSizeFitRequested.compareAndSet(true, false)) {
-                    doFitCacheSize();
+                Arrays.sort(files, new Comparator<File>() {
+                    @Override
+                    public int compare(File lhs, File rhs) {
+                        return Long.signum(rhs.lastModified() - lhs.lastModified());
+                    }
+                });
+                long size = 0;
+                for (File file : files) {
+                    size += file.length();
                 }
+                for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
+                    File removing = files[i];
+                    size -= removing.length();
+                    removing.delete();
+                }
+            } catch (Exception ignored) {
+            }
+            if (mCacheSizeFitRequested.compareAndSet(true, false)) {
+                doFitCacheSize();
             } else {
-                mCacheSizeFitRequested.set(true);
+                mCacheSizeFitting.set(false);
             }
         }
 
         public void fitCacheSize() {
-            BACKGROUND_EXECUTOR.submit(new Runnable() {
-                @Override
-                public void run() {
-                    doFitCacheSize();
-                }
-            });
+            if (mCacheSizeFitting.compareAndSet(false, true)) {
+                BACKGROUND_EXECUTOR.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        doFitCacheSize();
+                    }
+                });
+            } else {
+                mCacheSizeFitRequested.set(true);
+            }
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -1421,7 +1422,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * BitmapDrawable that recycles it's bitmap.
+     * {@code BitmapDrawable} that recycles it's bitmap.
      */
     public static class RecyclingBitmapDrawable extends BitmapDrawable {
         private int mDisplayReferencesCount;
@@ -1469,7 +1470,8 @@ public class ImageLoader<T> {
     }
 
     /**
-     * ImageView that notifies RecyclingBitmapDrawable when image drawable is changed.
+     * {@code ImageView} that notifies {@code RecyclingBitmapDrawable}
+     * when image drawable is changed.
      */
     public static class RecyclingImageView extends ImageView {
         private boolean mClearDrawableOnDetach;
@@ -1520,8 +1522,8 @@ public class ImageLoader<T> {
         }
 
         /**
-         * Clear image drawable when detached from window. Set true if RecyclingImageView is used
-         * with component which doesn't reuse views.
+         * Clear image drawable when detached from window. Set true if {@code RecyclingImageView}
+         * is used with component that doesn't reuse views.
          *
          * @param clearDrawableOnDetach Clear drawable on detach
          */
@@ -1565,8 +1567,8 @@ public class ImageLoader<T> {
      */
     public interface ImageSource<T> {
         /**
-         * Your source data from which you will load bitmaps
-         * in loadBitmap method of ImageLoader class
+         * Source data from which {@code Bitmap} should be loaded
+         * in load method of {@code BitmapLoader}
          *
          * @return Source data
          */
@@ -1583,13 +1585,13 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Bitmap loader from source data
+     * {@code Bitmap} loader from source data
      *
      * @param <T> Source data type
      */
     public interface BitmapLoader<T> {
         /**
-         * Load image bitmap from source data
+         * Load {@code Bitmap} from source data
          *
          * @param data Source data
          * @return Loaded bitmap
