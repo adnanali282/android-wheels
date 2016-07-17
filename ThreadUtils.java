@@ -73,7 +73,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Wrap Callable into Runnable
+     * Wrap {@code Callable} into {@code Runnable}
      *
      * @param callable Callable
      * @return Runnable
@@ -93,7 +93,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Wrap AsyncTask into Runnable
+     * Wrap {@code AsyncTask} into {@code Runnable}
      *
      * @param asyncTask  AsyncTask
      * @param parameters AsyncTask parameters
@@ -116,7 +116,7 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @return a Future representing pending completion of the task
+     * @return a {@code Future} representing pending completion of the task
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
@@ -127,7 +127,7 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @return a Future representing pending completion of the task
+     * @return a {@code Future} representing pending completion of the task
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
@@ -164,6 +164,16 @@ public final class ThreadUtils {
     /**
      * Run task asynchronous with specified delay
      *
+     * @param task  Task
+     * @param delay Delay
+     */
+    public static void runAsync(@NonNull Callable<?> task, long delay) {
+        runAsync(wrapCallable(task), delay);
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
      * @param task       Task
      * @param delay      Delay
      * @param parameters Parameters
@@ -176,17 +186,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Run task asynchronous with specified delay
-     *
-     * @param task  Task
-     * @param delay Delay
-     */
-    public static void runAsync(@NonNull Callable<?> task, long delay) {
-        runAsync(wrapCallable(task), delay);
-    }
-
-    /**
-     * Run task on main (UI) thread
+     * Run task on the main (UI) thread
      *
      * @param task Task
      */
@@ -199,7 +199,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Run task on main (UI) thread
+     * Run task on the main (UI) thread
      *
      * @param task Task
      */
@@ -208,7 +208,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Run task on main (UI) thread with specified delay
+     * Run task on the main (UI) thread with specified delay
      *
      * @param task  Task
      * @param delay Delay
@@ -218,7 +218,7 @@ public final class ThreadUtils {
     }
 
     /**
-     * Run task on main (UI) thread with specified delay
+     * Run task on the main (UI) thread with specified delay
      *
      * @param task  Task
      * @param delay Delay
