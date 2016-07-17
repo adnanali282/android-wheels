@@ -27,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -228,11 +229,21 @@ public final class ThreadUtils {
     }
 
     /**
+     * Throws {@link RuntimeException} with specified message
+     * if current thread is not the main (UI) thread
+     *
+     * @param message Message
+     */
+    public static void requireMainThread(@Nullable String message) {
+        if (Thread.currentThread() != MAIN_THREAD) {
+            throw new RuntimeException(message);
+        }
+    }
+
+    /**
      * Throws {@link RuntimeException} if current thread is not the main (UI) thread
      */
     public static void requireMainThread() {
-        if (Thread.currentThread() != MAIN_THREAD) {
-            throw new RuntimeException(NOT_MAIN_THREAD_MESSAGE);
-        }
+        requireMainThread(NOT_MAIN_THREAD_MESSAGE);
     }
 }
