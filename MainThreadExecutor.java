@@ -27,21 +27,33 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import java.util.concurrent.Executor;
+import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class MainThreadExecutor implements Executor {
-    private final Handler mMainThreadHandler;
-    private final Thread mMainThread;
+public class MainThreadExecutor extends AbstractExecutorService {
+    private final Handler mHandler;
+    private final Thread mThread;
 
-    private MainThreadExecutor() {
+    public MainThreadExecutor() {
         Looper mainLooper = Looper.getMainLooper();
-        mMainThreadHandler = new Handler(mainLooper);
-        mMainThread = mainLooper.getThread();
+        mHandler = new Handler(mainLooper);
+        mThread = mainLooper.getThread();
+    }
+
+    @NonNull
+    public Handler getHandler() {
+        return mHandler;
+    }
+
+    @NonNull
+    public Thread getThread() {
+        return mThread;
     }
 
     @Override
     public void execute(@NonNull Runnable command) {
-        if (Thread.currentThread() == mMainThread) {
+        if (Thread.currentThread() == mThread) {
             command.run();
         } else {
             execute(command, 0);
@@ -49,6 +61,33 @@ public class MainThreadExecutor implements Executor {
     }
 
     public void execute(@NonNull Runnable command, long delay) {
-        mMainThreadHandler.postDelayed(command, delay);
+        mHandler.postDelayed(command, delay);
+    }
+
+    @Override
+    public void shutdown() {
+        throw new UnsupportedOperationException();
+    }
+
+    @NonNull
+    @Override
+    public List<Runnable> shutdownNow() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isShutdown() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isTerminated() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws
+            InterruptedException {
+        throw new UnsupportedOperationException();
     }
 }
