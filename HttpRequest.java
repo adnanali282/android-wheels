@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -54,7 +55,7 @@ public final class HttpRequest {
         @NonNull
         @Override
         public Thread newThread(@NonNull Runnable runnable) {
-            Thread thread = new Thread(runnable, "HttpRequest background thread");
+            Thread thread = new Thread(runnable, "HttpRequest-background-thread");
             if (thread.isDaemon()) {
                 thread.setDaemon(false);
             }
@@ -64,6 +65,7 @@ public final class HttpRequest {
             return thread;
         }
     };
+    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(THREAD_FACTORY);
 
     private HttpRequest() {
     }
@@ -361,20 +363,15 @@ public final class HttpRequest {
     /**
      * Common interface of HTTP requests
      */
-    public interface Request {
+    public interface Request extends Runnable {
         @NonNull
-        Result execute();
-
-        @NonNull
-        Future<Result> execute(@NonNull ExecutorService executor);
-
-        void executeOnNewThread();
-
-        @NonNull
-        Callable<Result> getAction();
+        Future<Result> execute();
 
         @NonNull
         Result getResult();
+
+        @NonNull
+        Result executeAndGetResult();
     }
 
     /**
@@ -385,6 +382,7 @@ public final class HttpRequest {
         private static final String GET = "GET";
         private static final String ACCEPT_CHARSET = "Accept-Charset";
         private static final int CONNECTION_TIMEOUT = 10000;
+        private static final int BUFFER_SIZE = 4096;
         private final Object mResultLock = new Object();
         private final String mUrl;
         private final Collection<HeaderParameter> mHeaderParameters;
@@ -430,12 +428,14 @@ public final class HttpRequest {
                                 try (BufferedReader bufferedReader = new BufferedReader(
                                         new InputStreamReader(connection.getInputStream()))) {
                                     StringBuilder responseBuilder = new StringBuilder();
+                                    char[] buffer = new char[BUFFER_SIZE];
                                     for (; ; ) {
-                                        String line = bufferedReader.readLine();
-                                        if (line == null) {
+                                        int read = bufferedReader.read(buffer);
+                                        if (read > -1) {
+                                            responseBuilder.append(buffer, 0, read);
+                                        } else {
                                             break;
                                         }
-                                        responseBuilder.append(line);
                                     }
                                     result = Result.SUCCESS;
                                     result.setConnection(connection);
@@ -494,34 +494,8 @@ public final class HttpRequest {
 
         @NonNull
         @Override
-        public Result execute() {
-            try {
-                return mRequestAction.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @NonNull
-        @Override
-        public Future<Result> execute(@NonNull ExecutorService executor) {
-            return executor.submit(mRequestAction);
-        }
-
-        @Override
-        public void executeOnNewThread() {
-            THREAD_FACTORY.newThread(new Runnable() {
-                @Override
-                public void run() {
-                    execute();
-                }
-            }).start();
-        }
-
-        @NonNull
-        @Override
-        public Callable<Result> getAction() {
-            return mRequestAction;
+        public Future<Result> execute() {
+            return EXECUTOR.submit(mRequestAction);
         }
 
         @NonNull
@@ -539,6 +513,25 @@ public final class HttpRequest {
                 }
             }
             return result;
+        }
+
+        @NonNull
+        @Override
+        public Result executeAndGetResult() {
+            try {
+                return mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         /**
@@ -727,12 +720,14 @@ public final class HttpRequest {
                                 try (BufferedReader bufferedReader = new BufferedReader(
                                         new InputStreamReader(connection.getInputStream()))) {
                                     StringBuilder responseBuilder = new StringBuilder();
+                                    char[] buffer = new char[BUFFER_SIZE];
                                     for (; ; ) {
-                                        String line = bufferedReader.readLine();
-                                        if (line == null) {
+                                        int read = bufferedReader.read(buffer);
+                                        if (read > -1) {
+                                            responseBuilder.append(buffer, 0, read);
+                                        } else {
                                             break;
                                         }
-                                        responseBuilder.append(line);
                                     }
                                     result = Result.SUCCESS;
                                     result.setConnection(connection);
@@ -793,34 +788,8 @@ public final class HttpRequest {
 
         @NonNull
         @Override
-        public Result execute() {
-            try {
-                return mRequestAction.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @NonNull
-        @Override
-        public Future<Result> execute(@NonNull ExecutorService executor) {
-            return executor.submit(mRequestAction);
-        }
-
-        @Override
-        public void executeOnNewThread() {
-            THREAD_FACTORY.newThread(new Runnable() {
-                @Override
-                public void run() {
-                    execute();
-                }
-            }).start();
-        }
-
-        @NonNull
-        @Override
-        public Callable<Result> getAction() {
-            return mRequestAction;
+        public Future<Result> execute() {
+            return EXECUTOR.submit(mRequestAction);
         }
 
         @NonNull
@@ -838,6 +807,25 @@ public final class HttpRequest {
                 }
             }
             return result;
+        }
+
+        @NonNull
+        @Override
+        public Result executeAndGetResult() {
+            try {
+                return mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                mRequestAction.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         /**
