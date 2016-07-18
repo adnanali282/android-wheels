@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -33,11 +34,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,32 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tools for asynchronous tasks in Android
  */
 public final class ThreadUtils {
-    private static final String BACKGROUND_THREAD_NAME_PREFIX = "ThreadUtils-background-thread-";
-    private static final String NOT_MAIN_THREAD_MESSAGE = "Not main thread";
-    private static final AtomicInteger BACKGROUND_THREAD_COUNTER = new AtomicInteger(1);
-    private static final ThreadFactory BACKGROUND_THREAD_FACTORY;
-    private static final ExecutorService BACKGROUND_EXECUTOR;
-    private static final MainThreadExecutor MAIN_THREAD_EXECUTOR;
-
-    static {
-        BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
-            @Override
-            public Thread newThread(@NonNull Runnable runnable) {
-                BACKGROUND_THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
-                Thread thread = new Thread(runnable, BACKGROUND_THREAD_NAME_PREFIX +
-                        BACKGROUND_THREAD_COUNTER.getAndIncrement());
-                if (thread.isDaemon()) {
-                    thread.setDaemon(false);
-                }
-                if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                    thread.setPriority(Thread.NORM_PRIORITY);
-                }
-                return thread;
-            }
-        };
-        BACKGROUND_EXECUTOR = Executors.newCachedThreadPool(BACKGROUND_THREAD_FACTORY);
-        MAIN_THREAD_EXECUTOR = new MainThreadExecutor();
-    }
+    private static final BackgroundExecutor BACKGROUND_EXECUTOR =
+            new BackgroundExecutor("ThreadUtils-background-thread-");
+    private static final MainThreadExecutor MAIN_THREAD_EXECUTOR = new MainThreadExecutor();
 
     private ThreadUtils() {
     }
@@ -235,22 +213,60 @@ public final class ThreadUtils {
     }
 
     /**
-     * Throws {@link RuntimeException} with specified message
+     * Throws {@link NotMainThreadException} with specified message
      * if current thread is not the main (UI) thread
      *
      * @param message Message
      */
     public static void requireMainThread(@Nullable String message) {
         if (Thread.currentThread() != MAIN_THREAD_EXECUTOR.getThread()) {
-            throw new RuntimeException(message);
+            throw new NotMainThreadException(message);
         }
     }
 
     /**
-     * Throws {@link RuntimeException} if current thread is not the main (UI) thread
+     * Throws {@link NotMainThreadException} if current thread is not the main (UI) thread
      */
     public static void requireMainThread() {
-        requireMainThread(NOT_MAIN_THREAD_MESSAGE);
+        if (Thread.currentThread() != MAIN_THREAD_EXECUTOR.getThread()) {
+            throw new NotMainThreadException();
+        }
+    }
+
+    private static class BackgroundExecutor extends ThreadPoolExecutor {
+        public BackgroundExecutor(@NonNull String threadNamePrefix) {
+            super(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+                    new BackgroundThreadFactory(threadNamePrefix, Thread.NORM_PRIORITY, false));
+        }
+    }
+
+    private static class BackgroundThreadFactory implements ThreadFactory {
+        private final AtomicInteger mThreadCounter = new AtomicInteger(1);
+        private final String mThreadNamePrefix;
+        private final int mThreadPriority;
+        private final boolean mDaemonThread;
+
+        public BackgroundThreadFactory(@NonNull String threadNamePrefix,
+                @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
+                boolean daemonThread) {
+            mThreadNamePrefix = Objects.requireNonNull(threadNamePrefix);
+            mDaemonThread = daemonThread;
+            mThreadPriority = threadPriority;
+        }
+
+        @Override
+        public Thread newThread(@NonNull Runnable runnable) {
+            mThreadCounter.compareAndSet(Integer.MAX_VALUE, 1);
+            Thread thread =
+                    new Thread(runnable, mThreadNamePrefix + mThreadCounter.getAndIncrement());
+            if (thread.getPriority() != mThreadPriority) {
+                thread.setPriority(mThreadPriority);
+            }
+            if (thread.isDaemon() != mDaemonThread) {
+                thread.setDaemon(mDaemonThread);
+            }
+            return thread;
+        }
     }
 
     private static class MainThreadExecutor extends AbstractExecutorService {
@@ -322,9 +338,29 @@ public final class ThreadUtils {
         }
 
         @Override
-        public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws
-                InterruptedException {
+        public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Thrown when current thread is not the main (UI) thread
+     */
+    public static class NotMainThreadException extends RuntimeException {
+        public NotMainThreadException() {
+            super();
+        }
+
+        public NotMainThreadException(String detailMessage) {
+            super(detailMessage);
+        }
+
+        public NotMainThreadException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
+        }
+
+        public NotMainThreadException(Throwable throwable) {
+            super(throwable);
         }
     }
 }
