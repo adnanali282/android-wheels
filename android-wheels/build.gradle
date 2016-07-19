@@ -1,0 +1,128 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'android-wheels'
+    publishedGroupId = 'com.budiyev.android'
+    libraryName = 'AndroidWheels'
+    artifact = 'android-wheels'
+    libraryDescription = 'Some useful tools for android'
+    siteUrl = 'https://github.com/yuriy-budiyev/android-wheels'
+    gitUrl = 'https://github.com/yuriy-budiyev/android-wheels.git'
+    libraryVersion = '0.0.1'
+    developerId = 'yuriy-budiyev'
+    developerName = 'Yuriy Budiyev'
+    developerEmail = 'yuriy.budiyev@yandex.ru'
+    licenseName = 'The MIT License (MIT)'
+    allLicenses = ["MIT"]
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:24.1.0'
+    compile 'com.android.support:design:24.1.0'
+}
+
+group = publishedGroupId
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                groupId publishedGroupId
+                artifactId artifact
+                name libraryName
+                description libraryDescription
+                url siteUrl
+
+                licenses {
+                    license {
+                        name licenseName
+                    }
+                }
+
+                developers {
+                    developer {
+                        id developerId
+                        name developerName
+                        email developerEmail
+                    }
+                }
+
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
+
+version = libraryVersion
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        publish = true
+        publicDownloadNumbers = true
+        version {
+            desc = libraryDescription
+        }
+    }
+}
