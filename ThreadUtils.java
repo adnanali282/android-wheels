@@ -96,19 +96,19 @@ public final class ThreadUtils {
     /**
      * Set name prefix of background threads (threads named like [prefix][number])
      *
-     * @param threadNamePrefix Thread name prefix
+     * @param prefix Thread name prefix
      */
-    public static void setThreadNamePrefix(@NonNull String threadNamePrefix) {
-        BACKGROUND_EXECUTOR.getBackgroundThreadFactory().setThreadNamePrefix(threadNamePrefix);
+    public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
+        BACKGROUND_EXECUTOR.getBackgroundThreadFactory().setThreadNamePrefix(prefix);
     }
 
     /**
-     * Get current thread name prefix (threads named like [prefix][number])
+     * Get current name prefix of background threads (threads named like [prefix][number])
      *
      * @return Thread name prefix
      */
     @NonNull
-    public static String getThreadNamePrefix() {
+    public static String getBackgroundThreadNamePrefix() {
         return BACKGROUND_EXECUTOR.getBackgroundThreadFactory().getThreadNamePrefix();
     }
 
