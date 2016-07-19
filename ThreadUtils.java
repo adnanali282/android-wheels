@@ -94,6 +94,25 @@ public final class ThreadUtils {
     }
 
     /**
+     * Set name prefix of background threads (threads named like [prefix][number])
+     *
+     * @param threadNamePrefix Thread name prefix
+     */
+    public static void setThreadNamePrefix(@NonNull String threadNamePrefix) {
+        BACKGROUND_EXECUTOR.getBackgroundThreadFactory().setThreadNamePrefix(threadNamePrefix);
+    }
+
+    /**
+     * Get current thread name prefix (threads named like [prefix][number])
+     *
+     * @return Thread name prefix
+     */
+    @NonNull
+    public static String getThreadNamePrefix() {
+        return BACKGROUND_EXECUTOR.getBackgroundThreadFactory().getThreadNamePrefix();
+    }
+
+    /**
      * Run task asynchronous
      *
      * @param task Task
@@ -238,11 +257,21 @@ public final class ThreadUtils {
             super(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
                     new BackgroundThreadFactory(threadNamePrefix, Thread.NORM_PRIORITY, false));
         }
+
+        @NonNull
+        public BackgroundThreadFactory getBackgroundThreadFactory() {
+            ThreadFactory threadFactory = getThreadFactory();
+            if (threadFactory instanceof BackgroundThreadFactory) {
+                return (BackgroundThreadFactory) threadFactory;
+            } else {
+                throw new IllegalStateException();
+            }
+        }
     }
 
     private static class BackgroundThreadFactory implements ThreadFactory {
         private final AtomicInteger mThreadCounter = new AtomicInteger(1);
-        private final String mThreadNamePrefix;
+        private volatile String mThreadNamePrefix;
         private final int mThreadPriority;
         private final boolean mDaemonThread;
 
@@ -266,6 +295,15 @@ public final class ThreadUtils {
                 thread.setDaemon(mDaemonThread);
             }
             return thread;
+        }
+
+        public void setThreadNamePrefix(@NonNull String threadNamePrefix) {
+            mThreadNamePrefix = Objects.requireNonNull(threadNamePrefix);
+        }
+
+        @NonNull
+        public String getThreadNamePrefix() {
+            return mThreadNamePrefix;
         }
     }
 
