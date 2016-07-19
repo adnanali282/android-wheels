@@ -1,1 +1,1 @@
-include ':app', ':android-wheels-library'
+include ':app', ':android-wheels'
