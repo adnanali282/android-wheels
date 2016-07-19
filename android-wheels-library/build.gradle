@@ -3,18 +3,18 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'android-wheels'
-    publishedGroupId = 'com.budiyev.android'
     libraryName = 'AndroidWheels'
-    artifact = 'android-wheels'
     libraryDescription = 'Some useful tools for android'
-    siteUrl = 'https://github.com/yuriy-budiyev/android-wheels'
-    gitUrl = 'https://github.com/yuriy-budiyev/android-wheels.git'
-    libraryVersion = '0.0.1'
+    libraryVersion = '1.0.0'
+    artifact = 'android-wheels'
     developerId = 'yuriy-budiyev'
     developerName = 'Yuriy Budiyev'
     developerEmail = 'yuriy.budiyev@yandex.ru'
+    publishedGroupId = 'com.budiyev.android'
+    siteUrl = 'https://github.com/yuriy-budiyev/android-wheels'
+    gitUrl = 'https://github.com/yuriy-budiyev/android-wheels.git'
+    bintrayRepo = 'maven'
+    bintrayName = 'android-wheels'
     licenseName = 'The MIT License (MIT)'
     allLicenses = ["MIT"]
 }
@@ -27,7 +27,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName libraryVersion
     }
 
     buildTypes {
