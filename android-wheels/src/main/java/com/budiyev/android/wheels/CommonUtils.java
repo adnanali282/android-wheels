@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,17 @@
  */
 package com.budiyev.android.wheels;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewManager;
 import android.view.ViewParent;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 
 public final class CommonUtils {
     private CommonUtils() {
@@ -115,5 +119,56 @@ public final class CommonUtils {
      */
     public static int dpToPx(@NonNull Context context, float dp) {
         return dpToPx(context.getResources().getDisplayMetrics(), dp);
+    }
+
+    /**
+     * Get text resource value by name of identifier
+     *
+     * @param context      Context
+     * @param resourceName Name of resource identifier
+     * @return Text
+     */
+    @Nullable
+    public static CharSequence getTextByResourceName(@NonNull Context context,
+            @NonNull String resourceName) {
+        Resources resources = context.getResources();
+        int resId = resources.getIdentifier(resourceName, "string", context.getPackageName());
+        try {
+            return resources.getText(resId);
+        } catch (Resources.NotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Hide software input in window associated with specified {@link View}
+     *
+     * @param context Context
+     * @param view    View
+     */
+    public static void hideSoftwareInput(@NonNull Context context, @NonNull View view) {
+        InputMethodManager manager =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+    }
+
+    /**
+     * Hide software input in window associated with specified {@link Activity}
+     *
+     * @param activity Activity
+     */
+    public static void hideSoftwareInput(@NonNull Activity activity) {
+        Window window = activity.getWindow();
+        if (window == null) {
+            return;
+        }
+        View view = window.getDecorView();
+        if (view == null) {
+            return;
+        }
+        InputMethodManager manager =
+                (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
