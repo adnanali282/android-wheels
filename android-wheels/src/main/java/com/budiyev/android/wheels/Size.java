@@ -61,4 +61,16 @@ public final class Size {
     public android.util.Size toAndroidSize() {
         return new android.util.Size(mWidth, mHeight);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof Size) {
+            Size size = (Size) obj;
+            return mWidth == size.getWidth() && mHeight == size.getHeight();
+        } else {
+            return false;
+        }
+    }
 }
