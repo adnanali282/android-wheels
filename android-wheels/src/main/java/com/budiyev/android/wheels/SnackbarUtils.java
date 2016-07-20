@@ -107,7 +107,7 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
-     * @return {@link Snackbar}
+     * @return Snackbar
      */
     @NonNull
     public static Snackbar build(@NonNull View view, @NonNull CharSequence messageText,
@@ -139,7 +139,7 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
-     * @return {@link Snackbar}
+     * @return Snackbar
      */
     @NonNull
     public static Snackbar show(@NonNull View view, @NonNull CharSequence messageText,
@@ -161,7 +161,7 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
-     * @return {@link Snackbar} or null
+     * @return Snackbar or null
      */
     @Nullable
     public static Snackbar show(@NonNull Window window, @NonNull CharSequence messageText,
@@ -188,7 +188,7 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
-     * @return {@link Snackbar} or null
+     * @return Snackbar or null
      */
     @Nullable
     public static Snackbar show(@NonNull Activity activity, @NonNull CharSequence messageText,
@@ -211,7 +211,7 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
-     * @return {@link Snackbar} or null
+     * @return Snackbar or null
      */
     @Nullable
     public static Snackbar show(@NonNull Fragment fragment, @NonNull CharSequence messageText,
