@@ -37,7 +37,7 @@ public final class Size {
     }
 
     /**
-     * Copy values of {@link android.util.Size}
+     * Copy values from {@link android.util.Size}
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Size(@NonNull android.util.Size size) {
