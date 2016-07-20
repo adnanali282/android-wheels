@@ -23,6 +23,10 @@
  */
 package com.budiyev.android.wheels;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.support.annotation.NonNull;
+
 public final class Size {
     private final int mWidth;
     private final int mHeight;
@@ -32,11 +36,29 @@ public final class Size {
         mHeight = height;
     }
 
+    /**
+     * Copy values of {@link android.util.Size}
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public Size(@NonNull android.util.Size size) {
+        mWidth = size.getWidth();
+        mHeight = size.getHeight();
+    }
+
     public int getWidth() {
         return mWidth;
     }
 
     public int getHeight() {
         return mHeight;
+    }
+
+    /**
+     * Convert to {@link android.util.Size}
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @NonNull
+    public android.util.Size toAndroidSize() {
+        return new android.util.Size(mWidth, mHeight);
     }
 }
