@@ -52,7 +52,7 @@ public final class GetHttpRequest extends HttpRequest {
     private final Collection<HeaderParameter> mHeaderParameters;
     private final Collection<QueryParameter> mQueryParameters;
     private final RequestCallback mCallback;
-    private final ResultType mResultType;
+    private final RequestResultType mResultType;
     private volatile RequestResult mResult;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
@@ -147,8 +147,8 @@ public final class GetHttpRequest extends HttpRequest {
     };
 
     GetHttpRequest(@NonNull String url, @Nullable Collection<HeaderParameter> headerParameters,
-            @Nullable Collection<QueryParameter> queryParameters, @NonNull ResultType resultType,
-            @Nullable RequestCallback callback) {
+            @Nullable Collection<QueryParameter> queryParameters,
+            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
         mUrl = url;
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;

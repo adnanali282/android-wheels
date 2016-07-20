@@ -72,7 +72,7 @@ public final class PostHttpRequest extends HttpRequest {
     private final Collection<QueryParameter> mQueryParameters;
     private final Collection<PostParameter> mPostParameters;
     private final RequestCallback mCallback;
-    private final ResultType mResultType;
+    private final RequestResultType mResultType;
     private volatile RequestResult mResult;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
@@ -235,8 +235,8 @@ public final class PostHttpRequest extends HttpRequest {
 
     PostHttpRequest(@NonNull String url, @Nullable Collection<HeaderParameter> headerParameters,
             @Nullable Collection<QueryParameter> queryParameters,
-            @Nullable Collection<PostParameter> postParameters, @NonNull ResultType resultType,
-            @Nullable RequestCallback callback) {
+            @Nullable Collection<PostParameter> postParameters,
+            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
         mUrl = url;
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;

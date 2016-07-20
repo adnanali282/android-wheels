@@ -38,7 +38,7 @@ public final class PostRequestBuilder {
     private ArrayList<HeaderParameter> mHeaderParameters;
     private ArrayList<QueryParameter> mQueryParameters;
     private ArrayList<PostParameter> mPostParameters;
-    private ResultType mResultType = ResultType.STRING;
+    private RequestResultType mResultType = RequestResultType.STRING;
     private RequestCallback mCallback;
 
     PostRequestBuilder(@NonNull String url) {
@@ -87,7 +87,7 @@ public final class PostRequestBuilder {
         return this;
     }
 
-    public PostRequestBuilder setResultType(@NonNull ResultType resultType) {
+    public PostRequestBuilder setResultType(@NonNull RequestResultType resultType) {
         mResultType = resultType;
         return this;
     }

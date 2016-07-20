@@ -88,8 +88,8 @@ public abstract class HttpRequest implements Runnable {
     @NonNull
     public static GetHttpRequest newGetRequest(@NonNull String url,
             @Nullable Collection<HeaderParameter> headerParameters,
-            @Nullable Collection<QueryParameter> queryParameters, @NonNull ResultType resultType,
-            @Nullable RequestCallback callback) {
+            @Nullable Collection<QueryParameter> queryParameters,
+            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
         return new GetHttpRequest(url, headerParameters, queryParameters, resultType, callback);
     }
 
@@ -119,8 +119,8 @@ public abstract class HttpRequest implements Runnable {
     public static PostHttpRequest newPostRequest(@NonNull String url,
             @Nullable Collection<HeaderParameter> headerParameters,
             @Nullable Collection<QueryParameter> queryParameters,
-            @Nullable Collection<PostParameter> postParameters, @NonNull ResultType resultType,
-            @Nullable RequestCallback callback) {
+            @Nullable Collection<PostParameter> postParameters,
+            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
         return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
                 resultType, callback);
     }

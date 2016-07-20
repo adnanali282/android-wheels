@@ -35,7 +35,7 @@ public final class GetRequestBuilder {
     private final String mUrl;
     private ArrayList<HeaderParameter> mHeaderParameters;
     private ArrayList<QueryParameter> mQueryParameters;
-    private ResultType mResultType = ResultType.STRING;
+    private RequestResultType mResultType = RequestResultType.STRING;
     private RequestCallback mCallback;
 
     GetRequestBuilder(@NonNull String url) {
@@ -58,7 +58,7 @@ public final class GetRequestBuilder {
         return this;
     }
 
-    public GetRequestBuilder setResultType(@NonNull ResultType resultType) {
+    public GetRequestBuilder setResultType(@NonNull RequestResultType resultType) {
         mResultType = resultType;
         return this;
     }
