@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -47,9 +53,6 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * ImageLoader is a universal tool for loading bitmaps efficiently in Android which
@@ -60,29 +63,6 @@ import java.util.concurrent.ThreadFactory;
  * @param <T> Source data type
  */
 public class ImageLoader<T> {
-    private static final ThreadFactory BACKGROUND_THREAD_FACTORY;
-    private static final ExecutorService BACKGROUND_EXECUTOR;
-
-    static {
-        BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
-            @Override
-            public Thread newThread(@NonNull Runnable runnable) {
-                Thread thread =
-                        new Thread(runnable, ImageLoaderConstants.Threads.BACKGROUND_THREAD_NAME);
-                if (thread.isDaemon()) {
-                    thread.setDaemon(false);
-                }
-                if (thread.getPriority() != Thread.MIN_PRIORITY) {
-                    thread.setPriority(Thread.MIN_PRIORITY);
-                }
-                return thread;
-            }
-        };
-        BACKGROUND_EXECUTOR = Executors
-                .newFixedThreadPool(Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
-                        BACKGROUND_THREAD_FACTORY);
-    }
-
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private volatile boolean mImageFadeIn = true;
@@ -185,7 +165,7 @@ public class ImageLoader<T> {
                             loadAction);
             ThreadUtils.runOnMainThread(
                     new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
-            loadAction.execute(BACKGROUND_EXECUTOR);
+            loadAction.execute(ExecutorUtils.getImageLoaderExecutor());
         }
     }
 
@@ -319,42 +299,6 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Calculate sample size for required size from source size
-     * Sample size is the number of pixels in either dimension that
-     * correspond to a single pixel
-     *
-     * @param sourceWidth               Source width
-     * @param sourceHeight              Source height
-     * @param requiredWidth             Required width
-     * @param requiredHeight            Required height
-     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
-     *                                  (requiredWidth * requiredHeight)
-     * @return Sample size
-     */
-    protected static int calculateSampleSize(int sourceWidth, int sourceHeight, int requiredWidth,
-            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        int sampleSize = 1;
-        if (sourceWidth > requiredWidth || sourceHeight > requiredHeight) {
-            int halfWidth = sourceWidth / 2;
-            int halfHeight = sourceHeight / 2;
-            while ((halfWidth / sampleSize) > requiredWidth &&
-                    (halfHeight / sampleSize) > requiredHeight) {
-                sampleSize *= 2;
-            }
-            if (ignoreTotalNumberOfPixels) {
-                return sampleSize;
-            }
-            long totalPixels = (sourceWidth * sourceHeight) / (sampleSize * sampleSize);
-            long totalRequiredPixels = requiredWidth * requiredHeight;
-            while (totalPixels > totalRequiredPixels) {
-                sampleSize *= 2;
-                totalPixels /= 4L;
-            }
-        }
-        return sampleSize;
-    }
-
-    /**
      * Get input stream from uri
      *
      * @param context Context
@@ -373,22 +317,6 @@ public class ImageLoader<T> {
         } else {
             return context.getContentResolver().openInputStream(uri);
         }
-    }
-
-    /**
-     * ImageLoader background thread factory
-     */
-    @NonNull
-    static ThreadFactory getBackgroundThreadFactory() {
-        return BACKGROUND_THREAD_FACTORY;
-    }
-
-    /**
-     * ImageLoader background executor
-     */
-    @NonNull
-    static ExecutorService getBackgroundExecutor() {
-        return BACKGROUND_EXECUTOR;
     }
 
     /**
@@ -455,6 +383,122 @@ public class ImageLoader<T> {
         }
         StatFs stat = new StatFs(path.getAbsolutePath());
         return Math.round(stat.getTotalBytes() * fraction);
+    }
+
+    /**
+     * Calculate sample size for required size from source size
+     * Sample size is the number of pixels in either dimension that
+     * correspond to a single pixel
+     *
+     * @param sourceWidth               Source width
+     * @param sourceHeight              Source height
+     * @param requiredWidth             Required width
+     * @param requiredHeight            Required height
+     * @param ignoreTotalNumberOfPixels Ignore total number of pixels
+     *                                  (requiredWidth * requiredHeight)
+     * @return Sample size
+     */
+    public static int calculateSampleSize(int sourceWidth, int sourceHeight, int requiredWidth,
+            int requiredHeight, boolean ignoreTotalNumberOfPixels) {
+        int sampleSize = 1;
+        if (sourceWidth > requiredWidth || sourceHeight > requiredHeight) {
+            int halfWidth = sourceWidth / 2;
+            int halfHeight = sourceHeight / 2;
+            while ((halfWidth / sampleSize) > requiredWidth &&
+                    (halfHeight / sampleSize) > requiredHeight) {
+                sampleSize *= 2;
+            }
+            if (ignoreTotalNumberOfPixels) {
+                return sampleSize;
+            }
+            long totalPixels = (sourceWidth * sourceHeight) / (sampleSize * sampleSize);
+            long totalRequiredPixels = requiredWidth * requiredHeight;
+            while (totalPixels > totalRequiredPixels) {
+                sampleSize *= 2;
+                totalPixels /= 4L;
+            }
+        }
+        return sampleSize;
+    }
+
+    /**
+     * Crop {@link Bitmap} to specified size
+     *
+     * @param bitmap Source bitmap
+     * @param width  Result width
+     * @param height Result height
+     * @return Cropped bitmap
+     */
+    @NonNull
+    public static Bitmap cropBitmap(@NonNull Bitmap bitmap, int width, int height) {
+        int w = width;
+        int h = height;
+        while (w > 0 && h > 0) {
+            if (w > h) {
+                w %= h;
+            } else {
+                h %= w;
+            }
+        }
+        int d = w + h;
+        int arW = width / d;
+        int arH = height / d;
+        final int CROP_MODE_NONE = 1;
+        final int CROP_MODE_WIDTH = 2;
+        final int CROP_MODE_HEIGHT = 3;
+        int cropMode = CROP_MODE_HEIGHT;
+        int resultH = bitmap.getHeight();
+        int resultW = arW * resultH / arH;
+        if (resultW > bitmap.getWidth()) {
+            cropMode = CROP_MODE_WIDTH;
+            resultW = bitmap.getWidth();
+            resultH = arH * resultW / arW;
+        }
+        if (resultH == bitmap.getHeight() && resultW == bitmap.getWidth()) {
+            cropMode = CROP_MODE_NONE;
+        }
+        Bitmap croppedBitmap = null;
+        switch (cropMode) {
+            case CROP_MODE_NONE:
+                croppedBitmap = bitmap;
+                break;
+            case CROP_MODE_HEIGHT:
+                croppedBitmap =
+                        Bitmap.createBitmap(bitmap, (bitmap.getWidth() - resultW) / 2, 0, resultW,
+                                resultH);
+                break;
+            case CROP_MODE_WIDTH:
+                croppedBitmap =
+                        Bitmap.createBitmap(bitmap, 0, (bitmap.getHeight() - resultH) / 2, resultW,
+                                resultH);
+                break;
+        }
+        return Bitmap.createScaledBitmap(croppedBitmap, width, height, true);
+    }
+
+    /**
+     * Round {@link Bitmap} corners
+     *
+     * @param bitmap Bitmap
+     * @param radius Corner radius
+     * @return Rounded bitmap
+     */
+    @NonNull
+    public static Bitmap roundBitmapCorners(@NonNull Bitmap bitmap, float radius) {
+        int maskColor = 0xff424242;
+        Paint cornerPaint = new Paint();
+        cornerPaint.setAntiAlias(true);
+        cornerPaint.setColor(maskColor);
+        Rect rcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        RectF rcRectF = new RectF(rcRect);
+        Bitmap rcBitmap =
+                Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas rcCanvas = new Canvas(rcBitmap);
+        rcCanvas.drawARGB(0, 0, 0, 0);
+        rcCanvas.drawRoundRect(rcRectF, radius, radius, cornerPaint);
+        cornerPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        rcCanvas.drawBitmap(bitmap, rcRect, rcRect, cornerPaint);
+        return rcBitmap;
     }
 
     /**

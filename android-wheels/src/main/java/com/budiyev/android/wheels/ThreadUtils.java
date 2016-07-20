@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,10 +34,6 @@ import java.util.concurrent.Future;
  * Tools for asynchronous tasks in Android
  */
 public final class ThreadUtils {
-    private static final BackgroundExecutor BACKGROUND_EXECUTOR =
-            new BackgroundExecutor("ThreadUtils-background-thread-");
-    private static final MainThreadExecutor MAIN_THREAD_EXECUTOR = new MainThreadExecutor();
-
     private ThreadUtils() {
     }
 
@@ -76,7 +72,7 @@ public final class ThreadUtils {
         return new Runnable() {
             @Override
             public void run() {
-                asyncTask.executeOnExecutor(BACKGROUND_EXECUTOR, parameters);
+                asyncTask.executeOnExecutor(ExecutorUtils.getThreadUtilsExecutor(), parameters);
             }
         };
     }
@@ -87,7 +83,7 @@ public final class ThreadUtils {
      * @param prefix Thread name prefix
      */
     public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
-        BACKGROUND_EXECUTOR.getBackgroundThreadFactory().setThreadNamePrefix(prefix);
+        ExecutorUtils.setBackgroundThreadNamePrefix(prefix);
     }
 
     /**
@@ -97,7 +93,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static String getBackgroundThreadNamePrefix() {
-        return BACKGROUND_EXECUTOR.getBackgroundThreadFactory().getThreadNamePrefix();
+        return ExecutorUtils.getBackgroundThreadNamePrefix();
     }
 
     /**
@@ -108,7 +104,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
-        return BACKGROUND_EXECUTOR.submit(task);
+        return ExecutorUtils.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -119,7 +115,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
-        return BACKGROUND_EXECUTOR.submit(task);
+        return ExecutorUtils.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -131,7 +127,7 @@ public final class ThreadUtils {
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
-        MAIN_THREAD_EXECUTOR.execute(wrapAsyncTask(task, parameters));
+        ExecutorUtils.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
     }
 
     /**
@@ -141,7 +137,7 @@ public final class ThreadUtils {
      * @param delay Delay
      */
     public static void runAsync(@NonNull final Runnable task, long delay) {
-        MAIN_THREAD_EXECUTOR.execute(new Runnable() {
+        ExecutorUtils.getMainThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 runAsync(task);
@@ -170,7 +166,7 @@ public final class ThreadUtils {
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
-        MAIN_THREAD_EXECUTOR.execute(wrapAsyncTask(task, parameters), delay);
+        ExecutorUtils.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
     }
 
     /**
@@ -181,7 +177,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task) {
-        return MAIN_THREAD_EXECUTOR.submit(task);
+        return ExecutorUtils.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -192,7 +188,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task) {
-        return MAIN_THREAD_EXECUTOR.submit(task);
+        return ExecutorUtils.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -204,7 +200,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task, long delay) {
-        return MAIN_THREAD_EXECUTOR.submit(task, delay);
+        return ExecutorUtils.getMainThreadExecutor().submit(task, delay);
     }
 
     /**
@@ -216,7 +212,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
-        return MAIN_THREAD_EXECUTOR.submit(task, delay);
+        return ExecutorUtils.getMainThreadExecutor().submit(task, delay);
     }
 
     /**
@@ -226,7 +222,7 @@ public final class ThreadUtils {
      * @param message Message
      */
     public static void requireMainThread(@Nullable String message) {
-        if (Thread.currentThread() != MAIN_THREAD_EXECUTOR.getThread()) {
+        if (Thread.currentThread() != ExecutorUtils.getMainThreadExecutor().getThread()) {
             throw new NotMainThreadException(message);
         }
     }
@@ -235,7 +231,7 @@ public final class ThreadUtils {
      * Throws {@link NotMainThreadException} if current thread is not the main (UI) thread
      */
     public static void requireMainThread() {
-        if (Thread.currentThread() != MAIN_THREAD_EXECUTOR.getThread()) {
+        if (Thread.currentThread() != ExecutorUtils.getMainThreadExecutor().getThread()) {
             throw new NotMainThreadException();
         }
     }

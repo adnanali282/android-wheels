@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,31 +31,12 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * HTTP request
  */
 public abstract class HttpRequest implements Runnable {
-    protected static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
-        @NonNull
-        @Override
-        public Thread newThread(@NonNull Runnable runnable) {
-            Thread thread = new Thread(runnable, "HttpRequest-background-thread");
-            if (thread.isDaemon()) {
-                thread.setDaemon(false);
-            }
-            if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                thread.setPriority(Thread.NORM_PRIORITY);
-            }
-            return thread;
-        }
-    };
-    protected static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(THREAD_FACTORY);
-
     @NonNull
     protected static String buildParamsUrlString(@NonNull Collection<QueryParameter> params,
             @NonNull String charset) throws UnsupportedEncodingException {
