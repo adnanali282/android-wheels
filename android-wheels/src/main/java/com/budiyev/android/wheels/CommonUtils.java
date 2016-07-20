@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -92,5 +93,27 @@ public final class CommonUtils {
      */
     public static boolean isNullOrWhiteSpace(@Nullable String string) {
         return string == null || string.trim().length() == 0;
+    }
+
+    /**
+     * Convert DP to PX
+     *
+     * @param displayMetrics Display metrics
+     * @param dp             Value in DP
+     * @return Value in PX
+     */
+    public static int dpToPx(@NonNull DisplayMetrics displayMetrics, float dp) {
+        return Math.round(dp * displayMetrics.density);
+    }
+
+    /**
+     * Convert DP to PX
+     *
+     * @param context Context
+     * @param dp      Value in DP
+     * @return Value in PX
+     */
+    public static int dpToPx(@NonNull Context context, float dp) {
+        return dpToPx(context.getResources().getDisplayMetrics(), dp);
     }
 }
