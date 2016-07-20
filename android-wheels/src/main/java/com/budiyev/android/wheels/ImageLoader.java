@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -36,7 +37,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -48,10 +48,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
@@ -299,46 +295,6 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Get input stream from uri
-     *
-     * @param context Context
-     * @param uri     Uri
-     * @return Data stream
-     * @throws IOException
-     */
-    @Nullable
-    protected static InputStream getDataStreamFromUri(@NonNull Context context,
-            @NonNull Uri uri) throws IOException {
-        String scheme = uri.getScheme();
-        if (ImageLoaderConstants.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
-                ImageLoaderConstants.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
-                ImageLoaderConstants.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
-            return new URL(uri.toString()).openConnection().getInputStream();
-        } else {
-            return context.getContentResolver().openInputStream(uri);
-        }
-    }
-
-    /**
-     * Generate MD5 hash string for specified data
-     *
-     * @param data Data
-     * @return MD5 hash string
-     */
-    @NonNull
-    public static String generateMD5(byte[] data) {
-        try {
-            MessageDigest messageDigest =
-                    MessageDigest.getInstance(ImageLoaderConstants.MessageDigest.MD5);
-            messageDigest.update(data);
-            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
-            return bigInteger.toString(Character.MAX_RADIX);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Fraction of maximum number of bytes heap can expand to
      *
      * @param fraction Fraction
@@ -364,9 +320,7 @@ public class ImageLoader<T> {
             throw new IllegalArgumentException(
                     ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
-        StatFs stat = new StatFs(path.getAbsolutePath());
-        double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
-        return Math.round(bytesAvailable * fraction);
+        return Math.round(CommonUtils.getFreeBytes(path) * fraction);
     }
 
     /**
@@ -381,8 +335,7 @@ public class ImageLoader<T> {
             throw new IllegalArgumentException(
                     ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
-        StatFs stat = new StatFs(path.getAbsolutePath());
-        return Math.round(stat.getTotalBytes() * fraction);
+        return Math.round(CommonUtils.getTotalBytes(path) * fraction);
     }
 
     /**
@@ -502,6 +455,21 @@ public class ImageLoader<T> {
     }
 
     /**
+     * Rotate {@link Bitmap} by specified amount of degrees
+     *
+     * @param bitmap  Bitmap
+     * @param degrees Amount of degrees
+     * @return Rotated bitmap
+     */
+    @NonNull
+    public static Bitmap rotateBitmap(@NonNull Bitmap bitmap, float degrees) {
+        Matrix matrix = new Matrix();
+        matrix.setRotate(degrees);
+        return Bitmap
+                .createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    /**
      * Load sampled bitmap from uri
      *
      * @param context                   Context
@@ -517,7 +485,7 @@ public class ImageLoader<T> {
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        try (InputStream inputStream = getDataStreamFromUri(context, uri)) {
+        try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
             BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -526,7 +494,7 @@ public class ImageLoader<T> {
         options.inSampleSize =
                 calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
                         requiredHeight, ignoreTotalNumberOfPixels);
-        try (InputStream inputStream = getDataStreamFromUri(context, uri)) {
+        try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             return null;
@@ -745,7 +713,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static <T> ImageSource<T> newImageSource(@NonNull final T data) {
-        final String key = generateMD5(String.valueOf(data).getBytes());
+        final String key = CommonUtils.generateMD5(String.valueOf(data));
         return new ImageSource<T>() {
             @Override
             public T getData() {

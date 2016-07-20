@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
+ * <p/>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p>
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * <p/>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,8 @@ package com.budiyev.android.wheels;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.Uri;
+import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -35,7 +37,20 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public final class CommonUtils {
+    private static final String URI_SCHEME_HTTP = "http";
+    private static final String URI_SCHEME_HTTPS = "https";
+    private static final String URI_SCHEME_FTP = "ftp";
+    private static final String ALGORITHM_MD5 = "MD5";
+
     private CommonUtils() {
     }
 
@@ -170,5 +185,76 @@ public final class CommonUtils {
         InputMethodManager manager =
                 (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    /**
+     * Get input stream from uri
+     *
+     * @param context Context
+     * @param uri     Uri
+     * @return Data stream
+     * @throws IOException
+     */
+    @Nullable
+    public static InputStream getDataStreamFromUri(@NonNull Context context,
+            @NonNull Uri uri) throws IOException {
+        String scheme = uri.getScheme();
+        if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) ||
+                URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+                URI_SCHEME_FTP.equalsIgnoreCase(scheme)) {
+            return new URL(uri.toString()).openConnection().getInputStream();
+        } else {
+            return context.getContentResolver().openInputStream(uri);
+        }
+    }
+
+    /**
+     * Generate MD5 hash string for specified data
+     *
+     * @param data Data
+     * @return MD5 hash string
+     */
+    @NonNull
+    public static String generateMD5(byte[] data) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(ALGORITHM_MD5);
+            messageDigest.update(data);
+            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
+            return bigInteger.toString(Character.MAX_RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Generate MD5 hash string for specified {@link String}
+     *
+     * @param string Source string
+     * @return MD5 hash string
+     */
+    @NonNull
+    public static String generateMD5(@NonNull String string) {
+        return generateMD5(string.getBytes());
+    }
+
+    /**
+     * Get number of available bytes by specified path
+     *
+     * @param path Path
+     * @return Number of free bytes
+     */
+    public static long getFreeBytes(@NonNull File path) {
+        StatFs statFs = new StatFs(path.getAbsolutePath());
+        return statFs.getBlockSizeLong() * statFs.getBlockCountLong();
+    }
+
+    /**
+     * Get total number of bytes by specified path
+     *
+     * @param path Path
+     * @return Total number of bytes
+     */
+    public static long getTotalBytes(@NonNull File path) {
+        return new StatFs(path.getAbsolutePath()).getTotalBytes();
     }
 }
