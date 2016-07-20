@@ -209,5 +209,4 @@ public abstract class HttpRequest implements Runnable {
 
     @NonNull
     public abstract RequestResult executeAndGetResult();
-
 }

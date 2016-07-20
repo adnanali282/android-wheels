@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * {@link Bitmap} loader from source data
@@ -39,5 +40,6 @@ public interface BitmapLoader<T> {
      * @param data Source data
      * @return Loaded bitmap
      */
+    @Nullable
     Bitmap load(@NonNull Context context, T data);
 }

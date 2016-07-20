@@ -51,6 +51,11 @@ final class ExecutorUtils {
     private ExecutorUtils() {
     }
 
+    private static int getNextThreadNumber() {
+        THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
+        return THREAD_COUNTER.getAndIncrement();
+    }
+
     /**
      * Can be accessed via {@link ThreadUtils#getBackgroundThreadNamePrefix()}
      */
@@ -78,9 +83,8 @@ final class ExecutorUtils {
                             new SynchronousQueue<Runnable>(), new ThreadFactory() {
                         @Override
                         public Thread newThread(@NonNull Runnable runnable) {
-                            THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
                             Thread thread = new Thread(runnable,
-                                    sBackgroundThreadNamePrefix + THREAD_COUNTER.getAndIncrement());
+                                    sBackgroundThreadNamePrefix + getNextThreadNumber());
                             if (thread.getPriority() != Thread.NORM_PRIORITY) {
                                 thread.setPriority(Thread.NORM_PRIORITY);
                             }
@@ -113,10 +117,8 @@ final class ExecutorUtils {
                             new ThreadFactory() {
                                 @Override
                                 public Thread newThread(@NonNull Runnable runnable) {
-                                    THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
                                     Thread thread = new Thread(runnable,
-                                            sBackgroundThreadNamePrefix +
-                                                    THREAD_COUNTER.getAndIncrement());
+                                            sBackgroundThreadNamePrefix + getNextThreadNumber());
                                     if (thread.getPriority() != Thread.MIN_PRIORITY) {
                                         thread.setPriority(Thread.MIN_PRIORITY);
                                     }
