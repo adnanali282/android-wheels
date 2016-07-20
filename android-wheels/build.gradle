@@ -5,7 +5,7 @@ apply plugin: 'com.jfrog.bintray'
 ext {
     libraryName = 'AndroidWheels'
     libraryDescription = 'Some useful tools for android'
-    libraryVersion = '1.4.2' // In development
+    libraryVersion = '1.4.2'
     artifact = 'android-wheels'
     developerId = 'yuriy-budiyev'
     developerName = 'Yuriy Budiyev'
