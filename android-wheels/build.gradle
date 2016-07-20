@@ -5,7 +5,7 @@ apply plugin: 'com.jfrog.bintray'
 ext {
     libraryName = 'AndroidWheels'
     libraryDescription = 'Some useful tools for android'
-    libraryVersion = '1.2.0'
+    libraryVersion = '1.2.1'
     artifact = 'android-wheels'
     developerId = 'yuriy-budiyev'
     developerName = 'Yuriy Budiyev'
@@ -20,13 +20,13 @@ ext {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 23
-        versionCode 3
+        targetSdkVersion 24
+        versionCode 4
         versionName libraryVersion
     }
 
@@ -39,9 +39,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:support-annotations:24.1.0'
+    compile 'com.android.support:appcompat-v7:24.1.0'
+    compile 'com.android.support:design:24.1.0'
 }
 
 group = publishedGroupId
