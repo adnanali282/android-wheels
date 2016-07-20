@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
+ * <p/>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p>
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * <p/>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,14 +46,14 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Wrap {@link Action} into {@link View.OnClickListener}
+     * Wrap {@link SnackbarAction} into {@link View.OnClickListener}
      *
      * @param action   Action
      * @param snackbar Snackbar
      * @return OnClickListener
      */
     @NonNull
-    private static View.OnClickListener wrapAction(@NonNull final Action action,
+    private static View.OnClickListener wrapAction(@NonNull final SnackbarAction action,
             @NonNull final Snackbar snackbar) {
         return new View.OnClickListener() {
             @Override
@@ -110,7 +110,7 @@ public final class SnackbarUtils {
      */
     public static void show(@NonNull View view, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
-            @Nullable Action action, @Nullable CharSequence actionText) {
+            @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Snackbar snackbar = Snackbar.make(view, messageText, duration);
         if (backgroundColor != -1) {
             snackbar.getView().setBackgroundColor(backgroundColor);
@@ -140,7 +140,7 @@ public final class SnackbarUtils {
      */
     public static void show(@NonNull Window window, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
-            @Nullable Action action, @Nullable CharSequence actionText) {
+            @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         View view = window.getDecorView();
         if (view == null) {
             return;
@@ -165,7 +165,7 @@ public final class SnackbarUtils {
      */
     public static void show(@NonNull Activity activity, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
-            @Nullable Action action, @Nullable CharSequence actionText) {
+            @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Window window = activity.getWindow();
         if (window == null) {
             return;
@@ -186,18 +186,11 @@ public final class SnackbarUtils {
      */
     public static void show(@NonNull Fragment fragment, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
-            @Nullable Action action, @Nullable CharSequence actionText) {
+            @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return;
         }
         show(activity, messageText, backgroundColor, textColor, duration, action, actionText);
-    }
-
-    /**
-     * Action button click
-     */
-    public interface Action {
-        void onClick(View button, Snackbar snackbar);
     }
 }
