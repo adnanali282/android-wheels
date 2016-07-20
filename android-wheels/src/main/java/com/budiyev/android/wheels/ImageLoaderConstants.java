@@ -25,8 +25,11 @@ package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
 
-final class Constants {
-    private Constants() {
+/**
+ * Constants for {@link ImageLoader}
+ */
+final class ImageLoaderConstants {
+    private ImageLoaderConstants() {
     }
 
     public static final class Threads {

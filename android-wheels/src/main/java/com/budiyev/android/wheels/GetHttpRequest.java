@@ -39,7 +39,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * Instance class for GET requests
+ * Instance class for GET HTTP requests
  */
 public final class GetHttpRequest extends HttpRequest {
     private static final String UTF_8 = "UTF-8";

@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 /**
- * Result of HTTP request
+ * Request result of {@link HttpRequest}
  */
 public enum RequestResult {
     NONE,

@@ -36,6 +36,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * HTTP request
+ */
 public abstract class HttpRequest implements Runnable {
     protected static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
         @NonNull

@@ -39,6 +39,9 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
+/**
+ * Circular progress bar
+ */
 public class CircularProgressBar extends View {
     private static final float DEFAULT_MAXIMUM = 100F;
     private static final float DEFAULT_PROGRESS = 0F;

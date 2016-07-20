@@ -31,6 +31,9 @@ import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * {@link BitmapDrawable} that holds reference to {@link LoadImageAction}
+ */
 class AsyncBitmapDrawable extends BitmapDrawable {
     private final WeakReference<LoadImageAction<?>> mLoadImageActionReference;
 
@@ -40,6 +43,7 @@ class AsyncBitmapDrawable extends BitmapDrawable {
         mLoadImageActionReference = new WeakReference<LoadImageAction<?>>(loadImageAction);
     }
 
+    @Nullable
     public LoadImageAction<?> getLoadImageAction() {
         return mLoadImageActionReference.get();
     }

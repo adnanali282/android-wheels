@@ -30,6 +30,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Executor for background tasks in {@link ThreadUtils}
+ */
 class BackgroundExecutor extends ThreadPoolExecutor {
     public BackgroundExecutor(@NonNull String threadNamePrefix) {
         super(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),

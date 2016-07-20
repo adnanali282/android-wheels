@@ -31,7 +31,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
- * Builder for POST requests
+ * Builder for POST HTTP requests
  */
 public final class PostRequestBuilder {
     private final String mUrl;

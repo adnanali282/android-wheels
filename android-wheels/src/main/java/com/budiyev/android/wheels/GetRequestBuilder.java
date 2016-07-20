@@ -29,7 +29,7 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 
 /**
- * Builder for GET requests
+ * Builder for GET HTTP requests
  */
 public final class GetRequestBuilder {
     private final String mUrl;

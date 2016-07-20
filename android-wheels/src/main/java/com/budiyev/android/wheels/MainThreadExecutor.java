@@ -35,6 +35,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Executor for the main (UI) thread tasks in {@link ThreadUtils}
+ */
 class MainThreadExecutor extends AbstractExecutorService {
     private final Handler mHandler;
     private final Thread mThread;

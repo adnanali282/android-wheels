@@ -26,7 +26,7 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 
 /**
- * HTTP request callback.
+ * Request callback for {@link HttpRequest}
  */
 public interface RequestCallback {
     void onResult(@NonNull RequestResult requestResult);

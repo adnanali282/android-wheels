@@ -67,7 +67,8 @@ public class ImageLoader<T> {
         BACKGROUND_THREAD_FACTORY = new ThreadFactory() {
             @Override
             public Thread newThread(@NonNull Runnable runnable) {
-                Thread thread = new Thread(runnable, Constants.Threads.BACKGROUND_THREAD_NAME);
+                Thread thread =
+                        new Thread(runnable, ImageLoaderConstants.Threads.BACKGROUND_THREAD_NAME);
                 if (thread.isDaemon()) {
                     thread.setDaemon(false);
                 }
@@ -365,9 +366,9 @@ public class ImageLoader<T> {
     protected static InputStream getDataStreamFromUri(@NonNull Context context,
             @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
-        if (Constants.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
-                Constants.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
-                Constants.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
+        if (ImageLoaderConstants.Uri.SCHEME_HTTP.equalsIgnoreCase(scheme) ||
+                ImageLoaderConstants.Uri.SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+                ImageLoaderConstants.Uri.SCHEME_FTP.equalsIgnoreCase(scheme)) {
             return new URL(uri.toString()).openConnection().getInputStream();
         } else {
             return context.getContentResolver().openInputStream(uri);
@@ -399,7 +400,8 @@ public class ImageLoader<T> {
     @NonNull
     public static String generateMD5(byte[] data) {
         try {
-            MessageDigest messageDigest = MessageDigest.getInstance(Constants.MessageDigest.MD5);
+            MessageDigest messageDigest =
+                    MessageDigest.getInstance(ImageLoaderConstants.MessageDigest.MD5);
             messageDigest.update(data);
             BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
             return bigInteger.toString(Character.MAX_RADIX);
@@ -417,7 +419,7 @@ public class ImageLoader<T> {
     public static int getMaxMemoryFraction(float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
             throw new IllegalArgumentException(
-                    Constants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+                    ImageLoaderConstants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         return Math.round(fraction * Runtime.getRuntime().maxMemory());
     }
@@ -432,7 +434,7 @@ public class ImageLoader<T> {
     public static long getFreeStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+                    ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         StatFs stat = new StatFs(path.getAbsolutePath());
         double bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
@@ -449,7 +451,7 @@ public class ImageLoader<T> {
     public static long getTotalStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(
-                    Constants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+                    ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
         }
         StatFs stat = new StatFs(path.getAbsolutePath());
         return Math.round(stat.getTotalBytes() * fraction);
@@ -734,7 +736,7 @@ public class ImageLoader<T> {
     @NonNull
     public static MemoryImageCache newMemoryImageCache() {
         return newMemoryImageCache(
-                getMaxMemoryFraction(Constants.MemoryImageCache.DEFAULT_FRACTION));
+                getMaxMemoryFraction(ImageLoaderConstants.MemoryImageCache.DEFAULT_FRACTION));
     }
 
     /**
@@ -770,10 +772,10 @@ public class ImageLoader<T> {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        return newStorageImageCache(directory,
-                getTotalStorageFraction(directory, Constants.StorageImageCache.DEFAULT_FRACTION),
-                Constants.StorageImageCache.DEFAULT_FORMAT,
-                Constants.StorageImageCache.DEFAULT_QUALITY);
+        return newStorageImageCache(directory, getTotalStorageFraction(directory,
+                ImageLoaderConstants.StorageImageCache.DEFAULT_FRACTION),
+                ImageLoaderConstants.StorageImageCache.DEFAULT_FORMAT,
+                ImageLoaderConstants.StorageImageCache.DEFAULT_QUALITY);
     }
 
     /**
@@ -800,6 +802,6 @@ public class ImageLoader<T> {
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
-        return new File(cacheDir, Constants.StorageImageCache.DEFAULT_DIRECTORY);
+        return new File(cacheDir, ImageLoaderConstants.StorageImageCache.DEFAULT_DIRECTORY);
     }
 }

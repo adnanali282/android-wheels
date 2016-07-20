@@ -98,7 +98,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Show snackbar
+     * Build snackbar
      *
      * @param view            View
      * @param messageText     Message text
@@ -107,8 +107,10 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
+     * @return {@link Snackbar}
      */
-    public static void show(@NonNull View view, @NonNull CharSequence messageText,
+    @NonNull
+    public static Snackbar build(@NonNull View view, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Snackbar snackbar = Snackbar.make(view, messageText, duration);
@@ -124,7 +126,29 @@ public final class SnackbarUtils {
         if (action != null && actionText != null) {
             snackbar.setAction(actionText, wrapAction(action, snackbar));
         }
+        return snackbar;
+    }
+
+    /**
+     * Show snackbar
+     *
+     * @param view            View
+     * @param messageText     Message text
+     * @param backgroundColor Background color
+     * @param textColor       Text color
+     * @param duration        Duration
+     * @param action          Action
+     * @param actionText      Action text
+     * @return {@link Snackbar}
+     */
+    @NonNull
+    public static Snackbar show(@NonNull View view, @NonNull CharSequence messageText,
+            @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
+            @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
+        Snackbar snackbar =
+                build(view, messageText, backgroundColor, textColor, duration, action, actionText);
         snackbar.show();
+        return snackbar;
     }
 
     /**
@@ -137,19 +161,21 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
+     * @return {@link Snackbar} or null
      */
-    public static void show(@NonNull Window window, @NonNull CharSequence messageText,
+    @Nullable
+    public static Snackbar show(@NonNull Window window, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         View view = window.getDecorView();
         if (view == null) {
-            return;
+            return null;
         }
         View contentView = view.findViewById(android.R.id.content);
         if (contentView != null) {
             view = findSuitableView(contentView);
         }
-        show(view, messageText, backgroundColor, textColor, duration, action, actionText);
+        return show(view, messageText, backgroundColor, textColor, duration, action, actionText);
     }
 
     /**
@@ -162,15 +188,17 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
+     * @return {@link Snackbar} or null
      */
-    public static void show(@NonNull Activity activity, @NonNull CharSequence messageText,
+    @Nullable
+    public static Snackbar show(@NonNull Activity activity, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Window window = activity.getWindow();
         if (window == null) {
-            return;
+            return null;
         }
-        show(window, messageText, backgroundColor, textColor, duration, action, actionText);
+        return show(window, messageText, backgroundColor, textColor, duration, action, actionText);
     }
 
     /**
@@ -183,14 +211,17 @@ public final class SnackbarUtils {
      * @param duration        Duration
      * @param action          Action
      * @param actionText      Action text
+     * @return {@link Snackbar} or null
      */
-    public static void show(@NonNull Fragment fragment, @NonNull CharSequence messageText,
+    @Nullable
+    public static Snackbar show(@NonNull Fragment fragment, @NonNull CharSequence messageText,
             @ColorInt int backgroundColor, @ColorInt int textColor, @Snackbar.Duration int duration,
             @Nullable SnackbarAction action, @Nullable CharSequence actionText) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
-            return;
+            return null;
         }
-        show(activity, messageText, backgroundColor, textColor, duration, action, actionText);
+        return show(activity, messageText, backgroundColor, textColor, duration, action,
+                actionText);
     }
 }

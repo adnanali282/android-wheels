@@ -30,6 +30,9 @@ import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Thread factory for background threads in {@link ThreadUtils}
+ */
 class BackgroundThreadFactory implements ThreadFactory {
     private final AtomicInteger mThreadCounter = new AtomicInteger(1);
     private volatile String mThreadNamePrefix;

@@ -27,7 +27,7 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 
 /**
- * Action button click
+ * {@link Snackbar} action button click
  */
 public interface SnackbarAction {
     void onClick(View button, Snackbar snackbar);

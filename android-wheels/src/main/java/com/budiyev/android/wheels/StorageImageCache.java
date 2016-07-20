@@ -28,7 +28,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * Storage image cache
+ * Storage image cache for {@link ImageLoader}
  */
 public interface StorageImageCache {
     void put(@NonNull String key, @NonNull Bitmap value);

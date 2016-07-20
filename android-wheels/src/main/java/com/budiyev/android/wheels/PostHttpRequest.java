@@ -45,7 +45,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * Instance class for POST requests
+ * Instance class for POST HTTP requests
  */
 public final class PostHttpRequest extends HttpRequest {
     private static final String UTF_8 = "UTF-8";

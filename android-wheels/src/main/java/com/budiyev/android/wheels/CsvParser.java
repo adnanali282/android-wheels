@@ -35,6 +35,9 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Parser of CSV format
+ */
 public final class CsvParser {
     private static final String QUOTE_STRING = "\"";
     private static final String DOUBLE_QUOTE_STRING = "\"\"";

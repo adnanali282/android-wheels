@@ -39,6 +39,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Default implementation of {@link StorageImageCache} for {@link ImageLoader}
+ */
 class StorageImageCacheImplementation implements StorageImageCache {
     private final AtomicBoolean mCacheSizeFitting = new AtomicBoolean();
     private final AtomicBoolean mCacheSizeFitRequested = new AtomicBoolean();

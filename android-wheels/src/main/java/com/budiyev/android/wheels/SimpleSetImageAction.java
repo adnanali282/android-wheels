@@ -27,6 +27,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
+/**
+ * Simple set image action for {@link ImageLoader}
+ */
 class SimpleSetImageAction implements Runnable {
     private final ImageView mImageView;
     private final BitmapDrawable mBitmapDrawable;

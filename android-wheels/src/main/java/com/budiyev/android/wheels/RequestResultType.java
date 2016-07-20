@@ -24,7 +24,7 @@
 package com.budiyev.android.wheels;
 
 /**
- * Type of HTTP request result in {@link RequestResult}
+ * Type of {@link HttpRequest} result in {@link RequestResult}
  */
 public enum RequestResultType {
     STRING,

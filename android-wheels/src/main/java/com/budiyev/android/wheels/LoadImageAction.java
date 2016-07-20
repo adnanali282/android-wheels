@@ -34,6 +34,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Load image action for {@link ImageLoader}
+ *
+ * @param <T>
+ */
 class LoadImageAction<T> {
     private final ImageSource<T> mImageSource;
     private final WeakReference<ImageView> mImageViewReference;
