@@ -243,9 +243,8 @@ public final class CommonUtils {
      * @param path Path
      * @return Number of free bytes
      */
-    public static long getFreeBytes(@NonNull File path) {
-        StatFs statFs = new StatFs(path.getAbsolutePath());
-        return statFs.getBlockSizeLong() * statFs.getBlockCountLong();
+    public static long getAvailableBytes(@NonNull File path) {
+        return new StatFs(path.getAbsolutePath()).getAvailableBytes();
     }
 
     /**
