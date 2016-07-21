@@ -40,11 +40,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 final class ExecutorUtils {
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
+    private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
     private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(1);
     private static volatile String sBackgroundThreadNamePrefix = "AndroidWheels-background-thread-";
     private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
+    private static volatile ThreadPoolExecutor sHttpRequestExecutor;
     private static volatile ThreadPoolExecutor sImageLoaderExecutor;
     private static volatile MainThreadExecutor sMainThreadExecutor;
 
@@ -69,6 +71,14 @@ final class ExecutorUtils {
      */
     public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
         sBackgroundThreadNamePrefix = Objects.requireNonNull(prefix);
+    }
+
+    public static int getHttpRequestMaximumThreadPoolSize() {
+        return getHttpRequestExecutor().getMaximumPoolSize();
+    }
+
+    public static void setHttpRequestMaximumThreadPoolSize(int size) {
+        getHttpRequestExecutor().setMaximumPoolSize(size);
     }
 
     @NonNull
@@ -98,6 +108,39 @@ final class ExecutorUtils {
                 }
             } finally {
                 THREAD_UTILS_EXECUTOR_LOCK.unlock();
+            }
+        }
+        return executor;
+    }
+
+    @NonNull
+    public static ThreadPoolExecutor getHttpRequestExecutor() {
+        ThreadPoolExecutor executor = sHttpRequestExecutor;
+        if (executor == null) {
+            HTTP_REQUEST_EXECUTOR_LOCK.lock();
+            try {
+                executor = sHttpRequestExecutor;
+                if (executor == null) {
+                    executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
+                            120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+                            new ThreadFactory() {
+                                @Override
+                                public Thread newThread(@NonNull Runnable runnable) {
+                                    Thread thread = new Thread(runnable,
+                                            sBackgroundThreadNamePrefix + getNextThreadNumber());
+                                    if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                                        thread.setPriority(Thread.NORM_PRIORITY);
+                                    }
+                                    if (thread.isDaemon()) {
+                                        thread.setDaemon(false);
+                                    }
+                                    return thread;
+                                }
+                            });
+                    sHttpRequestExecutor = executor;
+                }
+            } finally {
+                HTTP_REQUEST_EXECUTOR_LOCK.unlock();
             }
         }
         return executor;

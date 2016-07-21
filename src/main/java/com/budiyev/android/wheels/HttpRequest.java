@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
+ * <p/>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p>
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * <p/>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,6 +36,9 @@ import java.util.concurrent.Future;
  * HTTP request
  */
 public abstract class HttpRequest implements Runnable {
+    HttpRequest() {
+    }
+
     @NonNull
     protected static String buildParamsUrlString(@NonNull Iterable<QueryParameter> params,
             @NonNull String charset) throws UnsupportedEncodingException {
@@ -59,6 +62,20 @@ public abstract class HttpRequest implements Runnable {
     }
 
     /**
+     * Maximum number of requests that can be executed simultaneously
+     */
+    public static int getParallelRequestsLimit() {
+        return ExecutorUtils.getHttpRequestMaximumThreadPoolSize();
+    }
+
+    /**
+     * Maximum number of requests that can be executed simultaneously
+     */
+    public static void setParallelRequestsLimit(int limit) {
+        ExecutorUtils.setHttpRequestMaximumThreadPoolSize(limit);
+    }
+
+    /**
      * Create new GET HTTP request
      *
      * @param url              URL-address
@@ -69,7 +86,7 @@ public abstract class HttpRequest implements Runnable {
      * @return New GET request instance
      */
     @NonNull
-    public static GetHttpRequest newGetRequest(@NonNull String url,
+    public static HttpRequest newGetRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
             @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
@@ -99,7 +116,7 @@ public abstract class HttpRequest implements Runnable {
      * @return New GET request instance
      */
     @NonNull
-    public static PostHttpRequest newPostRequest(@NonNull String url,
+    public static HttpRequest newPostRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
             @Nullable Iterable<PostParameter> postParameters, @NonNull RequestResultType resultType,
