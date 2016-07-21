@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,32 +25,37 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Parser of CSV format
  */
 public final class CsvParser {
-    private static final String QUOTE_STRING = "\"";
-    private static final String DOUBLE_QUOTE_STRING = "\"\"";
-    private static final char QUOTE = '\"';
-    private static final char LF = '\n';
+    static final String QUOTE_STRING = "\"";
+    static final String DOUBLE_QUOTE_STRING = "\"\"";
+    static final char QUOTE = '\"';
+    static final char LF = '\n';
 
     private CsvParser() {
     }
 
+    /**
+     * Encode {@link Table} in CSV format
+     *
+     * @param table        Table
+     * @param outputStream Stream to save result
+     * @param separator    Column separator
+     * @param encoding     Text encoding
+     * @return true if success, false otherwise
+     */
     public static boolean encode(Table table, OutputStream outputStream, char separator,
-            String charset) {
+            String encoding) {
         try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, charset))) {
+                new OutputStreamWriter(outputStream, encoding))) {
             for (Row row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
@@ -69,6 +74,13 @@ public final class CsvParser {
         }
     }
 
+    /**
+     * Encode {@link Table} in CSV format
+     *
+     * @param table     Table
+     * @param separator Column separator
+     * @return Encoded string
+     */
     @NonNull
     public static String encode(Table table, char separator) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -87,223 +99,28 @@ public final class CsvParser {
         return stringBuilder.toString();
     }
 
+    /**
+     * Parse CSV into {@link Table}
+     *
+     * @param inputStream Source data stream
+     * @param separator   Column separator
+     * @param encoding    Text encoding
+     * @return Table
+     */
     @NonNull
-    public static Table parse(InputStream inputStream, char separator, String charset) {
-        return new Table(inputStream, separator, charset);
+    public static Table parse(InputStream inputStream, char separator, String encoding) {
+        return new Table(inputStream, separator, encoding);
     }
 
+    /**
+     * Parse CSV into {@link Table}
+     *
+     * @param string    Source string
+     * @param separator Column separator
+     * @return Table
+     */
     @NonNull
     public static Table parse(String string, char separator) {
         return new Table(string, separator);
-    }
-
-    public static class Table implements Iterable<Row> {
-        private final ArrayList<Row> mRows = new ArrayList<>();
-
-        private Table(String table, char separator) {
-            StringBuilder row = new StringBuilder();
-            boolean inQuotes = false;
-            int length = table.length();
-            for (int i = 0; i < length; i++) {
-                char current = table.charAt(i);
-                if (current == LF && !inQuotes) {
-                    mRows.add(new Row(row.toString(), separator));
-                    row.delete(0, row.length());
-                } else {
-                    if (current == QUOTE) {
-                        inQuotes = !inQuotes;
-                    }
-                    row.append(current);
-                }
-            }
-            mRows.add(new Row(row.toString(), separator));
-        }
-
-        private Table(InputStream table, char separator, String charset) {
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(table, charset))) {
-                StringBuilder row = new StringBuilder();
-                boolean inQuotes = false;
-                for (; ; ) {
-                    int c = reader.read();
-                    char current;
-                    if (c == -1) {
-                        break;
-                    } else {
-                        current = (char) c;
-                    }
-                    if (current == LF && !inQuotes) {
-                        mRows.add(new Row(row.toString(), separator));
-                        row.delete(0, row.length());
-                    } else {
-                        if (current == QUOTE) {
-                            inQuotes = !inQuotes;
-                        }
-                        row.append(current);
-                    }
-                }
-                mRows.add(new Row(row.toString(), separator));
-            } catch (IOException ignored) {
-            }
-        }
-
-        public Table() {
-        }
-
-        public Table(int rows, int columns) {
-            for (int i = 0; i < rows; i++) {
-                add(new Row(columns));
-            }
-        }
-
-        @Override
-        public Iterator<Row> iterator() {
-            return mRows.iterator();
-        }
-
-        /**
-         * Row
-         *
-         * @param index Row position in table
-         * @return Row at index
-         */
-        public Row row(int index) {
-            return mRows.get(index);
-        }
-
-        /**
-         * Add empty row
-         */
-        public void add() {
-            mRows.add(new Row());
-        }
-
-        /**
-         * Add row to table
-         *
-         * @param row Row
-         */
-        public void add(Row row) {
-            mRows.add(row);
-        }
-
-        /**
-         * Remove row from table
-         *
-         * @param index Row index
-         * @return Removed row
-         */
-        public Row remove(int index) {
-            return mRows.remove(index);
-        }
-
-        /**
-         * Size of table
-         *
-         * @return Rows count
-         */
-        public int size() {
-            return mRows.size();
-        }
-    }
-
-    public static class Row implements Iterable<String> {
-        private final ArrayList<String> mCells = new ArrayList<>();
-
-        private Row(String row, char separator) {
-            StringBuilder cell = new StringBuilder();
-            boolean inQuotes = false;
-            boolean inElementQuotes = false;
-            int length = row.length();
-            for (int i = 0; i < length; i++) {
-                char current = row.charAt(i);
-                if (current == separator && !inElementQuotes) {
-                    mCells.add(cell.toString());
-                    cell.delete(0, cell.length());
-                } else if (current == QUOTE) {
-                    int n = i + 1;
-                    int p = i - 1;
-                    if ((p > -1 && row.charAt(p) == separator || i == 0) && !inElementQuotes) {
-                        inElementQuotes = true;
-                    } else if ((n < length && row.charAt(n) == separator || n == length) &&
-                            inElementQuotes) {
-                        inElementQuotes = false;
-                    } else if (n < length && row.charAt(n) == QUOTE) {
-                        cell.append(current);
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else {
-                    cell.append(current);
-                }
-            }
-            mCells.add(cell.toString());
-        }
-
-        public Row() {
-        }
-
-        public Row(int cells) {
-            for (int i = 0; i < cells; i++) {
-                add();
-            }
-        }
-
-        public Row(Object... cells) {
-            for (Object cell : cells) {
-                add(String.valueOf(cell));
-            }
-        }
-
-        @Override
-        public Iterator<String> iterator() {
-            return mCells.iterator();
-        }
-
-        /**
-         * Column
-         *
-         * @param index Column position in row
-         * @return Column at index
-         */
-        public String cell(int index) {
-            return mCells.get(index);
-        }
-
-        /**
-         * Add cell with null value to row
-         */
-        public void add() {
-            mCells.add(null);
-        }
-
-        /**
-         * Add cell to row
-         *
-         * @param cell Cell value
-         */
-        public void add(String cell) {
-            mCells.add(cell);
-        }
-
-        /**
-         * Remove cell from row
-         *
-         * @param index Column index
-         * @return Removed cell value
-         */
-        public String remove(int index) {
-            return mCells.remove(index);
-        }
-
-        /**
-         * Size of row
-         *
-         * @return Columns count
-         */
-        public int size() {
-            return mCells.size();
-        }
     }
 }
