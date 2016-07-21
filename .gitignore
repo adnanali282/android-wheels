@@ -3,8 +3,5 @@
 .DS_Store
 /.idea
 /local.properties
-/gradlew
-/gradlew.bat
-/gradle
 /build
 /captures
