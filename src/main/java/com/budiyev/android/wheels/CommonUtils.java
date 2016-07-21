@@ -200,15 +200,7 @@ public final class CommonUtils {
      * @param activity Activity
      */
     public static void hideSoftwareInput(@NonNull Activity activity) {
-        Window window = activity.getWindow();
-        if (window == null) {
-            return;
-        }
-        View view = window.getDecorView();
-        if (view == null) {
-            return;
-        }
-        hideSoftwareInput(activity, view);
+        hideSoftwareInput(activity, activity);
     }
 
     /**
