@@ -169,6 +169,32 @@ public final class CommonUtils {
     }
 
     /**
+     * Hide software input in window associated with specified {@link View}
+     *
+     * @param view View
+     */
+    public static void hideSoftwareInput(@NonNull View view) {
+        hideSoftwareInput(view.getContext(), view);
+    }
+
+    /**
+     * Hide software input in window associated with specified {@link Activity}
+     *
+     * @param activity Activity
+     */
+    public static void hideSoftwareInput(@NonNull Context context, @NonNull Activity activity) {
+        Window window = activity.getWindow();
+        if (window == null) {
+            return;
+        }
+        View view = window.getDecorView();
+        if (view == null) {
+            return;
+        }
+        hideSoftwareInput(context, view);
+    }
+
+    /**
      * Hide software input in window associated with specified {@link Activity}
      *
      * @param activity Activity
@@ -182,9 +208,7 @@ public final class CommonUtils {
         if (view == null) {
             return;
         }
-        InputMethodManager manager =
-                (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        hideSoftwareInput(activity, view);
     }
 
     /**
