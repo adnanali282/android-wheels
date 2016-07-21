@@ -3,7 +3,7 @@ Some useful tools for Android
 
 ### Contents
 * ThreadUtils - Tools for asynchronous tasks in Android
-* ImageLoader - universal image loading tool
+* ImageLoader - Universal image loading tool
 * HttpRequest - API for HTTP requests based on HttpURLConnection
 * CircularProgressBar - Progress bar view, supports indeterminate mode
 * FadeDrawable - Drawable with fade effect
