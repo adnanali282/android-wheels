@@ -78,7 +78,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link View}
+     * Make snackbar for specified {@link View}
      *
      * @param view     View
      * @param text     Message text
@@ -92,7 +92,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link View}
+     * Make snackbar for specified {@link View}
      *
      * @param view     View
      * @param textId   Message text resource identifier
@@ -106,7 +106,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Window}
+     * Make snackbar for specified {@link Window}
      *
      * @param window   Window
      * @param text     Message text
@@ -128,7 +128,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Window}
+     * Make snackbar for specified {@link Window}
      *
      * @param window   Window
      * @param textId   Message text resource identifier
@@ -150,7 +150,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Activity}
+     * Make snackbar for specified activity
      *
      * @param activity Activity
      * @param text     Message text
@@ -168,7 +168,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Activity}
+     * Make snackbar for specified activity
      *
      * @param activity Activity
      * @param textId   Message text resource identifier
@@ -186,7 +186,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Fragment}
+     * Make snackbar for specified fragment
      *
      * @param fragment Fragment
      * @param text     Message text
@@ -204,7 +204,7 @@ public final class SnackbarUtils {
     }
 
     /**
-     * Make Snackbar for specified {@link Fragment}
+     * Make snackbar for specified fragment
      *
      * @param fragment Fragment
      * @param textId   Message text resource identifier
