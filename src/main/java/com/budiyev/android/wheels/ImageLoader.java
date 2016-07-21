@@ -80,8 +80,7 @@ public class ImageLoader<T> {
     }
 
     /**
-     * ImageLoader with default memory and storage caches. ImageLoader
-     * is usable without bitmapLoader (loading new bitmaps is not available in this case).
+     * ImageLoader with default memory and storage caches.
      *
      * @param context      Context
      * @param bitmapLoader Bitmap loader

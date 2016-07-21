@@ -67,7 +67,7 @@ public final class CommonUtils {
     /**
      * Get size of specified {@link View}
      *
-     * @return Real size if view already displayed, measured size otherwise
+     * @return Real size if view has already been displayed, measured size otherwise
      */
     @NonNull
     public static SizeCompat getViewSize(@NonNull View view) {

@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Collection;
 import java.util.concurrent.Future;
 
 /**
@@ -38,7 +37,7 @@ import java.util.concurrent.Future;
  */
 public abstract class HttpRequest implements Runnable {
     @NonNull
-    protected static String buildParamsUrlString(@NonNull Collection<QueryParameter> params,
+    protected static String buildParamsUrlString(@NonNull Iterable<QueryParameter> params,
             @NonNull String charset) throws UnsupportedEncodingException {
         StringBuilder dataBuilder = new StringBuilder();
         boolean firstEntry = true;
@@ -71,8 +70,8 @@ public abstract class HttpRequest implements Runnable {
      */
     @NonNull
     public static GetHttpRequest newGetRequest(@NonNull String url,
-            @Nullable Collection<HeaderParameter> headerParameters,
-            @Nullable Collection<QueryParameter> queryParameters,
+            @Nullable Iterable<HeaderParameter> headerParameters,
+            @Nullable Iterable<QueryParameter> queryParameters,
             @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
         return new GetHttpRequest(url, headerParameters, queryParameters, resultType, callback);
     }
@@ -101,10 +100,10 @@ public abstract class HttpRequest implements Runnable {
      */
     @NonNull
     public static PostHttpRequest newPostRequest(@NonNull String url,
-            @Nullable Collection<HeaderParameter> headerParameters,
-            @Nullable Collection<QueryParameter> queryParameters,
-            @Nullable Collection<PostParameter> postParameters,
-            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
+            @Nullable Iterable<HeaderParameter> headerParameters,
+            @Nullable Iterable<QueryParameter> queryParameters,
+            @Nullable Iterable<PostParameter> postParameters, @NonNull RequestResultType resultType,
+            @Nullable RequestCallback callback) {
         return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
                 resultType, callback);
     }
@@ -201,12 +200,28 @@ public abstract class HttpRequest implements Runnable {
         return postParameter;
     }
 
+    /**
+     * Execute request asynchronously
+     *
+     * @return a {@link Future} representing pending completion of the request
+     */
     @NonNull
     public abstract Future<RequestResult> execute();
 
+    /**
+     * If request has no result pauses execution until result will be available,
+     * returns result immediately otherwise
+     *
+     * @return Request result
+     */
     @NonNull
     public abstract RequestResult getResult();
 
+    /**
+     * Execute request on current thread and return result
+     *
+     * @return Request result
+     */
     @NonNull
     public abstract RequestResult executeAndGetResult();
 }

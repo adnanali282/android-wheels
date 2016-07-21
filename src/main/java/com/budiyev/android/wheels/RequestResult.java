@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,6 +47,11 @@ public enum RequestResult {
     private InputStream mDataStream;
     private HttpURLConnection mConnection;
 
+    /**
+     * {@link HttpURLConnection} instance of this request
+     *
+     * @return HttpUrlConnection or null if result is NONE
+     */
     @Nullable
     public HttpURLConnection getConnection() {
         return mConnection;
@@ -56,6 +61,9 @@ public enum RequestResult {
         mConnection = connection;
     }
 
+    /**
+     * HTTP response code
+     */
     public int getHttpCode() {
         return mHttpCode;
     }
@@ -64,6 +72,10 @@ public enum RequestResult {
         mHttpCode = httpCode;
     }
 
+    /**
+     * Exception, if result is one of ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
+     * ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED
+     */
     @Nullable
     public Exception getException() {
         return mException;
@@ -74,9 +86,9 @@ public enum RequestResult {
     }
 
     /**
-     * Request result (ResultType.STRING)
+     * Result of the request (ResultType.STRING)
      *
-     * @return Request result string
+     * @return Result string
      */
     @Nullable
     public String getDataString() {
@@ -88,9 +100,9 @@ public enum RequestResult {
     }
 
     /**
-     * Request result (ResultType.STREAM)
+     * Result of the request (ResultType.STREAM)
      *
-     * @return Request result data stream
+     * @return Result data stream
      */
     @Nullable
     public InputStream getDataStream() {

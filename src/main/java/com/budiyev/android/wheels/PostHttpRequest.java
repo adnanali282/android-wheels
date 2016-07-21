@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p/>
+ * <p>
  * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,7 +40,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -68,9 +67,9 @@ public final class PostHttpRequest extends HttpRequest {
     private static final int BUFFER_SIZE = 4096;
     private final Object mResultLock = new Object();
     private final String mUrl;
-    private final Collection<HeaderParameter> mHeaderParameters;
-    private final Collection<QueryParameter> mQueryParameters;
-    private final Collection<PostParameter> mPostParameters;
+    private final Iterable<HeaderParameter> mHeaderParameters;
+    private final Iterable<QueryParameter> mQueryParameters;
+    private final Iterable<PostParameter> mPostParameters;
     private final RequestCallback mCallback;
     private final RequestResultType mResultType;
     private volatile RequestResult mResult;
@@ -84,7 +83,7 @@ public final class PostHttpRequest extends HttpRequest {
             try {
                 String boundary = "===" + System.currentTimeMillis() + "===";
                 String request = mUrl;
-                if (mQueryParameters != null && mQueryParameters.size() > 0) {
+                if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
                     request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                 }
                 URL url = new URL(request);
@@ -96,7 +95,7 @@ public final class PostHttpRequest extends HttpRequest {
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                 connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
-                if (mHeaderParameters != null) {
+                if (!CommonUtils.isNullOrEmpty(mHeaderParameters)) {
                     for (HeaderParameter parameter : mHeaderParameters) {
                         if (parameter.key != null && parameter.value != null) {
                             connection.setRequestProperty(parameter.key, parameter.value);
@@ -107,7 +106,7 @@ public final class PostHttpRequest extends HttpRequest {
                 OutputStream outputStream = connection.getOutputStream();
                 try (PrintWriter writer = new PrintWriter(
                         new OutputStreamWriter(outputStream, UTF_8), false)) {
-                    if (mPostParameters != null && mPostParameters.size() > 0) {
+                    if (!CommonUtils.isNullOrEmpty(mPostParameters)) {
                         for (PostParameter postParameter : mPostParameters) {
                             if (postParameter.key != null) {
                                 if (postParameter.value != null) {
@@ -233,10 +232,10 @@ public final class PostHttpRequest extends HttpRequest {
         }
     };
 
-    PostHttpRequest(@NonNull String url, @Nullable Collection<HeaderParameter> headerParameters,
-            @Nullable Collection<QueryParameter> queryParameters,
-            @Nullable Collection<PostParameter> postParameters,
-            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
+    PostHttpRequest(@NonNull String url, @Nullable Iterable<HeaderParameter> headerParameters,
+            @Nullable Iterable<QueryParameter> queryParameters,
+            @Nullable Iterable<PostParameter> postParameters, @NonNull RequestResultType resultType,
+            @Nullable RequestCallback callback) {
         mUrl = url;
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
