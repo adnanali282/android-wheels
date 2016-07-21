@@ -8,6 +8,7 @@ Some useful tools for Android
 * CircularProgressBar - Progress bar view, supports indeterminate mode
 * FadeDrawable - Drawable with fade effect
 * CsvParser - Parser/encoder of CSV format
+* SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * CommonUtils - Common useful tools
 * and more...
 
