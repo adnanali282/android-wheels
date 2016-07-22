@@ -37,8 +37,8 @@ public final class GetRequestBuilder {
     private final String mUrl;
     private List<HeaderParameter> mHeaderParameters;
     private List<QueryParameter> mQueryParameters;
+    private List<RequestCallback> mCallbacks;
     private RequestResultType mResultType = RequestResultType.STRING;
-    private RequestCallback mCallback;
 
     GetRequestBuilder(@NonNull String url) {
         mUrl = Objects.requireNonNull(url);
@@ -51,7 +51,8 @@ public final class GetRequestBuilder {
         if (mHeaderParameters == null) {
             mHeaderParameters = new ArrayList<>();
         }
-        mHeaderParameters.add(HttpRequest.newHeaderParameter(key, value));
+        mHeaderParameters.add(HttpRequest
+                .newHeaderParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
         return this;
     }
 
@@ -62,23 +63,26 @@ public final class GetRequestBuilder {
         if (mQueryParameters == null) {
             mQueryParameters = new ArrayList<>();
         }
-        mQueryParameters.add(HttpRequest.newQueryParameter(key, value));
+        mQueryParameters.add(HttpRequest.newQueryParameter(Objects.requireNonNull(key), value));
         return this;
     }
 
     /**
-     * Request result type
+     * Add request callback
+     */
+    public GetRequestBuilder addCallback(@NonNull RequestCallback callback) {
+        if (mCallbacks == null) {
+            mCallbacks = new ArrayList<>();
+        }
+        mCallbacks.add(Objects.requireNonNull(callback));
+        return this;
+    }
+
+    /**
+     * Set request result type
      */
     public GetRequestBuilder setResultType(@NonNull RequestResultType resultType) {
-        mResultType = resultType;
-        return this;
-    }
-
-    /**
-     * Request callback
-     */
-    public GetRequestBuilder setCallback(@Nullable RequestCallback callback) {
-        mCallback = callback;
+        mResultType = Objects.requireNonNull(resultType);
         return this;
     }
 
@@ -87,7 +91,7 @@ public final class GetRequestBuilder {
      */
     @NonNull
     public HttpRequest build() {
-        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mResultType,
-                mCallback);
+        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks,
+                mResultType);
     }
 }

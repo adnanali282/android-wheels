@@ -35,7 +35,7 @@ import java.util.concurrent.Future;
 /**
  * HTTP request
  */
-public abstract class HttpRequest implements Runnable {
+public abstract class HttpRequest {
     HttpRequest() {
     }
 
@@ -83,16 +83,15 @@ public abstract class HttpRequest implements Runnable {
      * @param url              URL-address
      * @param headerParameters Request header parameters
      * @param queryParameters  Query string parameters
+     * @param callbacks        Response callbacks
      * @param resultType       Type of request result in callback
-     * @param callback         Response callback
-     * @return New GET request instance
      */
     @NonNull
     public static HttpRequest newGetRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @NonNull RequestResultType resultType, @Nullable RequestCallback callback) {
-        return new GetHttpRequest(url, headerParameters, queryParameters, resultType, callback);
+            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
+        return new GetHttpRequest(url, headerParameters, queryParameters, callbacks, resultType);
     }
 
     /**
@@ -113,18 +112,17 @@ public abstract class HttpRequest implements Runnable {
      * @param headerParameters Request header parameters
      * @param queryParameters  Query string parameters
      * @param postParameters   Request body multipart/form-data parameters
+     * @param callbacks        Response callbacks
      * @param resultType       Type of request result in callback
-     * @param callback         Response callback
-     * @return New GET request instance
      */
     @NonNull
     public static HttpRequest newPostRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<PostParameter> postParameters, @NonNull RequestResultType resultType,
-            @Nullable RequestCallback callback) {
+            @Nullable Iterable<PostParameter> postParameters,
+            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
         return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
-                resultType, callback);
+                callbacks, resultType);
     }
 
     /**
@@ -220,28 +218,18 @@ public abstract class HttpRequest implements Runnable {
     }
 
     /**
-     * Execute request asynchronously
+     * Submit request for execution asynchronously
      *
      * @return a {@link Future} representing pending completion of the request
      */
     @NonNull
-    public abstract Future<RequestResult> execute();
+    public abstract Future<RequestResult> submit();
 
     /**
-     * If request has no result pauses execution until result will be available,
-     * returns result immediately otherwise
-     *
-     * @return Request result
-     * @throws IllegalStateException if request hasn't been executed
-     */
-    @NonNull
-    public abstract RequestResult getResult();
-
-    /**
-     * Execute request on current thread and return result
+     * Execute request
      *
      * @return Request result
      */
     @NonNull
-    public abstract RequestResult executeAndGetResult();
+    public abstract RequestResult execute();
 }

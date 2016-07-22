@@ -40,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -65,15 +66,12 @@ final class PostHttpRequest extends HttpRequest {
     private static final String BINARY = "binary";
     private static final int CONNECTION_TIMEOUT = 10000;
     private static final int BUFFER_SIZE = 4096;
-    private final Object mResultLock = new Object();
     private final String mUrl;
     private final Iterable<HeaderParameter> mHeaderParameters;
     private final Iterable<QueryParameter> mQueryParameters;
     private final Iterable<PostParameter> mPostParameters;
-    private final RequestCallback mCallback;
+    private final Iterable<RequestCallback> mCallbacks;
     private final RequestResultType mResultType;
-    private volatile RequestResult mResult;
-    private volatile boolean mHasBeenExecuted;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
         @Override
@@ -95,7 +93,7 @@ final class PostHttpRequest extends HttpRequest {
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                 connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
-                if (!CommonUtils.isNullOrEmpty(mHeaderParameters)) {
+                if (mHeaderParameters != null) {
                     for (HeaderParameter parameter : mHeaderParameters) {
                         if (parameter.key != null && parameter.value != null) {
                             connection.setRequestProperty(parameter.key, parameter.value);
@@ -106,7 +104,7 @@ final class PostHttpRequest extends HttpRequest {
                 OutputStream outputStream = connection.getOutputStream();
                 try (PrintWriter writer = new PrintWriter(
                         new OutputStreamWriter(outputStream, UTF_8), false)) {
-                    if (!CommonUtils.isNullOrEmpty(mPostParameters)) {
+                    if (mPostParameters != null) {
                         for (PostParameter postParameter : mPostParameters) {
                             if (postParameter.key != null) {
                                 if (postParameter.value != null) {
@@ -221,12 +219,12 @@ final class PostHttpRequest extends HttpRequest {
                 result.setConnection(connection);
                 result.setException(e);
             }
-            if (mCallback != null) {
-                mCallback.onResult(result);
-            }
-            mResult = result;
-            synchronized (mResultLock) {
-                mResultLock.notifyAll();
+            if (mCallbacks != null) {
+                for (RequestCallback callback : mCallbacks) {
+                    if (callback != null) {
+                        callback.onResult(result);
+                    }
+                }
             }
             return result;
         }
@@ -234,64 +232,27 @@ final class PostHttpRequest extends HttpRequest {
 
     PostHttpRequest(@NonNull String url, @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<PostParameter> postParameters, @NonNull RequestResultType resultType,
-            @Nullable RequestCallback callback) {
-        mUrl = url;
+            @Nullable Iterable<PostParameter> postParameters,
+            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
+        mUrl = Objects.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
         mPostParameters = postParameters;
-        mCallback = callback;
-        mResultType = resultType;
-    }
-
-    private void prepareExecution() {
-        mResult = null;
-        mHasBeenExecuted = true;
+        mCallbacks = callbacks;
+        mResultType = Objects.requireNonNull(resultType);
     }
 
     @NonNull
     @Override
-    public Future<RequestResult> execute() {
-        prepareExecution();
+    public Future<RequestResult> submit() {
         return ExecutorUtils.getHttpRequestExecutor().submit(mRequestAction);
     }
 
     @NonNull
     @Override
-    public RequestResult getResult() {
-        if (!mHasBeenExecuted) {
-            throw new IllegalStateException();
-        }
-        RequestResult result;
-        for (; ; ) {
-            result = mResult;
-            if (result != null) {
-                break;
-            }
-            try {
-                mResultLock.wait();
-            } catch (InterruptedException ignored) {
-            }
-        }
-        return result;
-    }
-
-    @NonNull
-    @Override
-    public RequestResult executeAndGetResult() {
-        prepareExecution();
+    public RequestResult execute() {
         try {
             return mRequestAction.call();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void run() {
-        prepareExecution();
-        try {
-            mRequestAction.call();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

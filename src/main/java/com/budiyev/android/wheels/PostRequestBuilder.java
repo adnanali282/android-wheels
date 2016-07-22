@@ -40,8 +40,8 @@ public final class PostRequestBuilder {
     private List<HeaderParameter> mHeaderParameters;
     private List<QueryParameter> mQueryParameters;
     private List<PostParameter> mPostParameters;
+    private List<RequestCallback> mCallbacks;
     private RequestResultType mResultType = RequestResultType.STRING;
-    private RequestCallback mCallback;
 
     PostRequestBuilder(@NonNull String url) {
         mUrl = Objects.requireNonNull(url);
@@ -54,7 +54,8 @@ public final class PostRequestBuilder {
         if (mHeaderParameters == null) {
             mHeaderParameters = new ArrayList<>();
         }
-        mHeaderParameters.add(HttpRequest.newHeaderParameter(key, value));
+        mHeaderParameters.add(HttpRequest
+                .newHeaderParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
         return this;
     }
 
@@ -65,7 +66,7 @@ public final class PostRequestBuilder {
         if (mQueryParameters == null) {
             mQueryParameters = new ArrayList<>();
         }
-        mQueryParameters.add(HttpRequest.newQueryParameter(key, value));
+        mQueryParameters.add(HttpRequest.newQueryParameter(Objects.requireNonNull(key), value));
         return this;
     }
 
@@ -76,7 +77,8 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest.newPostParameter(key, value));
+        mPostParameters.add(HttpRequest
+                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
         return this;
     }
 
@@ -87,7 +89,8 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest.newPostParameter(key, file));
+        mPostParameters.add(HttpRequest
+                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(file)));
         return this;
     }
 
@@ -100,23 +103,28 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest.newPostParameter(key, inputStream, fileName, contentType));
+        mPostParameters.add(HttpRequest
+                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(inputStream),
+                        Objects.requireNonNull(fileName), Objects.requireNonNull(contentType)));
         return this;
     }
 
     /**
-     * Request result type
+     * Add request callback
+     */
+    public PostRequestBuilder addCallback(@NonNull RequestCallback callback) {
+        if (mCallbacks == null) {
+            mCallbacks = new ArrayList<>();
+        }
+        mCallbacks.add(Objects.requireNonNull(callback));
+        return this;
+    }
+
+    /**
+     * Set request result type
      */
     public PostRequestBuilder setResultType(@NonNull RequestResultType resultType) {
-        mResultType = resultType;
-        return this;
-    }
-
-    /**
-     * Request callback
-     */
-    public PostRequestBuilder setCallback(@Nullable RequestCallback callback) {
-        mCallback = callback;
+        mResultType = Objects.requireNonNull(resultType);
         return this;
     }
 
@@ -126,6 +134,6 @@ public final class PostRequestBuilder {
     @NonNull
     public HttpRequest build() {
         return new PostHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mPostParameters,
-                mResultType, mCallback);
+                mCallbacks, mResultType);
     }
 }
