@@ -63,6 +63,7 @@ public abstract class HttpRequest implements Runnable {
 
     /**
      * Maximum number of requests that can be executed simultaneously
+     * by calling {@link HttpRequest#execute()}
      */
     public static int getParallelRequestsLimit() {
         return ExecutorUtils.getHttpRequestMaximumThreadPoolSize();
@@ -70,6 +71,7 @@ public abstract class HttpRequest implements Runnable {
 
     /**
      * Maximum number of requests that can be executed simultaneously
+     * by calling {@link HttpRequest#execute()}
      */
     public static void setParallelRequestsLimit(int limit) {
         ExecutorUtils.setHttpRequestMaximumThreadPoolSize(limit);
