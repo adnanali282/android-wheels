@@ -218,7 +218,7 @@ public abstract class HttpRequest {
     }
 
     /**
-     * Submit request for execution asynchronously
+     * Submit request for asynchronous execution
      *
      * @return a {@link Future} representing pending completion of the request
      */
@@ -226,7 +226,7 @@ public abstract class HttpRequest {
     public abstract Future<RequestResult> submit();
 
     /**
-     * Execute request
+     * Execute request immediately
      *
      * @return Request result
      */
