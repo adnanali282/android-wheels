@@ -232,6 +232,7 @@ public abstract class HttpRequest implements Runnable {
      * returns result immediately otherwise
      *
      * @return Request result
+     * @throws IllegalStateException if request hasn't been executed
      */
     @NonNull
     public abstract RequestResult getResult();

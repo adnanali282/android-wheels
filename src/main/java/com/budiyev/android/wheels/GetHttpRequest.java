@@ -53,13 +53,13 @@ final class GetHttpRequest extends HttpRequest {
     private final RequestCallback mCallback;
     private final RequestResultType mResultType;
     private volatile RequestResult mResult;
+    private volatile boolean mHasBeenExecuted;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
         @Override
         public RequestResult call() throws Exception {
             HttpURLConnection connection = null;
             RequestResult result = RequestResult.NONE;
-            mResult = null;
             try {
                 String request = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
@@ -155,15 +155,24 @@ final class GetHttpRequest extends HttpRequest {
         mResultType = resultType;
     }
 
+    private void prepareExecution() {
+        mResult = null;
+        mHasBeenExecuted = true;
+    }
+
     @NonNull
     @Override
     public Future<RequestResult> execute() {
+        prepareExecution();
         return ExecutorUtils.getHttpRequestExecutor().submit(mRequestAction);
     }
 
     @NonNull
     @Override
     public RequestResult getResult() {
+        if (!mHasBeenExecuted) {
+            throw new IllegalStateException();
+        }
         RequestResult result;
         for (; ; ) {
             result = mResult;
@@ -181,6 +190,7 @@ final class GetHttpRequest extends HttpRequest {
     @NonNull
     @Override
     public RequestResult executeAndGetResult() {
+        prepareExecution();
         try {
             return mRequestAction.call();
         } catch (Exception e) {
@@ -190,6 +200,7 @@ final class GetHttpRequest extends HttpRequest {
 
     @Override
     public void run() {
+        prepareExecution();
         try {
             mRequestAction.call();
         } catch (Exception e) {
