@@ -26,6 +26,8 @@ package com.budiyev.android.wheels;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.StatFs;
 import android.support.annotation.NonNull;
@@ -75,15 +77,59 @@ public final class CommonUtils {
         int height = view.getHeight();
         if (width == 0 || height == 0) {
             DisplayMetrics metrics = view.getResources().getDisplayMetrics();
-            int wSpec =
+            int widthSpec =
                     View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.EXACTLY);
-            int hSpec = View.MeasureSpec
+            int heightSpec = View.MeasureSpec
                     .makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.EXACTLY);
-            view.measure(wSpec, hSpec);
+            view.measure(widthSpec, heightSpec);
             width = view.getMeasuredWidth();
             height = view.getMeasuredHeight();
         }
         return new SizeCompat(width, height);
+    }
+
+    /**
+     * Get {@link Bitmap} representation of specified {@link View}
+     *
+     * @param view View
+     * @return Bitmap
+     */
+    @NonNull
+    private Bitmap getViewBitmap(@NonNull View view) {
+        int width = view.getWidth();
+        int height = view.getHeight();
+        if (width == 0 || height == 0) {
+            SizeCompat viewSize = getViewSize(view);
+            width = viewSize.getWidth();
+            height = viewSize.getHeight();
+            view.layout(0, 0, width, height);
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    /**
+     * Convert DP to PX
+     *
+     * @param displayMetrics Display metrics
+     * @param dp             Value in DP
+     * @return Value in PX
+     */
+    public static int dpToPx(@NonNull DisplayMetrics displayMetrics, float dp) {
+        return Math.round(dp * displayMetrics.density);
+    }
+
+    /**
+     * Convert DP to PX
+     *
+     * @param context Context
+     * @param dp      Value in DP
+     * @return Value in PX
+     */
+    public static int dpToPx(@NonNull Context context, float dp) {
+        return dpToPx(context.getResources().getDisplayMetrics(), dp);
     }
 
     /**
@@ -112,28 +158,6 @@ public final class CommonUtils {
      */
     public static boolean isNullOrWhiteSpace(@Nullable String string) {
         return string == null || string.trim().length() == 0;
-    }
-
-    /**
-     * Convert DP to PX
-     *
-     * @param displayMetrics Display metrics
-     * @param dp             Value in DP
-     * @return Value in PX
-     */
-    public static int dpToPx(@NonNull DisplayMetrics displayMetrics, float dp) {
-        return Math.round(dp * displayMetrics.density);
-    }
-
-    /**
-     * Convert DP to PX
-     *
-     * @param context Context
-     * @param dp      Value in DP
-     * @return Value in PX
-     */
-    public static int dpToPx(@NonNull Context context, float dp) {
-        return dpToPx(context.getResources().getDisplayMetrics(), dp);
     }
 
     /**
