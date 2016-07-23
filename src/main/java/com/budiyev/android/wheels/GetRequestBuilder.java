@@ -38,10 +38,10 @@ public final class GetRequestBuilder {
     private List<HeaderParameter> mHeaderParameters;
     private List<QueryParameter> mQueryParameters;
     private List<RequestCallback> mCallbacks;
-    private RequestResultType mResultType = RequestResultType.STRING;
+    private int mDataType = RequestResult.STRING;
 
     GetRequestBuilder(@NonNull String url) {
-        mUrl = Objects.requireNonNull(url);
+        mUrl = url;
     }
 
     /**
@@ -51,8 +51,7 @@ public final class GetRequestBuilder {
         if (mHeaderParameters == null) {
             mHeaderParameters = new ArrayList<>();
         }
-        mHeaderParameters.add(HttpRequest
-                .newHeaderParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
+        mHeaderParameters.add(HttpRequest.newHeaderParameter(key, value));
         return this;
     }
 
@@ -63,7 +62,7 @@ public final class GetRequestBuilder {
         if (mQueryParameters == null) {
             mQueryParameters = new ArrayList<>();
         }
-        mQueryParameters.add(HttpRequest.newQueryParameter(Objects.requireNonNull(key), value));
+        mQueryParameters.add(HttpRequest.newQueryParameter(key, value));
         return this;
     }
 
@@ -79,10 +78,11 @@ public final class GetRequestBuilder {
     }
 
     /**
-     * Set request result type
+     * Set request result data type
+     * Default - {@link RequestResult#STRING}
      */
-    public GetRequestBuilder setResultType(@NonNull RequestResultType resultType) {
-        mResultType = Objects.requireNonNull(resultType);
+    public GetRequestBuilder setDataType(@RequestResult.DataType int dataType) {
+        mDataType = dataType;
         return this;
     }
 
@@ -91,7 +91,6 @@ public final class GetRequestBuilder {
      */
     @NonNull
     public HttpRequest build() {
-        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks,
-                mResultType);
+        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks, mDataType);
     }
 }

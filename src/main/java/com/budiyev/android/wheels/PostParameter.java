@@ -23,20 +23,48 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+
 import java.io.File;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * Parameter of HTTP request (multipart/form-data)
  */
 public final class PostParameter {
-    String key;
-    String value;
-    File file;
-    InputStream stream;
-    String fileName;
-    String contentType;
+    final String key;
+    final String value;
+    final File file;
+    final InputStream stream;
+    final String fileName;
+    final String contentType;
 
-    PostParameter() {
+    PostParameter(@NonNull String key, @NonNull String value) {
+        this.key = Objects.requireNonNull(key);
+        this.value = Objects.requireNonNull(value);
+        this.file = null;
+        this.stream = null;
+        this.fileName = null;
+        this.contentType = null;
+    }
+
+    PostParameter(@NonNull String key, @NonNull File file) {
+        this.key = Objects.requireNonNull(key);
+        this.value = null;
+        this.file = Objects.requireNonNull(file);
+        this.stream = null;
+        this.fileName = null;
+        this.contentType = null;
+    }
+
+    PostParameter(@NonNull String key, @NonNull InputStream stream, @NonNull String fileName,
+            @NonNull String contentType) {
+        this.key = Objects.requireNonNull(key);
+        this.value = null;
+        this.file = null;
+        this.stream = Objects.requireNonNull(stream);
+        this.fileName = Objects.requireNonNull(fileName);
+        this.contentType = Objects.requireNonNull(contentType);
     }
 }

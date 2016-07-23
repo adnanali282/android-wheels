@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 
 import java.io.InputStream;
@@ -31,21 +32,110 @@ import java.net.HttpURLConnection;
 /**
  * Request result of {@link HttpRequest}
  */
-public enum RequestResult {
-    NONE,
-    SUCCESS,
-    ERROR_HTTP,
-    ERROR_MALFORMED_URL,
-    ERROR_UNSUPPORTED_ENCODING,
-    ERROR_PROTOCOL,
-    ERROR_IO,
-    ERROR_UNEXPECTED;
+public final class RequestResult {
+    public static final int NONE = -1;
+    public static final int SUCCESS = 1;
+    public static final int ERROR_HTTP = 2;
+    public static final int ERROR_MALFORMED_URL = 3;
+    public static final int ERROR_UNSUPPORTED_ENCODING = 4;
+    public static final int ERROR_PROTOCOL = 5;
+    public static final int ERROR_IO = 6;
+    public static final int ERROR_UNEXPECTED = 7;
 
-    private int mHttpCode = -1;
-    private Exception mException;
-    private String mDataString;
-    private InputStream mDataStream;
+    /**
+     * Type of this result
+     */
+    @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
+            ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED})
+    public @interface ResultType {
+    }
+
+    public static final int STRING = 1;
+    public static final int STREAM = 2;
+
+    /**
+     * Result data type
+     * {@link RequestResult#NONE} - don't receive any data / no data received
+     * {@link RequestResult#STRING} - {@link String} via {@link RequestResult#getString()}
+     * {@link RequestResult#STREAM} - {@link InputStream} via {@link RequestResult#getStream()}
+     */
+    @IntDef({NONE, STRING, STREAM})
+    public @interface DataType {
+    }
+
+    private int mResultType = NONE;
+    private int mDataType = NONE;
+    private int mHttpCode = NONE;
+    private String mString;
+    private InputStream mStream;
     private HttpURLConnection mConnection;
+    private Exception mException;
+
+    RequestResult() {
+    }
+
+    /**
+     * Result type
+     */
+    @ResultType
+    public int getResultType() {
+        return mResultType;
+    }
+
+    void setResultType(@ResultType int resultType) {
+        mResultType = resultType;
+    }
+
+    /**
+     * Result data type
+     */
+    @DataType
+    public int getDataType() {
+        return mDataType;
+    }
+
+    void setDataType(@DataType int dataType) {
+        mDataType = dataType;
+    }
+
+    /**
+     * HTTP response code, can be {@link RequestResult#NONE}
+     */
+    public int getHttpCode() {
+        return mHttpCode;
+    }
+
+    void setHttpCode(int httpCode) {
+        mHttpCode = httpCode;
+    }
+
+    /**
+     * Result of the request ({@link RequestResult#STRING})
+     *
+     * @return Result string
+     */
+    @Nullable
+    public String getString() {
+        return mString;
+    }
+
+    void setString(@Nullable String dataString) {
+        mString = dataString;
+    }
+
+    /**
+     * Result of the request ({@link RequestResult#STREAM})
+     *
+     * @return Result data stream
+     */
+    @Nullable
+    public InputStream getStream() {
+        return mStream;
+    }
+
+    void setStream(@Nullable InputStream dataStream) {
+        mStream = dataStream;
+    }
 
     /**
      * {@link HttpURLConnection} instance of this request
@@ -62,19 +152,10 @@ public enum RequestResult {
     }
 
     /**
-     * HTTP response code
-     */
-    public int getHttpCode() {
-        return mHttpCode;
-    }
-
-    void setHttpCode(int httpCode) {
-        mHttpCode = httpCode;
-    }
-
-    /**
-     * Exception, if result is one of ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
-     * ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED
+     * Exception, if {@link RequestResult#getResultType()} is one of
+     * {@link RequestResult#ERROR_MALFORMED_URL}, {@link RequestResult#ERROR_UNSUPPORTED_ENCODING},
+     * {@link RequestResult#ERROR_PROTOCOL}, {@link RequestResult#ERROR_IO},
+     * {@link RequestResult#ERROR_UNEXPECTED}
      */
     @Nullable
     public Exception getException() {
@@ -83,33 +164,5 @@ public enum RequestResult {
 
     void setException(@Nullable Exception exception) {
         mException = exception;
-    }
-
-    /**
-     * Result of the request (ResultType.STRING)
-     *
-     * @return Result string
-     */
-    @Nullable
-    public String getDataString() {
-        return mDataString;
-    }
-
-    void setDataString(@Nullable String dataString) {
-        mDataString = dataString;
-    }
-
-    /**
-     * Result of the request (ResultType.STREAM)
-     *
-     * @return Result data stream
-     */
-    @Nullable
-    public InputStream getDataStream() {
-        return mDataStream;
-    }
-
-    void setDataStream(@Nullable InputStream dataStream) {
-        mDataStream = dataStream;
     }
 }

@@ -23,13 +23,19 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+
+import java.util.Objects;
+
 /**
  * Query header request parameter
  */
 public final class HeaderParameter {
-    String key;
-    String value;
+    final String key;
+    final String value;
 
-    HeaderParameter() {
+    HeaderParameter(@NonNull String key, @NonNull String value) {
+        this.key = Objects.requireNonNull(key);
+        this.value = Objects.requireNonNull(value);
     }
 }

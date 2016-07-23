@@ -84,14 +84,14 @@ public abstract class HttpRequest {
      * @param headerParameters Request header parameters
      * @param queryParameters  Query string parameters
      * @param callbacks        Response callbacks
-     * @param resultType       Type of request result in callback
+     * @param dataType         Type of request result data
      */
     @NonNull
     public static HttpRequest newGetRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
-        return new GetHttpRequest(url, headerParameters, queryParameters, callbacks, resultType);
+            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
+        return new GetHttpRequest(url, headerParameters, queryParameters, callbacks, dataType);
     }
 
     /**
@@ -113,16 +113,16 @@ public abstract class HttpRequest {
      * @param queryParameters  Query string parameters
      * @param postParameters   Request body multipart/form-data parameters
      * @param callbacks        Response callbacks
-     * @param resultType       Type of request result in callback
+     * @param dataType         Type of request result data
      */
     @NonNull
     public static HttpRequest newPostRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
             @Nullable Iterable<PostParameter> postParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
+            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
         return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
-                callbacks, resultType);
+                callbacks, dataType);
     }
 
     /**
@@ -144,11 +144,8 @@ public abstract class HttpRequest {
      * @return New request header parameter
      */
     @NonNull
-    public static HeaderParameter newHeaderParameter(@NonNull String key, @Nullable String value) {
-        HeaderParameter headerParameter = new HeaderParameter();
-        headerParameter.key = key;
-        headerParameter.value = value;
-        return headerParameter;
+    public static HeaderParameter newHeaderParameter(@NonNull String key, @NonNull String value) {
+        return new HeaderParameter(key, value);
     }
 
     /**
@@ -160,10 +157,7 @@ public abstract class HttpRequest {
      */
     @NonNull
     public static QueryParameter newQueryParameter(@NonNull String key, @Nullable String value) {
-        QueryParameter queryParameter = new QueryParameter();
-        queryParameter.key = key;
-        queryParameter.value = value;
-        return queryParameter;
+        return new QueryParameter(key, value);
     }
 
     /**
@@ -175,10 +169,7 @@ public abstract class HttpRequest {
      */
     @NonNull
     public static PostParameter newPostParameter(@NonNull String key, @NonNull String value) {
-        PostParameter postParameter = new PostParameter();
-        postParameter.key = key;
-        postParameter.value = value;
-        return postParameter;
+        return new PostParameter(key, value);
     }
 
     /**
@@ -190,10 +181,7 @@ public abstract class HttpRequest {
      */
     @NonNull
     public static PostParameter newPostParameter(@NonNull String key, @NonNull File file) {
-        PostParameter postParameter = new PostParameter();
-        postParameter.key = key;
-        postParameter.file = file;
-        return postParameter;
+        return new PostParameter(key, file);
     }
 
     /**
@@ -209,12 +197,7 @@ public abstract class HttpRequest {
     public static PostParameter newPostParameter(@NonNull String key,
             @NonNull InputStream inputStream, @NonNull String fileName,
             @NonNull String contentType) {
-        PostParameter postParameter = new PostParameter();
-        postParameter.key = key;
-        postParameter.stream = inputStream;
-        postParameter.fileName = fileName;
-        postParameter.contentType = contentType;
-        return postParameter;
+        return new PostParameter(key, inputStream, fileName, contentType);
     }
 
     /**

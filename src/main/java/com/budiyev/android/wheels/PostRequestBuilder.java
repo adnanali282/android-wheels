@@ -41,10 +41,10 @@ public final class PostRequestBuilder {
     private List<QueryParameter> mQueryParameters;
     private List<PostParameter> mPostParameters;
     private List<RequestCallback> mCallbacks;
-    private RequestResultType mResultType = RequestResultType.STRING;
+    private int mDataType = RequestResult.STRING;
 
     PostRequestBuilder(@NonNull String url) {
-        mUrl = Objects.requireNonNull(url);
+        mUrl = url;
     }
 
     /**
@@ -54,8 +54,7 @@ public final class PostRequestBuilder {
         if (mHeaderParameters == null) {
             mHeaderParameters = new ArrayList<>();
         }
-        mHeaderParameters.add(HttpRequest
-                .newHeaderParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
+        mHeaderParameters.add(HttpRequest.newHeaderParameter(key, value));
         return this;
     }
 
@@ -66,7 +65,7 @@ public final class PostRequestBuilder {
         if (mQueryParameters == null) {
             mQueryParameters = new ArrayList<>();
         }
-        mQueryParameters.add(HttpRequest.newQueryParameter(Objects.requireNonNull(key), value));
+        mQueryParameters.add(HttpRequest.newQueryParameter(key, value));
         return this;
     }
 
@@ -77,8 +76,7 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest
-                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(value)));
+        mPostParameters.add(HttpRequest.newPostParameter(key, value));
         return this;
     }
 
@@ -89,8 +87,7 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest
-                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(file)));
+        mPostParameters.add(HttpRequest.newPostParameter(key, file));
         return this;
     }
 
@@ -103,9 +100,7 @@ public final class PostRequestBuilder {
         if (mPostParameters == null) {
             mPostParameters = new ArrayList<>();
         }
-        mPostParameters.add(HttpRequest
-                .newPostParameter(Objects.requireNonNull(key), Objects.requireNonNull(inputStream),
-                        Objects.requireNonNull(fileName), Objects.requireNonNull(contentType)));
+        mPostParameters.add(HttpRequest.newPostParameter(key, inputStream, fileName, contentType));
         return this;
     }
 
@@ -121,10 +116,11 @@ public final class PostRequestBuilder {
     }
 
     /**
-     * Set request result type
+     * Set request result data type
+     * Default - {@link RequestResult#STRING}
      */
-    public PostRequestBuilder setResultType(@NonNull RequestResultType resultType) {
-        mResultType = Objects.requireNonNull(resultType);
+    public PostRequestBuilder setDataType(@RequestResult.DataType int dataType) {
+        mDataType = dataType;
         return this;
     }
 
@@ -134,6 +130,6 @@ public final class PostRequestBuilder {
     @NonNull
     public HttpRequest build() {
         return new PostHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mPostParameters,
-                mCallbacks, mResultType);
+                mCallbacks, mDataType);
     }
 }

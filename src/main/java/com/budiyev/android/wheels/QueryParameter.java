@@ -23,13 +23,20 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import java.util.Objects;
+
 /**
  * Query string request parameter
  */
 public final class QueryParameter {
-    String key;
-    String value;
+    final String key;
+    final String value;
 
-    QueryParameter() {
+    QueryParameter(@NonNull String key, @Nullable String value) {
+        this.key = Objects.requireNonNull(key);
+        this.value = value;
     }
 }

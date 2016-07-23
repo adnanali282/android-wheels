@@ -51,13 +51,13 @@ final class GetHttpRequest extends HttpRequest {
     private final Iterable<HeaderParameter> mHeaderParameters;
     private final Iterable<QueryParameter> mQueryParameters;
     private final Iterable<RequestCallback> mCallbacks;
-    private final RequestResultType mResultType;
+    private final int mDataType;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
         @Override
         public RequestResult call() throws Exception {
             HttpURLConnection connection = null;
-            RequestResult result = RequestResult.NONE;
+            RequestResult result = new RequestResult();
             try {
                 String request = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
@@ -77,15 +77,12 @@ final class GetHttpRequest extends HttpRequest {
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    switch (mResultType) {
-                        case STREAM: {
-                            result = RequestResult.SUCCESS;
-                            result.setConnection(connection);
-                            result.setHttpCode(responseCode);
-                            result.setDataStream(connection.getInputStream());
+                    switch (mDataType) {
+                        case RequestResult.NONE: {
+                            connection.disconnect();
                             break;
                         }
-                        case STRING: {
+                        case RequestResult.STRING: {
                             try (BufferedReader bufferedReader = new BufferedReader(
                                     new InputStreamReader(connection.getInputStream()))) {
                                 StringBuilder responseBuilder = new StringBuilder();
@@ -98,37 +95,46 @@ final class GetHttpRequest extends HttpRequest {
                                         break;
                                     }
                                 }
-                                result = RequestResult.SUCCESS;
+                                result.setResultType(RequestResult.SUCCESS);
+                                result.setDataType(RequestResult.STRING);
                                 result.setConnection(connection);
                                 result.setHttpCode(responseCode);
-                                result.setDataString(responseBuilder.toString());
+                                result.setString(responseBuilder.toString());
                             }
+                            break;
+                        }
+                        case RequestResult.STREAM: {
+                            result.setResultType(RequestResult.SUCCESS);
+                            result.setDataType(RequestResult.STREAM);
+                            result.setConnection(connection);
+                            result.setHttpCode(responseCode);
+                            result.setStream(connection.getInputStream());
                             break;
                         }
                     }
                 } else {
-                    result = RequestResult.ERROR_HTTP;
+                    result.setResultType(RequestResult.ERROR_HTTP);
                     result.setConnection(connection);
                     result.setHttpCode(responseCode);
                 }
             } catch (MalformedURLException e) {
-                result = RequestResult.ERROR_MALFORMED_URL;
+                result.setResultType(RequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (UnsupportedEncodingException e) {
-                result = RequestResult.ERROR_UNSUPPORTED_ENCODING;
+                result.setResultType(RequestResult.ERROR_UNSUPPORTED_ENCODING);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (ProtocolException e) {
-                result = RequestResult.ERROR_PROTOCOL;
+                result.setResultType(RequestResult.ERROR_PROTOCOL);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (IOException e) {
-                result = RequestResult.ERROR_IO;
+                result.setResultType(RequestResult.ERROR_IO);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (Exception e) {
-                result = RequestResult.ERROR_UNEXPECTED;
+                result.setResultType(RequestResult.ERROR_UNEXPECTED);
                 result.setConnection(connection);
                 result.setException(e);
             }
@@ -145,12 +151,12 @@ final class GetHttpRequest extends HttpRequest {
 
     GetHttpRequest(@NonNull String url, @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @NonNull RequestResultType resultType) {
+            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
         mUrl = Objects.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
         mCallbacks = callbacks;
-        mResultType = Objects.requireNonNull(resultType);
+        mDataType = dataType;
     }
 
     @NonNull
