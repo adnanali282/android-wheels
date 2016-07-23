@@ -80,12 +80,11 @@ final class PostHttpRequest extends HttpRequest {
             RequestResult result = new RequestResult();
             try {
                 String boundary = "===" + System.currentTimeMillis() + "===";
-                String request = mUrl;
+                String query = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
-                    request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
+                    query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                 }
-                URL url = new URL(request);
-                connection = (HttpURLConnection) url.openConnection();
+                connection = openHttpUrlConnection(new URL(query));
                 connection.setUseCaches(false);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);

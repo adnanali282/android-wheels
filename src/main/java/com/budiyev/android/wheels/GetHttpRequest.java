@@ -59,12 +59,11 @@ final class GetHttpRequest extends HttpRequest {
             HttpURLConnection connection = null;
             RequestResult result = new RequestResult();
             try {
-                String request = mUrl;
+                String query = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
-                    request += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
+                    query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                 }
-                URL url = new URL(request);
-                connection = (HttpURLConnection) url.openConnection();
+                connection = openHttpUrlConnection(new URL(query));
                 connection.setRequestMethod(GET);
                 connection.setRequestProperty(ACCEPT_CHARSET, UTF_8);
                 if (mHeaderParameters != null) {
