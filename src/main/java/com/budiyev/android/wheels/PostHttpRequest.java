@@ -38,7 +38,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -84,7 +83,7 @@ final class PostHttpRequest extends HttpRequest {
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
                     query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                 }
-                connection = openHttpUrlConnection(new URL(query));
+                connection = openHttpUrlConnection(query);
                 connection.setUseCaches(false);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);

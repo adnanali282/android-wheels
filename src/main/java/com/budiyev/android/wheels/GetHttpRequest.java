@@ -33,7 +33,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -63,7 +62,7 @@ final class GetHttpRequest extends HttpRequest {
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
                     query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
                 }
-                connection = openHttpUrlConnection(new URL(query));
+                connection = openHttpUrlConnection(query);
                 connection.setRequestMethod(GET);
                 connection.setRequestProperty(ACCEPT_CHARSET, UTF_8);
                 if (mHeaderParameters != null) {

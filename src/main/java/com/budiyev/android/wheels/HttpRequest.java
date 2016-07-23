@@ -67,8 +67,8 @@ public abstract class HttpRequest {
     }
 
     @NonNull
-    protected HttpURLConnection openHttpUrlConnection(@NonNull URL url) throws IOException {
-        URLConnection connection = url.openConnection();
+    protected HttpURLConnection openHttpUrlConnection(@NonNull String query) throws IOException {
+        URLConnection connection = new URL(query).openConnection();
         if (connection instanceof HttpURLConnection) {
             return (HttpURLConnection) connection;
         } else {
