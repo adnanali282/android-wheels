@@ -111,7 +111,7 @@ final class PostHttpRequest extends HttpRequest {
                                             .append(QUOTE).append(LINE_END)
                                             .append(CONTENT_TYPE_REQUEST).append(PLAIN_TEXT)
                                             .append(LINE_END).append(LINE_END)
-                                            .append(postParameter.value).append(LINE_END).flush();
+                                            .append(postParameter.value).append(LINE_END);
                                 } else if (postParameter.file != null) {
                                     String fileName = postParameter.file.getName();
                                     String contentType =
@@ -122,17 +122,15 @@ final class PostHttpRequest extends HttpRequest {
                                             .append(QUOTE).append(LINE_END)
                                             .append(CONTENT_TYPE_REQUEST).append(contentType)
                                             .append(LINE_END).append(CONTENT_TRANSFER_ENCODING)
-                                            .append(BINARY).append(LINE_END).append(LINE_END)
-                                            .flush();
+                                            .append(BINARY).append(LINE_END).append(LINE_END);
                                     try (FileInputStream fileInput = new FileInputStream(
                                             postParameter.file)) {
                                         byte[] buffer = new byte[BUFFER_SIZE];
                                         for (int read; (read = fileInput.read(buffer)) != -1; ) {
                                             outputStream.write(buffer, 0, read);
                                         }
-                                        outputStream.flush();
                                     }
-                                    writer.append(LINE_END).flush();
+                                    writer.append(LINE_END);
                                 } else if (postParameter.stream != null &&
                                         postParameter.fileName != null &&
                                         postParameter.contentType != null) {
@@ -143,28 +141,28 @@ final class PostHttpRequest extends HttpRequest {
                                             .append(LINE_END).append(CONTENT_TYPE_REQUEST)
                                             .append(postParameter.contentType).append(LINE_END)
                                             .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
-                                            .append(LINE_END).append(LINE_END).flush();
+                                            .append(LINE_END).append(LINE_END);
                                     try (InputStream inputStream = postParameter.stream) {
                                         byte[] buffer = new byte[BUFFER_SIZE];
                                         for (int read; (read = inputStream.read(buffer)) != -1; ) {
                                             outputStream.write(buffer, 0, read);
                                         }
-                                        outputStream.flush();
                                     }
-                                    writer.append(LINE_END).flush();
+                                    writer.append(LINE_END);
                                 }
                             }
                         }
                     }
-                    writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END)
-                            .flush();
+                    writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH)
+                            .append(LINE_END);
                 }
-                outputStream.flush();
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     switch (mDataType) {
                         case RequestResult.NONE: {
-                            connection.disconnect();
+                            result.setResultType(RequestResult.SUCCESS);
+                            result.setConnection(connection);
+                            result.setHttpCode(responseCode);
                             break;
                         }
                         case RequestResult.STRING: {

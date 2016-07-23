@@ -77,7 +77,9 @@ final class GetHttpRequest extends HttpRequest {
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     switch (mDataType) {
                         case RequestResult.NONE: {
-                            connection.disconnect();
+                            result.setResultType(RequestResult.SUCCESS);
+                            result.setConnection(connection);
+                            result.setHttpCode(responseCode);
                             break;
                         }
                         case RequestResult.STRING: {
