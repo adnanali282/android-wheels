@@ -46,6 +46,8 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
+import java.util.List;
 
 public final class CommonUtils {
     private static final String URI_SCHEME_HTTP = "http";
@@ -295,5 +297,62 @@ public final class CommonUtils {
      */
     public static long getTotalBytes(@NonNull File path) {
         return new StatFs(path.getAbsolutePath()).getTotalBytes();
+    }
+
+    /**
+     * Sorts the {@code list} in ascending natural order
+     * Sorting algorithm is unstable (Heapsort)
+     */
+    public static <T extends Comparable<T>> void sort(@NonNull List<T> list) {
+        sort(list, new Comparator<T>() {
+            @Override
+            public int compare(T lhs, T rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+    }
+
+    /**
+     * Sorts the {@code list} using the {@code comparator)
+     * Sorting algorithm is unstable (Heapsort)
+     */
+    public static <T> void sort(@NonNull List<T> list, @NonNull Comparator<T> comparator) {
+        int size = list.size();
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            shift(list, comparator, i, size);
+        }
+        for (int i = size - 1; i >= 1; i--) {
+            swap(list, 0, i);
+            shift(list, comparator, 0, i);
+        }
+    }
+
+    private static <T> void shift(@NonNull List<T> list, @NonNull Comparator<T> comparator, int i,
+            int j) {
+        int max;
+        int di = i * 2;
+        while ((di + 1 < j)) {
+            if (di + 1 == j - 1) {
+                max = di + 1;
+            } else if (comparator.compare(list.get(di + 1), list.get(di + 2)) > 0) {
+                max = di + 1;
+            } else {
+                max = di + 2;
+            }
+            if (comparator.compare(list.get(i), list.get(max)) < 0) {
+                swap(list, i, max);
+                i = max;
+                di = i * 2;
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Swap the elements of {@code list} at positions {@code a} and {@code b}
+     */
+    public static <T> void swap(@NonNull List<T> list, int a, int b) {
+        list.set(b, list.set(a, list.get(b)));
     }
 }
