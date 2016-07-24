@@ -44,6 +44,28 @@ public final class RequestResult {
 
     /**
      * Type of this result
+     * <p/>
+     * {@link RequestResult#NONE} - No result;
+     * <p/>
+     * {@link RequestResult#SUCCESS} - Success (response code is {@link HttpURLConnection#HTTP_OK})
+     * <p/>
+     * {@link RequestResult#ERROR_HTTP} - Response code isn't {@link HttpURLConnection#HTTP_OK},
+     * see {@link RequestResult#getHttpCode()} for details
+     * <p/>
+     * {@link RequestResult#ERROR_MALFORMED_URL} - Malformed URL,
+     * see {@link RequestResult#getException()} for details
+     * <p/>
+     * {@link RequestResult#ERROR_UNSUPPORTED_ENCODING} - Unsupported text encoding,
+     * see {@link RequestResult#getException()} for details
+     * <p/>
+     * {@link RequestResult#ERROR_PROTOCOL} - Protocol error,
+     * see {@link RequestResult#getException()} for details
+     * <p/>
+     * {@link RequestResult#ERROR_IO} - IO error,
+     * see {@link RequestResult#getException()} for details
+     * <p/>
+     * {@link RequestResult#ERROR_UNEXPECTED} - Unexpected error,
+     * see {@link RequestResult#getException()} for details
      */
     @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
             ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED})
@@ -55,8 +77,11 @@ public final class RequestResult {
 
     /**
      * Result data type
-     * {@link RequestResult#NONE} - don't receive any data / no data received
+     * <p/>
+     * {@link RequestResult#NONE} - Don't receive any data / no data received
+     * <p/>
      * {@link RequestResult#STRING} - {@link String} via {@link RequestResult#getString()}
+     * <p/>
      * {@link RequestResult#STREAM} - {@link InputStream} via {@link RequestResult#getStream()}
      */
     @IntDef({NONE, STRING, STREAM})
@@ -68,8 +93,8 @@ public final class RequestResult {
     private int mHttpCode = NONE;
     private String mString;
     private InputStream mStream;
-    private HttpURLConnection mConnection;
     private Exception mException;
+    private HttpURLConnection mConnection;
 
     RequestResult() {
     }
@@ -82,10 +107,6 @@ public final class RequestResult {
         return mResultType;
     }
 
-    void setResultType(@ResultType int resultType) {
-        mResultType = resultType;
-    }
-
     /**
      * Result data type
      */
@@ -94,19 +115,11 @@ public final class RequestResult {
         return mDataType;
     }
 
-    void setDataType(@DataType int dataType) {
-        mDataType = dataType;
-    }
-
     /**
      * HTTP response code, can be {@link RequestResult#NONE}
      */
     public int getHttpCode() {
         return mHttpCode;
-    }
-
-    void setHttpCode(int httpCode) {
-        mHttpCode = httpCode;
     }
 
     /**
@@ -119,10 +132,6 @@ public final class RequestResult {
         return mString;
     }
 
-    void setString(@Nullable String dataString) {
-        mString = dataString;
-    }
-
     /**
      * Result of the request ({@link RequestResult#STREAM})
      *
@@ -131,24 +140,6 @@ public final class RequestResult {
     @Nullable
     public InputStream getStream() {
         return mStream;
-    }
-
-    void setStream(@Nullable InputStream dataStream) {
-        mStream = dataStream;
-    }
-
-    /**
-     * {@link HttpURLConnection} instance of this request
-     *
-     * @return HttpUrlConnection or null
-     */
-    @Nullable
-    public HttpURLConnection getConnection() {
-        return mConnection;
-    }
-
-    void setConnection(@Nullable HttpURLConnection connection) {
-        mConnection = connection;
     }
 
     /**
@@ -162,7 +153,41 @@ public final class RequestResult {
         return mException;
     }
 
+    /**
+     * Releases current connection so that its resources may be either reused or closed
+     */
+    public void disconnect() {
+        HttpURLConnection connection = mConnection;
+        if (connection != null) {
+            connection.disconnect();
+        }
+    }
+
+    void setResultType(@ResultType int resultType) {
+        mResultType = resultType;
+    }
+
+    void setDataType(@DataType int dataType) {
+        mDataType = dataType;
+    }
+
+    void setHttpCode(int httpCode) {
+        mHttpCode = httpCode;
+    }
+
+    void setString(@Nullable String dataString) {
+        mString = dataString;
+    }
+
+    void setStream(@Nullable InputStream dataStream) {
+        mStream = dataStream;
+    }
+
     void setException(@Nullable Exception exception) {
         mException = exception;
+    }
+
+    void setConnection(@Nullable HttpURLConnection connection) {
+        mConnection = connection;
     }
 }
