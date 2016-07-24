@@ -41,11 +41,6 @@ import java.util.concurrent.Future;
  * Instance class for GET HTTP requests
  */
 final class GetHttpRequest extends HttpRequest {
-    private static final String UTF_8 = "UTF-8";
-    private static final String GET = "GET";
-    private static final String ACCEPT_CHARSET = "Accept-Charset";
-    private static final int CONNECTION_TIMEOUT = 10000;
-    private static final int BUFFER_SIZE = 4096;
     private final String mUrl;
     private final Iterable<HeaderParameter> mHeaderParameters;
     private final Iterable<QueryParameter> mQueryParameters;
@@ -60,11 +55,11 @@ final class GetHttpRequest extends HttpRequest {
             try {
                 String query = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
-                    query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
+                    query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
-                connection.setRequestMethod(GET);
-                connection.setRequestProperty(ACCEPT_CHARSET, UTF_8);
+                connection.setRequestMethod(REQUEST_METHOD_GET);
+                connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 if (mHeaderParameters != null) {
                     for (HeaderParameter parameter : mHeaderParameters) {
                         if (parameter.key != null && parameter.value != null) {

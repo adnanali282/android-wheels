@@ -27,13 +27,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -47,24 +47,19 @@ import java.util.concurrent.Future;
  * Instance class for POST HTTP requests
  */
 final class PostHttpRequest extends HttpRequest {
-    private static final String UTF_8 = "UTF-8";
-    private static final String POST = "POST";
     private static final String KEY_CONTENT_TYPE = "Content-Type";
-    private static final String MULTIPART_FORM_DATA = "multipart/form-data; boundary=";
-    private static final String KEY_ACCEPT_CHARSET = "Accept-Charset";
-    private static final String LINE_END = "\r\n";
     private static final String KEY_CONNECTION = "Connection";
+    private static final String MULTIPART_FORM_DATA = "multipart/form-data; boundary=";
+    private static final String LINE_END = "\r\n";
     private static final String KEEP_ALIVE = "keep-alive";
     private static final String CONTENT_DISPOSITION = "Content-Disposition: form-data; name=\"";
     private static final String QUOTE = "\"";
     private static final String DOUBLE_DASH = "--";
     private static final String CONTENT_TYPE_REQUEST = "Content-Type: ";
-    private static final String PLAIN_TEXT = "text/plain; charset=" + UTF_8;
+    private static final String PLAIN_TEXT = "text/plain; charset=" + CHARSET_UTF_8;
     private static final String FILENAME = "; filename=\"";
     private static final String CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding: ";
     private static final String BINARY = "binary";
-    private static final int CONNECTION_TIMEOUT = 10000;
-    private static final int BUFFER_SIZE = 4096;
     private final String mUrl;
     private final Iterable<HeaderParameter> mHeaderParameters;
     private final Iterable<QueryParameter> mQueryParameters;
@@ -81,14 +76,14 @@ final class PostHttpRequest extends HttpRequest {
                 String boundary = "===" + System.currentTimeMillis() + "===";
                 String query = mUrl;
                 if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
-                    query += "?" + buildParamsUrlString(mQueryParameters, UTF_8);
+                    query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
                 connection.setUseCaches(false);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
-                connection.setRequestMethod(POST);
-                connection.setRequestProperty(KEY_ACCEPT_CHARSET, UTF_8);
+                connection.setRequestMethod(REQUEST_METHOD_POST);
+                connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                 connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
                 if (mHeaderParameters != null) {
@@ -100,8 +95,8 @@ final class PostHttpRequest extends HttpRequest {
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 OutputStream outputStream = connection.getOutputStream();
-                try (PrintWriter writer = new PrintWriter(
-                        new OutputStreamWriter(outputStream, UTF_8), false)) {
+                try (BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
                     if (mPostParameters != null) {
                         for (PostParameter postParameter : mPostParameters) {
                             if (postParameter.key != null) {
@@ -122,7 +117,8 @@ final class PostHttpRequest extends HttpRequest {
                                             .append(QUOTE).append(LINE_END)
                                             .append(CONTENT_TYPE_REQUEST).append(contentType)
                                             .append(LINE_END).append(CONTENT_TRANSFER_ENCODING)
-                                            .append(BINARY).append(LINE_END).append(LINE_END);
+                                            .append(BINARY).append(LINE_END).append(LINE_END)
+                                            .flush();
                                     try (FileInputStream fileInput = new FileInputStream(
                                             postParameter.file)) {
                                         byte[] buffer = new byte[BUFFER_SIZE];
@@ -141,7 +137,7 @@ final class PostHttpRequest extends HttpRequest {
                                             .append(LINE_END).append(CONTENT_TYPE_REQUEST)
                                             .append(postParameter.contentType).append(LINE_END)
                                             .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
-                                            .append(LINE_END).append(LINE_END);
+                                            .append(LINE_END).append(LINE_END).flush();
                                     try (InputStream inputStream = postParameter.stream) {
                                         byte[] buffer = new byte[BUFFER_SIZE];
                                         for (int read; (read = inputStream.read(buffer)) != -1; ) {
@@ -153,8 +149,8 @@ final class PostHttpRequest extends HttpRequest {
                             }
                         }
                     }
-                    writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH)
-                            .append(LINE_END);
+                    writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END)
+                            .flush();
                 }
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {

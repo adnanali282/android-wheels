@@ -41,6 +41,13 @@ import java.util.concurrent.Future;
  * HTTP request
  */
 public abstract class HttpRequest {
+    protected static final String CHARSET_UTF_8 = "UTF-8";
+    protected static final String REQUEST_METHOD_GET = "GET";
+    protected static final String REQUEST_METHOD_POST = "POST";
+    protected static final String KEY_ACCEPT_CHARSET = "Accept-Charset";
+    protected static final int CONNECTION_TIMEOUT = 10000;
+    protected static final int BUFFER_SIZE = 8192;
+
     HttpRequest() {
     }
 
