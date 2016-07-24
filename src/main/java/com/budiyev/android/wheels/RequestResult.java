@@ -44,26 +44,26 @@ public final class RequestResult {
 
     /**
      * Type of this result
-     * <p/>
+     * <p>
      * {@link RequestResult#NONE} - No result;
-     * <p/>
+     * <p>
      * {@link RequestResult#SUCCESS} - Success (response code is {@link HttpURLConnection#HTTP_OK})
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_HTTP} - Response code isn't {@link HttpURLConnection#HTTP_OK},
      * see {@link RequestResult#getHttpCode()} for details
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_MALFORMED_URL} - Malformed URL,
      * see {@link RequestResult#getException()} for details
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_UNSUPPORTED_ENCODING} - Unsupported text encoding,
      * see {@link RequestResult#getException()} for details
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_PROTOCOL} - Protocol error,
      * see {@link RequestResult#getException()} for details
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_IO} - IO error,
      * see {@link RequestResult#getException()} for details
-     * <p/>
+     * <p>
      * {@link RequestResult#ERROR_UNEXPECTED} - Unexpected error,
      * see {@link RequestResult#getException()} for details
      */
@@ -77,11 +77,11 @@ public final class RequestResult {
 
     /**
      * Result data type
-     * <p/>
+     * <p>
      * {@link RequestResult#NONE} - Don't receive any data / no data received
-     * <p/>
+     * <p>
      * {@link RequestResult#STRING} - {@link String} via {@link RequestResult#getString()}
-     * <p/>
+     * <p>
      * {@link RequestResult#STREAM} - {@link InputStream} via {@link RequestResult#getStream()}
      */
     @IntDef({NONE, STRING, STREAM})
