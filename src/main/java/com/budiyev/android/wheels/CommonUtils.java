@@ -331,10 +331,8 @@ public final class CommonUtils {
             int j) {
         int max;
         int di = i * 2;
-        while ((di + 1 < j)) {
-            if (di + 1 == j - 1) {
-                max = di + 1;
-            } else if (comparator.compare(list.get(di + 1), list.get(di + 2)) > 0) {
+        while (di + 1 < j) {
+            if (di + 1 == j - 1 || comparator.compare(list.get(di + 1), list.get(di + 2)) > 0) {
                 max = di + 1;
             } else {
                 max = di + 2;
