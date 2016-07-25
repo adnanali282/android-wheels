@@ -73,10 +73,16 @@ final class ExecutorUtils {
         sBackgroundThreadNamePrefix = Objects.requireNonNull(prefix);
     }
 
+    /**
+     * Can be accessed vie {@link HttpRequest#getParallelRequestsLimit()}
+     */
     public static int getHttpRequestMaximumThreadPoolSize() {
         return getHttpRequestExecutor().getMaximumPoolSize();
     }
 
+    /**
+     * Can be accessed vie {@link HttpRequest#setParallelRequestsLimit(int)}
+     */
     public static void setHttpRequestMaximumThreadPoolSize(int size) {
         getHttpRequestExecutor().setMaximumPoolSize(size);
     }
