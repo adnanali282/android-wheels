@@ -300,7 +300,7 @@ public final class CommonUtils {
     }
 
     /**
-     * Sorts specified {@link List} in ascending natural order
+     * Sorts the {@code list} in ascending natural order
      * Sorting algorithm is unstable (Heapsort)
      */
     public static <T extends Comparable<T>> void sort(@NonNull List<T> list) {
@@ -313,7 +313,7 @@ public final class CommonUtils {
     }
 
     /**
-     * Sorts specified {@link List} using specified {@link Comparator)
+     * Sorts the {@code list} using the {@code comparator}
      * Sorting algorithm is unstable (Heapsort)
      */
     public static <T> void sort(@NonNull List<T> list, @NonNull Comparator<T> comparator) {
@@ -348,7 +348,7 @@ public final class CommonUtils {
     }
 
     /**
-     * Swap the elements of specified {@link List} at positions a and b
+     * Swap the elements of {@code list} at positions {@code a} and {@code b}
      */
     public static <T> void swap(@NonNull List<T> list, int a, int b) {
         list.set(b, list.set(a, list.get(b)));
