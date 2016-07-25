@@ -74,14 +74,14 @@ final class ExecutorUtils {
     }
 
     /**
-     * Can be accessed vie {@link HttpRequest#getParallelRequestsLimit()}
+     * Can be accessed via {@link HttpRequest#getParallelRequestsLimit()}
      */
     public static int getHttpRequestMaximumThreadPoolSize() {
         return getHttpRequestExecutor().getMaximumPoolSize();
     }
 
     /**
-     * Can be accessed vie {@link HttpRequest#setParallelRequestsLimit(int)}
+     * Can be accessed via {@link HttpRequest#setParallelRequestsLimit(int)}
      */
     public static void setHttpRequestMaximumThreadPoolSize(int size) {
         getHttpRequestExecutor().setMaximumPoolSize(size);
