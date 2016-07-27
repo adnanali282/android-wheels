@@ -48,6 +48,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public final class CommonUtils {
     private static final String URI_SCHEME_HTTP = "http";
@@ -352,5 +353,54 @@ public final class CommonUtils {
      */
     public static <T> void swap(@NonNull List<T> list, int a, int b) {
         list.set(b, list.set(a, list.get(b)));
+    }
+
+    /**
+     * Search {@code item} in {@code list}
+     * <p>
+     * The algorithm looks for an element in the list, such approach is very effective
+     * if approximate position of an element in the list is known.
+     * Starting from {@code position} it checks {@code step} of elements on the left
+     * and at the right, if {@code item} is not found among them, another {@code step} of
+     * elements on the left and at the right, and so on while element found or list ended.
+     *
+     * @param list     List of items
+     * @param item     Item to search for
+     * @param position Search start position
+     * @param step     Search step
+     * @return Position of item in list or -1
+     */
+    public static <T> int findItem(@NonNull List<T> list, @Nullable T item, int position,
+            int step) {
+        if (Objects.equals(item, list.get(position))) {
+            return position;
+        } else {
+            int listSize = list.size();
+            int currentOffset = step;
+            int previousOffset = 0;
+            for (; ; ) {
+                int start = position - currentOffset;
+                if (start < 0) {
+                    start = 0;
+                }
+                int end = position + currentOffset + 1;
+                if (end > listSize) {
+                    end = listSize;
+                }
+                for (int i = start; i < end; i++) {
+                    if (i >= position - previousOffset && i <= position + previousOffset) {
+                        continue;
+                    }
+                    if (Objects.equals(item, list.get(i))) {
+                        return i;
+                    }
+                }
+                previousOffset = currentOffset;
+                currentOffset += step;
+                if (start == 0 && end == listSize) {
+                    return -1;
+                }
+            }
+        }
     }
 }
