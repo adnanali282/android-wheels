@@ -314,6 +314,13 @@ public final class CommonUtils {
     }
 
     /**
+     * Swap the elements of {@code list} at positions {@code a} and {@code b}
+     */
+    public static <T> void swap(@NonNull List<T> list, int a, int b) {
+        list.set(b, list.set(a, list.get(b)));
+    }
+
+    /**
      * Sorts the {@code list} using the {@code comparator}
      * Sorting algorithm is unstable (Heapsort)
      */
@@ -346,13 +353,6 @@ public final class CommonUtils {
                 break;
             }
         }
-    }
-
-    /**
-     * Swap the elements of {@code list} at positions {@code a} and {@code b}
-     */
-    public static <T> void swap(@NonNull List<T> list, int a, int b) {
-        list.set(b, list.set(a, list.get(b)));
     }
 
     /**
