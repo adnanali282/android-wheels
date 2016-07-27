@@ -46,9 +46,12 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 
 public final class CommonUtils {
     private static final String URI_SCHEME_HTTP = "http";
@@ -402,5 +405,35 @@ public final class CommonUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Delete all files and directories at specified path
+     *
+     * @param path Path
+     * @return {@code true} if all files deleted successfully, {@code false} otherwise
+     */
+    public static boolean deletePath(@NonNull File path) {
+        boolean result = true;
+        Queue<File> queue = new LinkedList<>();
+        queue.add(path);
+        while (!queue.isEmpty()) {
+            File current = queue.remove();
+            if (!current.exists()) {
+                continue;
+            }
+            if (current.isDirectory()) {
+                File[] content = current.listFiles();
+                if (isNullOrEmpty(content)) {
+                    result &= current.delete();
+                } else {
+                    Collections.addAll(queue, content);
+                    queue.add(current);
+                }
+            } else {
+                result &= current.delete();
+            }
+        }
+        return result;
     }
 }
