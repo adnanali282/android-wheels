@@ -370,8 +370,7 @@ public final class CommonUtils {
      * @param step     Search step
      * @return Position of item in list or -1
      */
-    public static <T> int findItem(@NonNull List<T> list, @Nullable T item, int position,
-            int step) {
+    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position, int step) {
         if (Objects.equals(item, list.get(position))) {
             return position;
         } else {
