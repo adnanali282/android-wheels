@@ -414,6 +414,9 @@ public final class CommonUtils {
      * @return {@code true} if all files deleted successfully, {@code false} otherwise
      */
     public static boolean deletePath(@NonNull File path) {
+        if (!path.exists()) {
+            return false;
+        }
         boolean result = true;
         Queue<File> queue = new LinkedList<>();
         queue.add(path);
