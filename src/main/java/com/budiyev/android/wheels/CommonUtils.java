@@ -358,8 +358,9 @@ public final class CommonUtils {
     /**
      * Search {@code item} in {@code list}
      * <p>
-     * The algorithm looks for an element in the list, such approach is very effective
-     * if approximate position of an element in the list is known.
+     * The algorithm searches for an element in the list in both directions, starting from
+     * {@code position}. Such approach is very effective if approximate position
+     * of an element in the list is known.
      * Starting from {@code position} it checks {@code step} of elements on the left
      * and at the right, if {@code item} is not found among them, another {@code step} of
      * elements on the left and at the right, and so on while element found or list ended.
