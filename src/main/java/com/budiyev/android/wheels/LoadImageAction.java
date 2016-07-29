@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @param <T>
  */
-class LoadImageAction<T> {
+final class LoadImageAction<T> {
     private final ImageSource<T> mImageSource;
     private final WeakReference<ImageView> mImageViewReference;
     private final ImageLoader<T> mImageLoader;

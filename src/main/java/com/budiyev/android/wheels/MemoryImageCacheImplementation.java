@@ -31,7 +31,7 @@ import android.support.v4.util.LruCache;
 /**
  * Default implementation of {@link MemoryImageCache} for {@link ImageLoader}
  */
-class MemoryImageCacheImplementation implements MemoryImageCache {
+final class MemoryImageCacheImplementation implements MemoryImageCache {
     private final LruCache<String, BitmapDrawable> mCache;
 
     /**

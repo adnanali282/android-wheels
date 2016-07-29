@@ -33,7 +33,7 @@ import android.widget.ImageView;
 /**
  * Set image action for {@link ImageLoader}
  */
-class SetImageAction implements Runnable {
+final class SetImageAction implements Runnable {
     private final BitmapDrawable mBitmapDrawable;
     private final ImageLoader<?> mImageLoader;
     private final LoadImageAction<?> mLoadImageAction;

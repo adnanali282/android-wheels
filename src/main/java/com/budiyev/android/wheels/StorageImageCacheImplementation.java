@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Default implementation of {@link StorageImageCache} for {@link ImageLoader}
  */
-class StorageImageCacheImplementation implements StorageImageCache {
+final class StorageImageCacheImplementation implements StorageImageCache {
     private final AtomicBoolean mCacheSizeFitting = new AtomicBoolean();
     private final AtomicBoolean mCacheSizeFitRequested = new AtomicBoolean();
     private final File mDirectory;
