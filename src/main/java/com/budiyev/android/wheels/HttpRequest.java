@@ -37,6 +37,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * HTTP request
@@ -89,7 +90,7 @@ public abstract class HttpRequest {
      * by calling {@link HttpRequest#submit()}
      */
     public static int getParallelRequestsLimit() {
-        return AndroidWheelsExecutors.getPoolSize(AndroidWheelsExecutors.getHttpRequestExecutor());
+        return AndroidWheelsExecutors.getHttpRequestExecutor().getPoolSize();
     }
 
     /**
@@ -98,7 +99,9 @@ public abstract class HttpRequest {
      */
     public static void setParallelRequestsLimit(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
-        AndroidWheelsExecutors.setPoolSize(AndroidWheelsExecutors.getHttpRequestExecutor(), limit);
+        ThreadPoolExecutor executor = AndroidWheelsExecutors.getHttpRequestExecutor();
+        executor.setCorePoolSize(limit);
+        executor.setMaximumPoolSize(limit);
     }
 
     /**

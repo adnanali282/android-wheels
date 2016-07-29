@@ -25,7 +25,6 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
@@ -40,43 +39,25 @@ final class AndroidWheelsExecutors {
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock STORAGE_IMAGE_CACHE_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
-    private static volatile ExecutorService sThreadUtilsExecutor;
-    private static volatile ExecutorService sHttpRequestExecutor;
-    private static volatile ExecutorService sImageLoaderExecutor;
-    private static volatile ExecutorService sStorageImageCacheExecutor;
-    private static volatile ExecutorService sMainThreadExecutor;
+    private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
+    private static volatile ThreadPoolExecutor sHttpRequestExecutor;
+    private static volatile ThreadPoolExecutor sImageLoaderExecutor;
+    private static volatile ThreadPoolExecutor sStorageImageCacheExecutor;
+    private static volatile MainThreadExecutor sMainThreadExecutor;
 
     private AndroidWheelsExecutors() {
     }
 
-    public static boolean setPoolSize(@NonNull ExecutorService executor, int size) {
-        if (executor instanceof ThreadPoolExecutor) {
-            ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
-            threadPoolExecutor.setCorePoolSize(size);
-            threadPoolExecutor.setMaximumPoolSize(size);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static int getPoolSize(@NonNull ExecutorService executor) {
-        if (executor instanceof ThreadPoolExecutor) {
-            return ((ThreadPoolExecutor) executor).getPoolSize();
-        } else {
-            return -1;
-        }
-    }
-
     @NonNull
-    public static ExecutorService getThreadUtilsExecutor() {
-        ExecutorService executor = sThreadUtilsExecutor;
+    public static ThreadPoolExecutor getThreadUtilsExecutor() {
+        ThreadPoolExecutor executor = sThreadUtilsExecutor;
         if (executor == null) {
             THREAD_UTILS_EXECUTOR_LOCK.lock();
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    executor = Executors.newCachedThreadPool(new AndroidWheelsThreadFactory());
+                    executor = (ThreadPoolExecutor) Executors
+                            .newCachedThreadPool(new AndroidWheelsThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
@@ -87,14 +68,14 @@ final class AndroidWheelsExecutors {
     }
 
     @NonNull
-    public static ExecutorService getHttpRequestExecutor() {
-        ExecutorService executor = sHttpRequestExecutor;
+    public static ThreadPoolExecutor getHttpRequestExecutor() {
+        ThreadPoolExecutor executor = sHttpRequestExecutor;
         if (executor == null) {
             HTTP_REQUEST_EXECUTOR_LOCK.lock();
             try {
                 executor = sHttpRequestExecutor;
                 if (executor == null) {
-                    executor = Executors
+                    executor = (ThreadPoolExecutor) Executors
                             .newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
                                     new AndroidWheelsThreadFactory());
                     sHttpRequestExecutor = executor;
@@ -107,14 +88,14 @@ final class AndroidWheelsExecutors {
     }
 
     @NonNull
-    public static ExecutorService getImageLoaderExecutor() {
-        ExecutorService executor = sImageLoaderExecutor;
+    public static ThreadPoolExecutor getImageLoaderExecutor() {
+        ThreadPoolExecutor executor = sImageLoaderExecutor;
         if (executor == null) {
             IMAGE_LOADER_EXECUTOR_LOCK.lock();
             try {
                 executor = sImageLoaderExecutor;
                 if (executor == null) {
-                    executor = Executors.newFixedThreadPool(
+                    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(
                             Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
                             new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
                     sImageLoaderExecutor = executor;
@@ -127,14 +108,14 @@ final class AndroidWheelsExecutors {
     }
 
     @NonNull
-    public static ExecutorService getStorageImageCacheExecutor() {
-        ExecutorService executor = sStorageImageCacheExecutor;
+    public static ThreadPoolExecutor getStorageImageCacheExecutor() {
+        ThreadPoolExecutor executor = sStorageImageCacheExecutor;
         if (executor == null) {
             STORAGE_IMAGE_CACHE_EXECUTOR_LOCK.lock();
             try {
                 executor = sStorageImageCacheExecutor;
                 if (executor == null) {
-                    executor = Executors.newSingleThreadExecutor(
+                    executor = (ThreadPoolExecutor) Executors.newSingleThreadExecutor(
                             new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
                     sStorageImageCacheExecutor = executor;
                 }
@@ -146,8 +127,8 @@ final class AndroidWheelsExecutors {
     }
 
     @NonNull
-    public static ExecutorService getMainThreadExecutor() {
-        ExecutorService executor = sMainThreadExecutor;
+    public static MainThreadExecutor getMainThreadExecutor() {
+        MainThreadExecutor executor = sMainThreadExecutor;
         if (executor == null) {
             MAIN_THREAD_EXECUTOR_LOCK.lock();
             try {
