@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -88,15 +89,16 @@ public abstract class HttpRequest {
      * by calling {@link HttpRequest#submit()}
      */
     public static int getParallelRequestsLimit() {
-        return ExecutorUtils.getHttpRequestMaximumThreadPoolSize();
+        return AndroidWheelsExecutors.getHttpRequestExecutor().getMaximumPoolSize();
     }
 
     /**
      * Maximum number of requests that can be executed simultaneously
      * by calling {@link HttpRequest#submit()}
      */
-    public static void setParallelRequestsLimit(int limit) {
-        ExecutorUtils.setHttpRequestMaximumThreadPoolSize(limit);
+    public static void setParallelRequestsLimit(
+            @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
+        AndroidWheelsExecutors.getHttpRequestExecutor().setMaximumPoolSize(limit);
     }
 
     /**

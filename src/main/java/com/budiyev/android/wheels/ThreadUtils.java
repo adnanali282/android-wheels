@@ -73,7 +73,8 @@ public final class ThreadUtils {
         return new Runnable() {
             @Override
             public void run() {
-                asyncTask.executeOnExecutor(ExecutorUtils.getThreadUtilsExecutor(), parameters);
+                asyncTask.executeOnExecutor(AndroidWheelsExecutors.getThreadUtilsExecutor(),
+                        parameters);
             }
         };
     }
@@ -84,7 +85,7 @@ public final class ThreadUtils {
      * @param prefix Thread name prefix
      */
     public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
-        ExecutorUtils.setBackgroundThreadNamePrefix(prefix);
+        AndroidWheelsThreadFactory.setThreadNamePrefix(prefix);
     }
 
     /**
@@ -94,7 +95,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static String getBackgroundThreadNamePrefix() {
-        return ExecutorUtils.getBackgroundThreadNamePrefix();
+        return AndroidWheelsThreadFactory.getThreadNamePrefix();
     }
 
     /**
@@ -105,7 +106,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
-        return ExecutorUtils.getThreadUtilsExecutor().submit(task);
+        return AndroidWheelsExecutors.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -116,7 +117,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
-        return ExecutorUtils.getThreadUtilsExecutor().submit(task);
+        return AndroidWheelsExecutors.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -128,7 +129,7 @@ public final class ThreadUtils {
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
-        ExecutorUtils.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
+        AndroidWheelsExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
     }
 
     /**
@@ -138,7 +139,7 @@ public final class ThreadUtils {
      * @param delay Delay
      */
     public static void runAsync(@NonNull final Runnable task, long delay) {
-        ExecutorUtils.getMainThreadExecutor().execute(new Runnable() {
+        AndroidWheelsExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 runAsync(task);
@@ -167,7 +168,8 @@ public final class ThreadUtils {
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
-        ExecutorUtils.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
+        AndroidWheelsExecutors.getMainThreadExecutor()
+                .execute(wrapAsyncTask(task, parameters), delay);
     }
 
     /**
@@ -178,7 +180,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task) {
-        return ExecutorUtils.getMainThreadExecutor().submit(task);
+        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -189,7 +191,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task) {
-        return ExecutorUtils.getMainThreadExecutor().submit(task);
+        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -201,7 +203,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task, long delay) {
-        return ExecutorUtils.getMainThreadExecutor().submit(task, delay);
+        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task, delay);
     }
 
     /**
@@ -213,7 +215,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
-        return ExecutorUtils.getMainThreadExecutor().submit(task, delay);
+        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task, delay);
     }
 
     /**

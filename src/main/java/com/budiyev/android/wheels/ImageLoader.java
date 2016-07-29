@@ -160,7 +160,7 @@ public class ImageLoader<T> {
                             loadAction);
             ThreadUtils.runOnMainThread(
                     new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
-            loadAction.execute(ExecutorUtils.getImageLoaderExecutor());
+            loadAction.execute(AndroidWheelsExecutors.getImageLoaderExecutor());
         }
     }
 

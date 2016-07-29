@@ -32,6 +32,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -338,20 +339,32 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Maximum progress value
+     */
     public float getMaximum() {
         return mMaximum;
     }
 
+    /**
+     * Maximum progress value
+     */
     public void setMaximum(float maximum) {
         stopProgressAnimation();
         mMaximum = maximum;
         invalidate();
     }
 
+    /**
+     * Current progress value
+     */
     public float getProgress() {
         return mProgress;
     }
 
+    /**
+     * Current progress value
+     */
     public void setProgress(float progress) {
         stopProgressAnimation();
         if (mIndeterminate) {
@@ -367,10 +380,18 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Foreground stroke width
+     * Foreground stroke represents current progress value
+     */
     public float getForegroundStrokeWidth() {
         return mForegroundStrokeWidth;
     }
 
+    /**
+     * Foreground stroke width
+     * Foreground stroke represents current progress value
+     */
     public void setForegroundStrokeWidth(float foregroundStrokeWidth) {
         mForegroundStrokeWidth = foregroundStrokeWidth;
         mForegroundStrokePaint.setStrokeWidth(mForegroundStrokeWidth);
@@ -378,10 +399,16 @@ public class CircularProgressBar extends View {
         invalidate();
     }
 
+    /**
+     * Background stroke width
+     */
     public float getBackgroundStrokeWidth() {
         return mBackgroundStrokeWidth;
     }
 
+    /**
+     * Background stroke width
+     */
     public void setBackgroundStrokeWidth(float backgroundStrokeWidth) {
         mBackgroundStrokeWidth = backgroundStrokeWidth;
         mBackgroundStrokePaint.setStrokeWidth(mBackgroundStrokeWidth);
@@ -389,10 +416,16 @@ public class CircularProgressBar extends View {
         invalidate();
     }
 
+    /**
+     * Progress bar start angle
+     */
     public float getStartAngle() {
         return mStartAngle;
     }
 
+    /**
+     * Progress bar start angle
+     */
     public void setStartAngle(float startAngle) {
         stopProgressAnimation();
         mStartAngle = startAngle;
@@ -401,42 +434,73 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Foreground stroke color
+     * Foreground stroke represents current progress value
+     */
+    @ColorInt
     public int getForegroundStrokeColor() {
         return mForegroundStrokeColor;
     }
 
-    public void setForegroundStrokeColor(int foregroundStrokeColor) {
+    /**
+     * Foreground stroke color
+     * Foreground stroke represents current progress value
+     */
+    public void setForegroundStrokeColor(@ColorInt int foregroundStrokeColor) {
         mForegroundStrokeColor = foregroundStrokeColor;
         mForegroundStrokePaint.setColor(mForegroundStrokeColor);
         invalidate();
     }
 
+    /**
+     * Background stroke color
+     */
+    @ColorInt
     public int getBackgroundStrokeColor() {
         return mBackgroundStrokeColor;
     }
 
-    public void setBackgroundStrokeColor(int backgroundStrokeColor) {
+    /**
+     * Background stroke color
+     */
+    public void setBackgroundStrokeColor(@ColorInt int backgroundStrokeColor) {
         mBackgroundStrokeColor = backgroundStrokeColor;
         mBackgroundStrokePaint.setColor(mBackgroundStrokeColor);
         invalidate();
     }
 
+    /**
+     * Progress change animation duration
+     */
     public long getAnimationDuration() {
         return mAnimationDuration;
     }
 
+    /**
+     * Progress change animation duration
+     */
     public void setAnimationDuration(long animationDuration) {
         mAnimationDuration = animationDuration;
     }
 
+    /**
+     * Progress animation state
+     */
     public boolean isAnimating() {
         return mProgressAnimator.isRunning();
     }
 
+    /**
+     * Animate progress changes
+     */
     public boolean isAnimateProgress() {
         return mAnimateProgress;
     }
 
+    /**
+     * Animate progress changes
+     */
     public void setAnimateProgress(boolean animateProgress) {
         if (!animateProgress) {
             stopProgressAnimation();
@@ -444,20 +508,32 @@ public class CircularProgressBar extends View {
         mAnimateProgress = animateProgress;
     }
 
+    /**
+     * Draw background stroke
+     */
     public boolean isDrawBackgroundStroke() {
         return mDrawBackgroundStroke;
     }
 
+    /**
+     * Draw background stroke
+     */
     public void setDrawBackgroundStroke(boolean drawBackgroundStroke) {
         mDrawBackgroundStroke = drawBackgroundStroke;
         invalidateDrawRect();
         invalidate();
     }
 
+    /**
+     * Minimum angle of indeterminate animation
+     */
     public float getIndeterminateMinimumAngle() {
         return mIndeterminateMinimumAngle;
     }
 
+    /**
+     * Minimum angle of indeterminate animation
+     */
     public void setIndeterminateMinimumAngle(float indeterminateMinimumAngle) {
         stopIndeterminateAnimations();
         mIndeterminateMinimumAngle = indeterminateMinimumAngle;
@@ -468,10 +544,16 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Duration of start angle animation in indeterminate mode
+     */
     public long getIndeterminateStartAngleAnimationDuration() {
         return mIndeterminateStartAngleAnimator.getDuration();
     }
 
+    /**
+     * Duration of start angle animation in indeterminate mode
+     */
     public void setIndeterminateStartAngleAnimationDuration(
             long indeterminateStartAngleAnimationDuration) {
         stopIndeterminateAnimations();
@@ -482,10 +564,16 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Duration of sweep angle animation in indeterminate mode
+     */
     public long getIndeterminateSweepAngleAnimationDuration() {
         return mIndeterminateSweepAngleAnimator.getDuration();
     }
 
+    /**
+     * Duration of sweep angle animation in indeterminate mode
+     */
     public void setIndeterminateSweepAngleAnimationDuration(
             long indeterminateSweepAngleAnimationDuration) {
         stopIndeterminateAnimations();
@@ -496,10 +584,16 @@ public class CircularProgressBar extends View {
         }
     }
 
+    /**
+     * Indeterminate mode
+     */
     public boolean isIndeterminate() {
         return mIndeterminate;
     }
 
+    /**
+     * Indeterminate mode
+     */
     public void setIndeterminate(boolean indeterminate) {
         if (indeterminate != mIndeterminate) {
             mIndeterminate = indeterminate;

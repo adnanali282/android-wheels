@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference;
 /**
  * {@link BitmapDrawable} that holds reference to {@link LoadImageAction}
  */
-class AsyncBitmapDrawable extends BitmapDrawable {
+final class AsyncBitmapDrawable extends BitmapDrawable {
     private final WeakReference<LoadImageAction<?>> mLoadImageActionReference;
 
     public AsyncBitmapDrawable(@Nullable Resources res, @Nullable Bitmap bitmap,

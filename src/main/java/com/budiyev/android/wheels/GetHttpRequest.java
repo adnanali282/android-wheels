@@ -157,7 +157,7 @@ final class GetHttpRequest extends HttpRequest {
     @NonNull
     @Override
     public Future<RequestResult> submit() {
-        return ExecutorUtils.getHttpRequestExecutor().submit(mRequestAction);
+        return AndroidWheelsExecutors.getHttpRequestExecutor().submit(mRequestAction);
     }
 
     @NonNull

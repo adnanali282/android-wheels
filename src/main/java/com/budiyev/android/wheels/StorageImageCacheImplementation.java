@@ -117,7 +117,7 @@ class StorageImageCacheImplementation implements StorageImageCache {
 
     public void fitCacheSize() {
         if (mCacheSizeFitting.compareAndSet(false, true)) {
-            ExecutorUtils.getImageLoaderExecutor().execute(new Runnable() {
+            AndroidWheelsExecutors.getStorageImageCacheExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     doFitCacheSize();

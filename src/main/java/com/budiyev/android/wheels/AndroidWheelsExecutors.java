@@ -25,66 +25,30 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Executors for internal usage in AndroidWheels
  */
-final class ExecutorUtils {
+final class AndroidWheelsExecutors {
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
+    private static final Lock STORAGE_IMAGE_CACHE_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
-    private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(1);
-    private static volatile String sBackgroundThreadNamePrefix = "AndroidWheels-background-thread-";
+    private static final long BACKGROUND_THREAD_KEEP_ALIVE_TIME = 90;
     private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
     private static volatile ThreadPoolExecutor sHttpRequestExecutor;
     private static volatile ThreadPoolExecutor sImageLoaderExecutor;
+    private static volatile ThreadPoolExecutor sStorageImageCacheExecutor;
     private static volatile MainThreadExecutor sMainThreadExecutor;
 
-    private ExecutorUtils() {
-    }
-
-    private static int getNextThreadNumber() {
-        THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 1);
-        return THREAD_COUNTER.getAndIncrement();
-    }
-
-    /**
-     * Can be accessed via {@link ThreadUtils#getBackgroundThreadNamePrefix()}
-     */
-    @NonNull
-    public static String getBackgroundThreadNamePrefix() {
-        return sBackgroundThreadNamePrefix;
-    }
-
-    /**
-     * Can be accessed via {@link ThreadUtils#setBackgroundThreadNamePrefix(String)}
-     */
-    public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
-        sBackgroundThreadNamePrefix = Objects.requireNonNull(prefix);
-    }
-
-    /**
-     * Can be accessed via {@link HttpRequest#getParallelRequestsLimit()}
-     */
-    public static int getHttpRequestMaximumThreadPoolSize() {
-        return getHttpRequestExecutor().getMaximumPoolSize();
-    }
-
-    /**
-     * Can be accessed via {@link HttpRequest#setParallelRequestsLimit(int)}
-     */
-    public static void setHttpRequestMaximumThreadPoolSize(int size) {
-        getHttpRequestExecutor().setMaximumPoolSize(size);
+    private AndroidWheelsExecutors() {
     }
 
     @NonNull
@@ -95,21 +59,9 @@ final class ExecutorUtils {
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
-                            new SynchronousQueue<Runnable>(), new ThreadFactory() {
-                        @Override
-                        public Thread newThread(@NonNull Runnable runnable) {
-                            Thread thread = new Thread(runnable,
-                                    sBackgroundThreadNamePrefix + getNextThreadNumber());
-                            if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                                thread.setPriority(Thread.NORM_PRIORITY);
-                            }
-                            if (thread.isDaemon()) {
-                                thread.setDaemon(false);
-                            }
-                            return thread;
-                        }
-                    });
+                    executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                            BACKGROUND_THREAD_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new SynchronousQueue<Runnable>(), new AndroidWheelsThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
@@ -128,21 +80,8 @@ final class ExecutorUtils {
                 executor = sHttpRequestExecutor;
                 if (executor == null) {
                     executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
-                            120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-                            new ThreadFactory() {
-                                @Override
-                                public Thread newThread(@NonNull Runnable runnable) {
-                                    Thread thread = new Thread(runnable,
-                                            sBackgroundThreadNamePrefix + getNextThreadNumber());
-                                    if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                                        thread.setPriority(Thread.NORM_PRIORITY);
-                                    }
-                                    if (thread.isDaemon()) {
-                                        thread.setDaemon(false);
-                                    }
-                                    return thread;
-                                }
-                            });
+                            BACKGROUND_THREAD_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<Runnable>(), new AndroidWheelsThreadFactory());
                     sHttpRequestExecutor = executor;
                 }
             } finally {
@@ -161,26 +100,34 @@ final class ExecutorUtils {
                 executor = sImageLoaderExecutor;
                 if (executor == null) {
                     executor = new ThreadPoolExecutor(0,
-                            Math.round(Runtime.getRuntime().availableProcessors() * 1.5F), 300,
-                            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-                            new ThreadFactory() {
-                                @Override
-                                public Thread newThread(@NonNull Runnable runnable) {
-                                    Thread thread = new Thread(runnable,
-                                            sBackgroundThreadNamePrefix + getNextThreadNumber());
-                                    if (thread.getPriority() != Thread.MIN_PRIORITY) {
-                                        thread.setPriority(Thread.MIN_PRIORITY);
-                                    }
-                                    if (thread.isDaemon()) {
-                                        thread.setDaemon(false);
-                                    }
-                                    return thread;
-                                }
-                            });
+                            Math.round(Runtime.getRuntime().availableProcessors() * 1.5F),
+                            BACKGROUND_THREAD_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<Runnable>(),
+                            new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
                     sImageLoaderExecutor = executor;
                 }
             } finally {
                 IMAGE_LOADER_EXECUTOR_LOCK.unlock();
+            }
+        }
+        return executor;
+    }
+
+    @NonNull
+    public static ThreadPoolExecutor getStorageImageCacheExecutor() {
+        ThreadPoolExecutor executor = sStorageImageCacheExecutor;
+        if (executor == null) {
+            STORAGE_IMAGE_CACHE_EXECUTOR_LOCK.lock();
+            try {
+                executor = sStorageImageCacheExecutor;
+                if (executor == null) {
+                    executor = new ThreadPoolExecutor(0, 1, BACKGROUND_THREAD_KEEP_ALIVE_TIME,
+                            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+                            new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
+                    sStorageImageCacheExecutor = executor;
+                }
+            } finally {
+                STORAGE_IMAGE_CACHE_EXECUTOR_LOCK.unlock();
             }
         }
         return executor;

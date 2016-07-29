@@ -29,7 +29,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * {@link Bitmap} loader from source data
+ * {@link Bitmap} loader for {@link ImageLoader}
  *
  * @param <T> Source data type
  */
