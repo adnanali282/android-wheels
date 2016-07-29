@@ -61,7 +61,7 @@ class SetImageAction implements Runnable {
                 imageView.setBackground(new BitmapDrawable(mImageLoader.getContext().getResources(),
                         mImageLoader.getPlaceholderImage()));
                 imageView.setImageDrawable(fadeDrawable);
-                fadeDrawable.setFadeCallback(new FadeDrawable.FadeCallback() {
+                fadeDrawable.setFadeCallback(new FadeCallback() {
                     @Override
                     public void onStart(@NonNull FadeDrawable drawable) {
                     }

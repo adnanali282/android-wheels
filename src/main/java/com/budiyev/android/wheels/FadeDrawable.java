@@ -26,7 +26,6 @@ package com.budiyev.android.wheels;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
@@ -152,19 +151,4 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
         mFadeCallback = fadeCallback;
     }
 
-    public interface FadeCallback {
-        /**
-         * Called on start of fade effect
-         *
-         * @param drawable Drawable
-         */
-        void onStart(@NonNull FadeDrawable drawable);
-
-        /**
-         * Called when fade effect is ended
-         *
-         * @param drawable Drawable
-         */
-        void onEnd(@NonNull FadeDrawable drawable);
-    }
 }
