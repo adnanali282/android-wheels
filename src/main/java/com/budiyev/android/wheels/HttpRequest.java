@@ -89,7 +89,7 @@ public abstract class HttpRequest {
      * by calling {@link HttpRequest#submit()}
      */
     public static int getParallelRequestsLimit() {
-        return AndroidWheelsExecutors.getHttpRequestExecutor().getMaximumPoolSize();
+        return AndroidWheelsExecutors.getPoolSize(AndroidWheelsExecutors.getHttpRequestExecutor());
     }
 
     /**
@@ -98,7 +98,7 @@ public abstract class HttpRequest {
      */
     public static void setParallelRequestsLimit(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
-        AndroidWheelsExecutors.getHttpRequestExecutor().setMaximumPoolSize(limit);
+        AndroidWheelsExecutors.setPoolSize(AndroidWheelsExecutors.getHttpRequestExecutor(), limit);
     }
 
     /**
