@@ -31,12 +31,32 @@ import android.support.annotation.Nullable;
  * Storage image cache for {@link ImageLoader}
  */
 public interface StorageImageCache {
+    /**
+     * Put {@link Bitmap} into cache
+     *
+     * @param key   Unique key
+     * @param value Image bitmap
+     */
     void put(@NonNull String key, @NonNull Bitmap value);
 
+    /**
+     * Get {@link Bitmap} for the specified key
+     *
+     * @param key Unique key
+     * @return Image bitmap or null, id there are no entry for the specified key
+     */
     @Nullable
     Bitmap get(@NonNull String key);
 
+    /**
+     * Remove entry with specified {@code key} from cache
+     *
+     * @param key Unique key
+     */
     void remove(@NonNull String key);
 
+    /**
+     * Clear cache
+     */
     void clear();
 }

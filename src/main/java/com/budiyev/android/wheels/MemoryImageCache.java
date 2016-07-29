@@ -31,12 +31,32 @@ import android.support.annotation.Nullable;
  * Memory image cache for {@link ImageLoader}
  */
 public interface MemoryImageCache {
+    /**
+     * Put {@link BitmapDrawable} into cache
+     *
+     * @param key   Unique key
+     * @param value Image drawable
+     */
     void put(@NonNull String key, @NonNull BitmapDrawable value);
 
+    /**
+     * Get {@link BitmapDrawable} for the specified key
+     *
+     * @param key Key
+     * @return Image drawable or null, id there are no entry for the specified key
+     */
     @Nullable
     BitmapDrawable get(@NonNull String key);
 
+    /**
+     * Remove entry with specified {@code key} from cache
+     *
+     * @param key Unique key
+     */
     void remove(@NonNull String key);
 
+    /**
+     * Clear cache
+     */
     void clear();
 }
