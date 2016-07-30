@@ -17,7 +17,7 @@ apply plugin: 'com.jfrog.bintray'
 ext {
     libraryName = 'AndroidWheels'
     libraryDescription = 'Some useful tools for android'
-    libraryVersion = '2.7.2'
+    libraryVersion = '2.7.3'
     artifact = 'android-wheels'
     developerId = 'yuriy-budiyev'
     developerName = 'Yuriy Budiyev'
@@ -38,7 +38,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 26
+        versionCode 27
         versionName libraryVersion
     }
 
