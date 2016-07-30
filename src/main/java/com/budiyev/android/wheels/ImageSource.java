@@ -30,6 +30,7 @@ import android.support.annotation.NonNull;
  * Source data and key to cache loaded bitmaps
  *
  * @param <T> Type of source data
+ * @see ImageLoader#newImageSource(Object)
  */
 public interface ImageSource<T> {
     /**

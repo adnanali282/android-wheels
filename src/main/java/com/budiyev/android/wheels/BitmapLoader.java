@@ -32,6 +32,11 @@ import android.support.annotation.Nullable;
  * {@link Bitmap} loader for {@link ImageLoader}
  *
  * @param <T> Source data type
+ * @see ImageLoader#newUriBitmapLoader()
+ * @see ImageLoader#newFileBitmapLoader()
+ * @see ImageLoader#newFileDescriptorBitmapLoader()
+ * @see ImageLoader#newResourceBitmapLoader()
+ * @see ImageLoader#newByteArrayBitmapLoader()
  */
 public interface BitmapLoader<T> {
     /**

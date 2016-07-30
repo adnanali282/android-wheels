@@ -23,12 +23,19 @@
  */
 package com.budiyev.android.wheels;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.io.File;
+
 /**
  * Storage image cache for {@link ImageLoader}
+ *
+ * @see ImageLoader#newStorageImageCache(Context)
+ * @see ImageLoader#newStorageImageCache(File)
+ * @see ImageLoader#newStorageImageCache(File, long, Bitmap.CompressFormat, int)
  */
 public interface StorageImageCache {
     /**
