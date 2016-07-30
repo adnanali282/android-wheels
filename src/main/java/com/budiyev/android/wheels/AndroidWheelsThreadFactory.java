@@ -30,6 +30,9 @@ import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Thread factory for internal usage in AndroidWheels
+ */
 final class AndroidWheelsThreadFactory implements ThreadFactory {
     private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(1);
     private static volatile String sThreadNamePrefix = "AndroidWheels-background-thread-";
