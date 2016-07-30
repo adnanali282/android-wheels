@@ -45,7 +45,7 @@ public final class RequestResult {
     /**
      * Type of this result
      * <p>
-     * {@link RequestResult#NONE} - No result;
+     * {@link RequestResult#NONE} - No result
      * <p>
      * {@link RequestResult#SUCCESS} - Success (response code is {@link HttpURLConnection#HTTP_OK})
      * <p>
