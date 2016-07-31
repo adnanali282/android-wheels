@@ -81,6 +81,8 @@ public final class ThreadUtils {
 
     /**
      * Set name prefix of background threads (threads named like [prefix][number])
+     * Name prefix should be set before any background actions,
+     * otherwise default prefix will be used
      *
      * @param prefix Thread name prefix
      */
