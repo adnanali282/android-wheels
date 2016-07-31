@@ -305,6 +305,7 @@ public final class CommonUtils {
 
     /**
      * Sorts the {@code list} in ascending natural order
+     * <br>
      * Sorting algorithm is unstable (Heapsort)
      */
     public static <T extends Comparable<T>> void sort(@NonNull List<T> list) {
@@ -325,6 +326,7 @@ public final class CommonUtils {
 
     /**
      * Sorts the {@code list} using the {@code comparator}
+     * <br>
      * Sorting algorithm is unstable (Heapsort)
      */
     public static <T> void sort(@NonNull List<T> list, @NonNull Comparator<T> comparator) {
@@ -360,10 +362,11 @@ public final class CommonUtils {
 
     /**
      * Search {@code item} in {@code list}
-     * <p>
+     * <br>
      * The algorithm searches for an element in the list in both directions, starting from
      * {@code position}. Such approach is very effective if approximate position
      * of an element in the list is known.
+     * <br>
      * Starting from {@code position} it checks {@code step} of elements on the left
      * and at the right, if {@code item} is not found among them, another {@code step} of
      * elements on the left and at the right, and so on while {@code item} found or list ended.
