@@ -366,7 +366,7 @@ public final class CommonUtils {
      * of an element in the list is known.
      * Starting from {@code position} it checks {@code step} of elements on the left
      * and at the right, if {@code item} is not found among them, another {@code step} of
-     * elements on the left and at the right, and so on while element found or list ended.
+     * elements on the left and at the right, and so on while {@code item} found or list ended.
      *
      * @param list     List of items
      * @param item     Item to search for
