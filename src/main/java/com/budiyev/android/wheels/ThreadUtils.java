@@ -83,6 +83,8 @@ public final class ThreadUtils {
      * Set name prefix of background threads (threads named like [prefix][number])
      * Name prefix should be set before any background actions,
      * otherwise default prefix will be used
+     * Name prefix of {@link ImageLoader} and {@link HttpRequest} threads can't be
+     * changed after their usage
      *
      * @param prefix Thread name prefix
      */
