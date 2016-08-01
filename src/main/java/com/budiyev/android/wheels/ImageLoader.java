@@ -111,15 +111,24 @@ public class ImageLoader<T> {
         return mPauseWorkLock;
     }
 
+    /**
+     * Context of this {@link ImageLoader} instance
+     */
     @NonNull
     protected Context getContext() {
         return mContext;
     }
 
+    /**
+     * Whether to pause image loading
+     */
     protected boolean isPauseWork() {
         return mPauseWork;
     }
 
+    /**
+     * Whether to pause image loading
+     */
     protected void setPauseWork(boolean pauseWork) {
         synchronized (getPauseWorkLock()) {
             mPauseWork = pauseWork;
@@ -186,71 +195,160 @@ public class ImageLoader<T> {
         }
     }
 
+    /**
+     * Placeholder image
+     * <br>
+     * Displayed while image is loading
+     */
     @Nullable
     public Bitmap getPlaceholderImage() {
         return mPlaceholderBitmap;
     }
 
+    /**
+     * Placeholder image
+     * <br>
+     * Displayed while image is loading
+     *
+     * @param bitmap Image bitmap
+     */
     public void setPlaceholderImage(@Nullable Bitmap bitmap) {
         mPlaceholderBitmap = bitmap;
     }
 
+    /**
+     * Placeholder image
+     * <br>
+     * Displayed while image is loading
+     *
+     * @param resourceId Image resource identifier
+     */
     public void setPlaceholderImage(int resourceId) {
         mPlaceholderBitmap = BitmapFactory.decodeResource(getContext().getResources(), resourceId);
     }
 
+    /**
+     * Current {@link BitmapLoader} implementation
+     * <br>
+     * {@link BitmapLoader} is used for loading new bitmaps
+     * if there are no cached images with the same key
+     */
     @Nullable
     public BitmapLoader<T> getBitmapLoader() {
         return mBitmapLoader;
     }
 
+    /**
+     * Current {@link BitmapLoader} implementation
+     * <br>
+     * {@link BitmapLoader} is used for loading new bitmaps
+     * if there are no cached images with the same key
+     */
     public void setBitmapLoader(@Nullable BitmapLoader<T> bitmapLoader) {
         mBitmapLoader = bitmapLoader;
     }
 
+    /**
+     * Current {@link MemoryImageCache} implementation
+     * <br>
+     * {@link MemoryImageCache} is used for caching images in memory
+     */
     @Nullable
     public MemoryImageCache getMemoryImageCache() {
         return mMemoryImageCache;
     }
 
+    /**
+     * Current {@link MemoryImageCache} implementation
+     * <br>
+     * {@link MemoryImageCache} is used for caching images in memory
+     */
     public void setMemoryImageCache(@Nullable MemoryImageCache memoryImageCache) {
         mMemoryImageCache = memoryImageCache;
     }
 
+    /**
+     * Current {@link StorageImageCache} implementation
+     * <br>
+     * {@link StorageImageCache} is used for caching images in storage
+     */
     @Nullable
     public StorageImageCache getStorageImageCache() {
         return mStorageImageCache;
     }
 
+    /**
+     * Current {@link StorageImageCache} implementation
+     * <br>
+     * {@link StorageImageCache} is used for caching images in storage
+     */
     public void setStorageImageCache(@Nullable StorageImageCache storageImageCache) {
         mStorageImageCache = storageImageCache;
     }
 
+    /**
+     * Whether to use fade effect to display images
+     *
+     * @see ImageLoader#getImageFadeInTime()
+     * @see ImageLoader#setImageFadeInTime(int)
+     */
     public boolean isImageFadeIn() {
         return mImageFadeIn;
     }
 
+    /**
+     * Whether to use fade effect to display images
+     *
+     * @see ImageLoader#getImageFadeInTime()
+     * @see ImageLoader#setImageFadeInTime(int)
+     */
     public void setImageFadeIn(boolean imageFadeIn) {
         mImageFadeIn = imageFadeIn;
     }
 
+    /**
+     * Whether to exit all image loading tasks before start of image loading
+     */
     public boolean isExitTasksEarly() {
         return mExitTasksEarly;
     }
 
+    /**
+     * Whether to exit all image loading tasks before start of image loading
+     */
     public void setExitTasksEarly(boolean exitTasksEarly) {
         mExitTasksEarly = exitTasksEarly;
         setPauseWork(false);
     }
 
+    /**
+     * Fade effect duration if that effect is enabled
+     *
+     * @see ImageLoader#isImageFadeIn()
+     * @see ImageLoader#setImageFadeIn(boolean)
+     */
     public int getImageFadeInTime() {
         return mImageFadeInTime;
     }
 
+    /**
+     * Fade effect duration if that effect is enabled
+     *
+     * @see ImageLoader#isImageFadeIn()
+     * @see ImageLoader#setImageFadeIn(boolean)
+     */
     public void setImageFadeInTime(int imageFadeInTime) {
         mImageFadeInTime = imageFadeInTime;
     }
 
+    /**
+     * Clear all caches
+     *
+     * @see ImageLoader#getMemoryImageCache()
+     * @see ImageLoader#setMemoryImageCache(MemoryImageCache)
+     * @see ImageLoader#getStorageImageCache()
+     * @see ImageLoader#setStorageImageCache(StorageImageCache)
+     */
     public void clearCache() {
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
