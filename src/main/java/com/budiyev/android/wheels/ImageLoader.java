@@ -318,7 +318,6 @@ public class ImageLoader<T> {
      */
     public void setExitTasksEarly(boolean exitTasksEarly) {
         mExitTasksEarly = exitTasksEarly;
-        setPauseWork(false);
     }
 
     /**
