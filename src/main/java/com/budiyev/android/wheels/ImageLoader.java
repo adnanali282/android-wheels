@@ -183,6 +183,9 @@ public class ImageLoader<T> {
         loadImage(imageSource, imageView, null);
     }
 
+    /**
+     * Delete cached image for specified {@link ImageSource}
+     */
     public void invalidate(@NonNull ImageSource<T> imageSource) {
         String key = imageSource.getKey();
         MemoryImageCache memoryImageCache = getMemoryImageCache();
