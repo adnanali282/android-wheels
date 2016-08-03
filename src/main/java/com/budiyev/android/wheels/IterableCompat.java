@@ -434,4 +434,11 @@ public final class IterableCompat<T> implements Iterable<T> {
     public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
         return new IterableCompat<>(iterable);
     }
+
+    @NonNull
+    public static <T> IterableCompat<T> wrap(@NonNull T[] array) {
+        List<T> list = new ArrayList<>(array.length);
+        Collections.addAll(list, array);
+        return new IterableCompat<>(list);
+    }
 }
