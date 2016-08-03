@@ -82,6 +82,55 @@ public class IterableCompat<T> implements Iterable<T> {
     }
 
     @NonNull
+    public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException();
+        }
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> taken;
+                if (mIterable instanceof List) {
+                    List<T> list = (List<T>) mIterable;
+                    taken = list.subList(0, count);
+                } else {
+                    taken = new ArrayList<>();
+                    int position = 0;
+                    for (T element : mIterable) {
+                        if (position < count) {
+                            taken.add(element);
+                        } else {
+                            break;
+                        }
+                        position++;
+                    }
+                }
+                mIterable = taken;
+            }
+        });
+        return this;
+    }
+
+    @NonNull
+    public IterableCompat<T> takeWhile(@NonNull final PredicateCompat<T> predicate) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> taken = new ArrayList<>();
+                for (T element : mIterable) {
+                    if (predicate.apply(element)) {
+                        taken.add(element);
+                    } else {
+                        break;
+                    }
+                }
+                mIterable = taken;
+            }
+        });
+        return this;
+    }
+
+    @NonNull
     public IterableCompat<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
         if (count < 0) {
             throw new IllegalArgumentException();
@@ -110,30 +159,21 @@ public class IterableCompat<T> implements Iterable<T> {
     }
 
     @NonNull
-    public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException();
-        }
+    public IterableCompat<T> skipWhile(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> taken;
-                if (mIterable instanceof List) {
-                    List<T> list = (List<T>) mIterable;
-                    taken = list.subList(0, count);
-                } else {
-                    taken = new ArrayList<>();
-                    int position = 0;
-                    for (T element : mIterable) {
-                        if (position < count) {
-                            taken.add(element);
-                        } else {
-                            break;
-                        }
-                        position++;
+                List<T> rest = new ArrayList<>();
+                boolean skip = true;
+                for (T element : mIterable) {
+                    if (skip) {
+                        skip = predicate.apply(element);
+                    }
+                    if (!skip) {
+                        rest.add(element);
                     }
                 }
-                mIterable = taken;
+                mIterable = rest;
             }
         });
         return this;
