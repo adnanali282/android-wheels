@@ -229,24 +229,35 @@ public class IterableCompat<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        executeTasks();
-        return mIterable.iterator();
+        Iterable<T> iterable = executeTasks();
+        return iterable.iterator();
     }
 
     @NonNull
     public <H> IterableCompat<H> convert(@NonNull ConverterCompat<T, H> converter) {
-        executeTasks();
+        Iterable<T> iterable = executeTasks();
         List<H> converted = new ArrayList<>();
-        for (T element : mIterable) {
+        for (T element : iterable) {
             converted.add(converter.apply(element));
         }
         return new IterableCompat<>(converted);
     }
 
     @Nullable
+    public T first() {
+        Iterable<T> iterable = executeTasks();
+        Iterator<T> iterator = iterable.iterator();
+        if (iterator.hasNext()) {
+            return iterator.next();
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
     public T first(@NonNull PredicateCompat<T> predicate) {
-        executeTasks();
-        for (T element : mIterable) {
+        Iterable<T> iterable = executeTasks();
+        for (T element : iterable) {
             if (predicate.apply(element)) {
                 return element;
             }
@@ -254,30 +265,94 @@ public class IterableCompat<T> implements Iterable<T> {
         return null;
     }
 
-    @NonNull
-    public List<T> toList() {
-        executeTasks();
-        if (mIterable instanceof List) {
-            return (List<T>) mIterable;
-        } else {
-            List<T> list = new ArrayList<>();
-            for (T element : mIterable) {
-                list.add(element);
+    @Nullable
+    public T min(@NonNull Comparator<T> comparator) {
+        Iterable<T> iterable = executeTasks();
+        T min = null;
+        boolean first = true;
+        for (T element : iterable) {
+            if (first) {
+                min = element;
+                first = false;
+                continue;
             }
-            return list;
+            if (comparator.compare(min, element) > 0) {
+                min = element;
+            }
         }
+        return min;
+    }
+
+    @Nullable
+    public T max(@NonNull Comparator<T> comparator) {
+        Iterable<T> iterable = executeTasks();
+        T max = null;
+        boolean first = true;
+        for (T element : iterable) {
+            if (first) {
+                max = element;
+                first = false;
+                continue;
+            }
+            if (comparator.compare(max, element) < 0) {
+                max = element;
+            }
+        }
+        return max;
+    }
+
+    public boolean all(@NonNull PredicateCompat<T> predicate) {
+        Iterable<T> iterable = executeTasks();
+        boolean all = true;
+        for (T element : iterable) {
+            all &= predicate.apply(element);
+        }
+        return all;
+    }
+
+    public boolean none(@NonNull PredicateCompat<T> predicate) {
+        Iterable<T> iterable = executeTasks();
+        boolean none = true;
+        for (T element : iterable) {
+            none &= !predicate.apply(element);
+        }
+        return none;
+    }
+
+    public boolean has(@NonNull PredicateCompat<T> predicate) {
+        Iterable<T> iterable = executeTasks();
+        for (T element : iterable) {
+            if (predicate.apply(element)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int count() {
-        executeTasks();
-        if (mIterable instanceof Collection) {
-            return ((Collection<T>) mIterable).size();
+        Iterable<T> iterable = executeTasks();
+        if (iterable instanceof Collection) {
+            return ((Collection<T>) iterable).size();
         } else {
             int count = 0;
-            for (T element : mIterable) {
+            for (T element : iterable) {
                 count++;
             }
             return count;
+        }
+    }
+
+    @NonNull
+    public List<T> toList() {
+        Iterable<T> iterable = executeTasks();
+        if (iterable instanceof List) {
+            return (List<T>) iterable;
+        } else {
+            List<T> list = new ArrayList<>();
+            for (T element : iterable) {
+                list.add(element);
+            }
+            return list;
         }
     }
 
@@ -292,13 +367,14 @@ public class IterableCompat<T> implements Iterable<T> {
         }
     }
 
-    private void executeTasks() {
+    private Iterable<T> executeTasks() {
         mTasksLock.lock();
         try {
             for (Runnable operation = mTasksQueue.poll(); operation != null;
                     operation = mTasksQueue.poll()) {
                 operation.run();
             }
+            return mIterable;
         } finally {
             mTasksLock.unlock();
         }
