@@ -49,6 +49,15 @@ public class IterableCompat<T> implements Iterable<T> {
         mIterable = Objects.requireNonNull(iterable);
     }
 
+    private void enqueueTask(@NonNull Runnable task) {
+        mTasksLock.lock();
+        try {
+            mTasksQueue.offer(task);
+        } finally {
+            mTasksLock.unlock();
+        }
+    }
+
     private void executeTasks() {
         mTasksLock.lock();
         try {
@@ -61,14 +70,7 @@ public class IterableCompat<T> implements Iterable<T> {
         }
     }
 
-    private void enqueueTask(@NonNull Runnable task) {
-        mTasksLock.lock();
-        try {
-            mTasksQueue.offer(task);
-        } finally {
-            mTasksLock.unlock();
-        }
-    }
+    //region Non-terminal methods
 
     @NonNull
     public IterableCompat<T> filter(@NonNull final PredicateCompat<T> predicate) {
@@ -198,6 +200,10 @@ public class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    //endregion
+
+    //region Terminal methods
+
     @Override
     public Iterator<T> iterator() {
         executeTasks();
@@ -251,4 +257,6 @@ public class IterableCompat<T> implements Iterable<T> {
             return count;
         }
     }
+
+    //endregion
 }
