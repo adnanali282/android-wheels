@@ -50,7 +50,7 @@ public class IterableCompat<T> implements Iterable<T> {
     private volatile Iterable<T> mIterable;
 
     private IterableCompat(@NonNull Iterable<T> iterable) {
-        mIterable = Objects.requireNonNull(iterable);
+        setIterable(Objects.requireNonNull(iterable));
     }
 
     //region Non-terminal methods
@@ -423,7 +423,7 @@ public class IterableCompat<T> implements Iterable<T> {
                     operation = mTasksQueue.poll()) {
                 operation.run();
             }
-            return mIterable;
+            return getIterable();
         } finally {
             mTasksLock.unlock();
         }
