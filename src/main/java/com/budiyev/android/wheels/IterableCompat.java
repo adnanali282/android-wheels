@@ -54,7 +54,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class IterableCompat<T> implements Iterable<T> {
     private final Queue<Runnable> mTasksQueue = new LinkedList<>();
-    private final Lock mTasksLock = new ReentrantLock();
+    private final Lock mTasksLock = new ReentrantLock(true);
     private volatile Iterable<T> mIterable;
 
     private IterableCompat(@NonNull Iterable<T> iterable) {
@@ -73,9 +73,15 @@ public final class IterableCompat<T> implements Iterable<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
+                Iterable<T> operandIterable;
+                if (iterable instanceof IterableCompat) {
+                    operandIterable = ((IterableCompat<T>) iterable).executeTasks();
+                } else {
+                    operandIterable = iterable;
+                }
                 Iterable<T> sourceIterable = getIterable();
-                if (sourceIterable instanceof Collection && iterable instanceof Collection) {
-                    ((Collection<T>) sourceIterable).addAll((Collection<T>) iterable);
+                if (sourceIterable instanceof Collection && operandIterable instanceof Collection) {
+                    ((Collection<T>) sourceIterable).addAll((Collection<T>) operandIterable);
                 } else {
                     Collection<T> sourceCollection;
                     if (sourceIterable instanceof Collection) {
@@ -87,10 +93,10 @@ public final class IterableCompat<T> implements Iterable<T> {
                         }
                         setIterable(sourceCollection);
                     }
-                    if (iterable instanceof Collection) {
-                        sourceCollection.addAll((Collection<T>) iterable);
+                    if (operandIterable instanceof Collection) {
+                        sourceCollection.addAll((Collection<T>) operandIterable);
                     } else {
-                        for (T element : iterable) {
+                        for (T element : operandIterable) {
                             sourceCollection.add(element);
                         }
                     }
