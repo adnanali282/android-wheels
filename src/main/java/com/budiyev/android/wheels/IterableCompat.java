@@ -398,11 +398,12 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     //endregion
 
+    @NonNull
     private Iterable<T> getIterable() {
         return mIterable;
     }
 
-    private void setIterable(Iterable<T> iterable) {
+    private void setIterable(@NonNull Iterable<T> iterable) {
         mIterable = iterable;
     }
 
