@@ -44,6 +44,13 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @see IterableCompat#wrap(Iterable)
  * @see IterableCompat#wrap(Object[])
+ * @see IterableCompat#wrap(boolean[])
+ * @see IterableCompat#wrap(byte[])
+ * @see IterableCompat#wrap(short[])
+ * @see IterableCompat#wrap(int[])
+ * @see IterableCompat#wrap(long[])
+ * @see IterableCompat#wrap(float[])
+ * @see IterableCompat#wrap(double[])
  */
 public final class IterableCompat<T> implements Iterable<T> {
     private final Queue<Runnable> mTasksQueue = new LinkedList<>();
