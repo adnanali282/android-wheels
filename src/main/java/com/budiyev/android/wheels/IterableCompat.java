@@ -367,6 +367,7 @@ public class IterableCompat<T> implements Iterable<T> {
         }
     }
 
+    @NonNull
     private Iterable<T> executeTasks() {
         mTasksLock.lock();
         try {
