@@ -40,11 +40,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @param <T> Element type
+ * Sequence of elements
+ *
  * @see IterableCompat#wrap(Iterable)
  * @see IterableCompat#wrap(Object[])
  */
-// TODO
 public final class IterableCompat<T> implements Iterable<T> {
     private final Queue<Runnable> mTasksQueue = new LinkedList<>();
     private final Lock mTasksLock = new ReentrantLock();
@@ -56,8 +56,13 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     //region Non-terminal methods
 
+    /**
+     * Add all elements of specified {@code iterable}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
-    public IterableCompat<T> concat(@NonNull final Iterable<T> iterable) {
+    public IterableCompat<T> add(@NonNull final Iterable<T> iterable) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
@@ -88,6 +93,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Remove all elements that doesn't match specified {@code predicate}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> filter(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
@@ -106,6 +116,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Apply specified {@code function} to all elements
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> apply(@NonNull final FunctionCompat<T> function) {
         enqueueTask(new Runnable() {
@@ -120,6 +135,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Retain only first {@code count} of elements
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
         if (count < 0) {
@@ -151,6 +171,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Retain only first sequence of elements that matches specified {@code predicate}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> takeWhile(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
@@ -171,6 +196,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Remove first {@code count} of elements
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
         if (count < 0) {
@@ -200,6 +230,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Remove first sequence of elements that matches specified {@code predicate}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> skipWhile(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
@@ -222,6 +257,13 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Sort using specified {@code comparator}
+     * <br>
+     * Sorting algorithm is <b>unstable</b> (Heapsort)
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> sort(@NonNull final Comparator<T> comparator) {
         enqueueTask(new Runnable() {
@@ -243,6 +285,11 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Reverse elements order
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
     @NonNull
     public IterableCompat<T> reverse() {
         enqueueTask(new Runnable() {
@@ -268,12 +315,18 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     //region Terminal methods
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<T> iterator() {
         Iterable<T> iterable = executeTasks();
         return iterable.iterator();
     }
 
+    /**
+     * Convert all elements using specified {@code converter}
+     */
     @NonNull
     public <H> IterableCompat<H> convert(@NonNull ConverterCompat<T, H> converter) {
         Iterable<T> iterable = executeTasks();
@@ -284,6 +337,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         return new IterableCompat<>(converted);
     }
 
+    /**
+     * First element, or {@code null} if there are no elements
+     */
     @Nullable
     public T first() {
         Iterable<T> iterable = executeTasks();
@@ -295,6 +351,10 @@ public final class IterableCompat<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * First element that matches specified {@code predicate}, or {@code null} if
+     * there are no matching elements
+     */
     @Nullable
     public T first(@NonNull PredicateCompat<T> predicate) {
         Iterable<T> iterable = executeTasks();
@@ -306,6 +366,10 @@ public final class IterableCompat<T> implements Iterable<T> {
         return null;
     }
 
+    /**
+     * Minimum element according to specified {@code comparator}, or {@code null}
+     * if there are no elements
+     */
     @Nullable
     public T min(@NonNull Comparator<T> comparator) {
         Iterable<T> iterable = executeTasks();
@@ -324,6 +388,10 @@ public final class IterableCompat<T> implements Iterable<T> {
         return min;
     }
 
+    /**
+     * Maximum element according to specified {@code comparator}, or {@code null}
+     * if there are no elements
+     */
     @Nullable
     public T max(@NonNull Comparator<T> comparator) {
         Iterable<T> iterable = executeTasks();
@@ -342,6 +410,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         return max;
     }
 
+    /**
+     * Whether all elements match specified predicate
+     */
     public boolean all(@NonNull PredicateCompat<T> predicate) {
         Iterable<T> iterable = executeTasks();
         boolean all = true;
@@ -351,6 +422,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         return all;
     }
 
+    /**
+     * Whether no elements match specified predicate
+     */
     public boolean none(@NonNull PredicateCompat<T> predicate) {
         Iterable<T> iterable = executeTasks();
         boolean none = true;
@@ -360,6 +434,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         return none;
     }
 
+    /**
+     * Whether any elements match specified predicate
+     */
     public boolean has(@NonNull PredicateCompat<T> predicate) {
         Iterable<T> iterable = executeTasks();
         for (T element : iterable) {
@@ -370,6 +447,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         return false;
     }
 
+    /**
+     * Count elements
+     */
     public int count() {
         Iterable<T> iterable = executeTasks();
         if (iterable instanceof Collection) {
@@ -383,6 +463,9 @@ public final class IterableCompat<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * Convert to {@link List}
+     */
     @NonNull
     public List<T> toList() {
         Iterable<T> iterable = executeTasks();
@@ -431,11 +514,17 @@ public final class IterableCompat<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * Wrap specified {@code iterable} into {@link IterableCompat}
+     */
     @NonNull
     public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
         return new IterableCompat<>(iterable);
     }
 
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
     @NonNull
     public static <T> IterableCompat<T> wrap(@NonNull T[] array) {
         List<T> list = new ArrayList<>(array.length);

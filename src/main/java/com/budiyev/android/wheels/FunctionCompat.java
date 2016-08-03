@@ -23,7 +23,11 @@
  */
 package com.budiyev.android.wheels;
 
-// TODO
+/**
+ * Function
+ *
+ * @see IterableCompat#apply(FunctionCompat)
+ */
 public interface FunctionCompat<T> {
     void apply(T t);
 }

@@ -23,7 +23,11 @@
  */
 package com.budiyev.android.wheels;
 
-// TODO
+/**
+ * Converter
+ *
+ * @see IterableCompat#convert(ConverterCompat)
+ */
 public interface ConverterCompat<T, H> {
     H apply(T t);
 }
