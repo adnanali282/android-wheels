@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @param <T> Element type
- * @see IterableCompat#wrap(Iterable)
+ * @see IterableCompat#from(Iterable)
  */
 // TODO
 public class IterableCompat<T> implements Iterable<T> {
@@ -305,7 +305,7 @@ public class IterableCompat<T> implements Iterable<T> {
     }
 
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
+    public static <T> IterableCompat<T> from(@NonNull Iterable<T> iterable) {
         return new IterableCompat<>(iterable);
     }
 }
