@@ -40,7 +40,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Sequence of elements
+ * Object query API
  *
  * @see IterableCompat#wrap(Iterable)
  * @see IterableCompat#wrap(Object[])
