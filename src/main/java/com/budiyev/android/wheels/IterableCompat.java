@@ -64,7 +64,33 @@ public final class IterableCompat<T> implements Iterable<T> {
     //region Non-terminal methods
 
     /**
-     * Add all elements of specified {@code iterable}
+     * Add specified {@code element} to end of sequence
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
+    @NonNull
+    public IterableCompat<T> add(@Nullable final T element) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                Iterable<T> iterable = getIterable();
+                if (iterable instanceof Collection) {
+                    ((Collection<T>) iterable).add(element);
+                } else {
+                    List<T> list = new ArrayList<>();
+                    for (T element : iterable) {
+                        list.add(element);
+                    }
+                    list.add(element);
+                    setIterable(list);
+                }
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Add all elements of specified {@code iterable} to end of sequence
      * <br>
      * <b>Lazy evaluation</b>
      */
@@ -73,32 +99,28 @@ public final class IterableCompat<T> implements Iterable<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
+                Iterable<T> sourceIterable = getIterable();
                 Iterable<T> operandIterable;
                 if (iterable instanceof IterableCompat) {
                     operandIterable = ((IterableCompat<T>) iterable).executeTasks();
                 } else {
                     operandIterable = iterable;
                 }
-                Iterable<T> sourceIterable = getIterable();
-                if (sourceIterable instanceof Collection && operandIterable instanceof Collection) {
-                    ((Collection<T>) sourceIterable).addAll((Collection<T>) operandIterable);
+                Collection<T> sourceCollection;
+                if (sourceIterable instanceof Collection) {
+                    sourceCollection = (Collection<T>) sourceIterable;
                 } else {
-                    Collection<T> sourceCollection;
-                    if (sourceIterable instanceof Collection) {
-                        sourceCollection = (Collection<T>) sourceIterable;
-                    } else {
-                        sourceCollection = new ArrayList<>();
-                        for (T element : sourceIterable) {
-                            sourceCollection.add(element);
-                        }
-                        setIterable(sourceCollection);
+                    sourceCollection = new ArrayList<>();
+                    for (T element : sourceIterable) {
+                        sourceCollection.add(element);
                     }
-                    if (operandIterable instanceof Collection) {
-                        sourceCollection.addAll((Collection<T>) operandIterable);
-                    } else {
-                        for (T element : operandIterable) {
-                            sourceCollection.add(element);
-                        }
+                    setIterable(sourceCollection);
+                }
+                if (operandIterable instanceof Collection) {
+                    sourceCollection.addAll((Collection<T>) operandIterable);
+                } else {
+                    for (T element : operandIterable) {
+                        sourceCollection.add(element);
                     }
                 }
             }
