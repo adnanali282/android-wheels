@@ -44,7 +44,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @see IterableCompat#wrap(Iterable)
  */
 // TODO
-public class IterableCompat<T> implements Iterable<T> {
+public final class IterableCompat<T> implements Iterable<T> {
     private final Queue<Runnable> mTasksQueue = new LinkedList<>();
     private final Lock mTasksLock = new ReentrantLock();
     private volatile Iterable<T> mIterable;
