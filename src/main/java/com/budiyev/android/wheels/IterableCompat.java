@@ -42,6 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @param <T> Element type
  * @see IterableCompat#wrap(Iterable)
+ * @see IterableCompat#wrap(Object[])
  */
 // TODO
 public final class IterableCompat<T> implements Iterable<T> {
