@@ -32,36 +32,181 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 // TODO
 public class IterableCompat<T> implements Iterable<T> {
-    private Iterable<T> mIterable;
+    private final Queue<Runnable> mTasksQueue = new LinkedList<>();
+    private final Lock mTasksLock = new ReentrantLock();
+    private volatile Iterable<T> mIterable;
 
     public IterableCompat(@NonNull Iterable<T> iterable) {
         mIterable = Objects.requireNonNull(iterable);
     }
 
-    @Override
-    public Iterator<T> iterator() {
-        return mIterable.iterator();
+    private void executeTasks() {
+        mTasksLock.lock();
+        try {
+            for (Runnable operation = mTasksQueue.poll(); operation != null;
+                    operation = mTasksQueue.poll()) {
+                operation.run();
+            }
+        } finally {
+            mTasksLock.unlock();
+        }
+    }
+
+    private void enqueueTask(@NonNull Runnable task) {
+        mTasksLock.lock();
+        try {
+            mTasksQueue.offer(task);
+        } finally {
+            mTasksLock.unlock();
+        }
     }
 
     @NonNull
-    public IterableCompat<T> filter(@NonNull PredicateCompat<T> predicate) {
-        List<T> filtered = new ArrayList<>();
-        for (T element : mIterable) {
-            if (predicate.apply(element)) {
-                filtered.add(element);
+    public IterableCompat<T> filter(@NonNull final PredicateCompat<T> predicate) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> filtered = new ArrayList<>();
+                for (T element : mIterable) {
+                    if (predicate.apply(element)) {
+                        filtered.add(element);
+                    }
+                }
+                mIterable = filtered;
             }
-        }
-        mIterable = filtered;
+        });
         return this;
     }
 
     @NonNull
+    public IterableCompat<T> apply(@NonNull final FunctionCompat<T> function) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                for (T element : mIterable) {
+                    function.apply(element);
+                }
+            }
+        });
+        return this;
+    }
+
+    @NonNull
+    public IterableCompat<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException();
+        }
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> rest;
+                if (mIterable instanceof List) {
+                    List<T> list = (List<T>) mIterable;
+                    rest = list.subList(count, list.size());
+                } else {
+                    rest = new ArrayList<>();
+                    int position = 0;
+                    for (T element : mIterable) {
+                        if (position >= count) {
+                            rest.add(element);
+                        }
+                        position++;
+                    }
+                }
+                mIterable = rest;
+            }
+        });
+        return this;
+    }
+
+    @NonNull
+    public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException();
+        }
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> taken;
+                if (mIterable instanceof List) {
+                    List<T> list = (List<T>) mIterable;
+                    taken = list.subList(0, count);
+                } else {
+                    taken = new ArrayList<>();
+                    int position = 0;
+                    for (T element : mIterable) {
+                        if (position < count) {
+                            taken.add(element);
+                        } else {
+                            break;
+                        }
+                        position++;
+                    }
+                }
+                mIterable = taken;
+            }
+        });
+        return this;
+    }
+
+    @NonNull
+    public IterableCompat<T> sort(@NonNull final Comparator<T> comparator) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                if (mIterable instanceof List) {
+                    CommonUtils.sort((List<T>) mIterable, comparator);
+                } else {
+                    List<T> sorted = new ArrayList<>();
+                    for (T element : mIterable) {
+                        sorted.add(element);
+                    }
+                    CommonUtils.sort(sorted, comparator);
+                    mIterable = sorted;
+                }
+            }
+        });
+        return this;
+    }
+
+    @NonNull
+    public IterableCompat<T> reverse() {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                if (mIterable instanceof List) {
+                    Collections.reverse((List<T>) mIterable);
+                } else {
+                    List<T> reversed = new ArrayList<>();
+                    for (T element : mIterable) {
+                        reversed.add(element);
+                    }
+                    Collections.reverse(reversed);
+                    mIterable = reversed;
+                }
+            }
+        });
+        return this;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        executeTasks();
+        return mIterable.iterator();
+    }
+
+    @NonNull
     public <H> IterableCompat<H> convert(@NonNull ConverterCompat<T, H> converter) {
+        executeTasks();
         List<H> converted = new ArrayList<>();
         for (T element : mIterable) {
             converted.add(converter.apply(element));
@@ -69,94 +214,9 @@ public class IterableCompat<T> implements Iterable<T> {
         return new IterableCompat<>(converted);
     }
 
-    @NonNull
-    public IterableCompat<T> apply(@NonNull FunctionCompat<T> function) {
-        for (T element : mIterable) {
-            function.apply(element);
-        }
-        return this;
-    }
-
-    @NonNull
-    public IterableCompat<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException();
-        }
-        List<T> rest;
-        if (mIterable instanceof List) {
-            List<T> list = (List<T>) mIterable;
-            rest = list.subList(count, list.size());
-        } else {
-            rest = new ArrayList<>();
-            int position = 0;
-            for (T element : mIterable) {
-                if (position >= count) {
-                    rest.add(element);
-                }
-                position++;
-            }
-        }
-        mIterable = rest;
-        return this;
-    }
-
-    @NonNull
-    public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException();
-        }
-        List<T> taken;
-        if (mIterable instanceof List) {
-            List<T> list = (List<T>) mIterable;
-            taken = list.subList(0, count);
-        } else {
-            taken = new ArrayList<>();
-            int position = 0;
-            for (T element : mIterable) {
-                if (position < count) {
-                    taken.add(element);
-                } else {
-                    break;
-                }
-                position++;
-            }
-        }
-        mIterable = taken;
-        return this;
-    }
-
-    @NonNull
-    public IterableCompat<T> sort(@NonNull Comparator<T> comparator) {
-        if (mIterable instanceof List) {
-            CommonUtils.sort((List<T>) mIterable, comparator);
-        } else {
-            List<T> sorted = new ArrayList<>();
-            for (T element : mIterable) {
-                sorted.add(element);
-            }
-            CommonUtils.sort(sorted, comparator);
-            mIterable = sorted;
-        }
-        return this;
-    }
-
-    @NonNull
-    public IterableCompat<T> reverse() {
-        if (mIterable instanceof List) {
-            Collections.reverse((List<T>) mIterable);
-        } else {
-            List<T> reversed = new ArrayList<>();
-            for (T element : mIterable) {
-                reversed.add(element);
-            }
-            Collections.reverse(reversed);
-            mIterable = reversed;
-        }
-        return this;
-    }
-
     @Nullable
     public T first(@NonNull PredicateCompat<T> predicate) {
+        executeTasks();
         for (T element : mIterable) {
             if (predicate.apply(element)) {
                 return element;
@@ -165,20 +225,9 @@ public class IterableCompat<T> implements Iterable<T> {
         return null;
     }
 
-    public int count() {
-        if (mIterable instanceof Collection) {
-            return ((Collection<T>) mIterable).size();
-        } else {
-            int count = 0;
-            for (T element : mIterable) {
-                count++;
-            }
-            return count;
-        }
-    }
-
     @NonNull
     public List<T> toList() {
+        executeTasks();
         if (mIterable instanceof List) {
             return (List<T>) mIterable;
         } else {
@@ -187,6 +236,19 @@ public class IterableCompat<T> implements Iterable<T> {
                 list.add(element);
             }
             return list;
+        }
+    }
+
+    public int count() {
+        executeTasks();
+        if (mIterable instanceof Collection) {
+            return ((Collection<T>) mIterable).size();
+        } else {
+            int count = 0;
+            for (T element : mIterable) {
+                count++;
+            }
+            return count;
         }
     }
 }
