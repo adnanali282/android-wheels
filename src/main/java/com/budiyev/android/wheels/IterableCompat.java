@@ -531,4 +531,88 @@ public final class IterableCompat<T> implements Iterable<T> {
         Collections.addAll(list, array);
         return new IterableCompat<>(list);
     }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Boolean> wrap(@NonNull boolean[] array) {
+        List<Boolean> list = new ArrayList<>(array.length);
+        for (boolean element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Byte> wrap(@NonNull byte[] array) {
+        List<Byte> list = new ArrayList<>(array.length);
+        for (byte element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Short> wrap(@NonNull short[] array) {
+        List<Short> list = new ArrayList<>(array.length);
+        for (short element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Integer> wrap(@NonNull int[] array) {
+        List<Integer> list = new ArrayList<>(array.length);
+        for (int element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Long> wrap(@NonNull long[] array) {
+        List<Long> list = new ArrayList<>(array.length);
+        for (long element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Float> wrap(@NonNull float[] array) {
+        List<Float> list = new ArrayList<>(array.length);
+        for (float element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link IterableCompat}
+     */
+    @NonNull
+    public static IterableCompat<Double> wrap(@NonNull double[] array) {
+        List<Double> list = new ArrayList<>(array.length);
+        for (double element : array) {
+            list.add(element);
+        }
+        return new IterableCompat<>(list);
+    }
 }

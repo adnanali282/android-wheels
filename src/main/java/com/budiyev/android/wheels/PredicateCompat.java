@@ -35,5 +35,5 @@ package com.budiyev.android.wheels;
  * @see IterableCompat#has(PredicateCompat)
  */
 public interface PredicateCompat<T> {
-    boolean apply(T t);
+    boolean apply(T value);
 }
