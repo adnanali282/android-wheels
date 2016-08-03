@@ -49,27 +49,6 @@ public class IterableCompat<T> implements Iterable<T> {
         mIterable = Objects.requireNonNull(iterable);
     }
 
-    private void enqueueTask(@NonNull Runnable task) {
-        mTasksLock.lock();
-        try {
-            mTasksQueue.offer(task);
-        } finally {
-            mTasksLock.unlock();
-        }
-    }
-
-    private void executeTasks() {
-        mTasksLock.lock();
-        try {
-            for (Runnable operation = mTasksQueue.poll(); operation != null;
-                    operation = mTasksQueue.poll()) {
-                operation.run();
-            }
-        } finally {
-            mTasksLock.unlock();
-        }
-    }
-
     //region Non-terminal methods
 
     @NonNull
@@ -259,4 +238,25 @@ public class IterableCompat<T> implements Iterable<T> {
     }
 
     //endregion
+
+    private void enqueueTask(@NonNull Runnable task) {
+        mTasksLock.lock();
+        try {
+            mTasksQueue.offer(task);
+        } finally {
+            mTasksLock.unlock();
+        }
+    }
+
+    private void executeTasks() {
+        mTasksLock.lock();
+        try {
+            for (Runnable operation = mTasksQueue.poll(); operation != null;
+                    operation = mTasksQueue.poll()) {
+                operation.run();
+            }
+        } finally {
+            mTasksLock.unlock();
+        }
+    }
 }
