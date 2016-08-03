@@ -39,13 +39,17 @@ import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * @param <T> Element type
+ * @see IterableCompat#wrap(Iterable)
+ */
 // TODO
 public class IterableCompat<T> implements Iterable<T> {
     private final Queue<Runnable> mTasksQueue = new LinkedList<>();
     private final Lock mTasksLock = new ReentrantLock();
     private volatile Iterable<T> mIterable;
 
-    public IterableCompat(@NonNull Iterable<T> iterable) {
+    private IterableCompat(@NonNull Iterable<T> iterable) {
         mIterable = Objects.requireNonNull(iterable);
     }
 
@@ -298,5 +302,10 @@ public class IterableCompat<T> implements Iterable<T> {
         } finally {
             mTasksLock.unlock();
         }
+    }
+
+    @NonNull
+    public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
+        return new IterableCompat<>(iterable);
     }
 }
