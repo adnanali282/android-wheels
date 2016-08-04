@@ -127,7 +127,7 @@ public class ImageLoader<T> {
     public void setPauseWork(boolean pauseWork) {
         synchronized (mPauseWorkLock) {
             mPauseWork = pauseWork;
-            if (!isPauseWork()) {
+            if (!pauseWork) {
                 mPauseWorkLock.notifyAll();
             }
         }
@@ -317,6 +317,9 @@ public class ImageLoader<T> {
      */
     public void setExitTasksEarly(boolean exitTasksEarly) {
         mExitTasksEarly = exitTasksEarly;
+        if (exitTasksEarly) {
+            mPauseWorkLock.notifyAll();
+        }
     }
 
     /**

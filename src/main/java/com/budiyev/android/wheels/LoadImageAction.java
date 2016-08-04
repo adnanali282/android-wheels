@@ -59,14 +59,15 @@ final class LoadImageAction<T> {
 
     public void loadImage() {
         synchronized (mPauseWorkLock) {
-            while (mImageLoader.isPauseWork() && !isCancelled()) {
+            while (mImageLoader.isPauseWork() && !mImageLoader.isExitTasksEarly() &&
+                    !isCancelled()) {
                 try {
                     mPauseWorkLock.wait();
                 } catch (InterruptedException ignored) {
                 }
             }
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() != null) {
+        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() == null) {
             return;
         }
         Bitmap image = null;
@@ -99,7 +100,7 @@ final class LoadImageAction<T> {
                 memoryImageCache.put(mImageSource.getKey(), drawable);
             }
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() != null) {
+        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() == null) {
             return;
         }
         ThreadUtils.runOnMainThread(
