@@ -29,65 +29,65 @@ import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Load image action for {@link ImageLoader}
- *
- * @param <T>
  */
 final class LoadImageAction<T> {
     private final ImageSource<T> mImageSource;
     private final WeakReference<ImageView> mImageViewReference;
     private final ImageLoader<T> mImageLoader;
+    private final Object mPauseWorkLock;
     private final ImageLoadCallback mImageLoadCallback;
     private final AtomicBoolean mSubmitted = new AtomicBoolean();
-    private volatile boolean mFinished;
-    private volatile boolean mCancelled;
-    private volatile Future<Void> mFuture;
+    private final AtomicBoolean mFinished = new AtomicBoolean();
+    private final AtomicBoolean mCancelled = new AtomicBoolean();
+    private final AtomicReference<Future<?>> mFuture = new AtomicReference<>();
 
     public LoadImageAction(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @Nullable ImageLoadCallback imageLoadCallback, @NonNull ImageLoader<T> imageLoader) {
+            @NonNull ImageLoader<T> imageLoader, @NonNull Object pauseWorkLock,
+            @Nullable ImageLoadCallback imageLoadCallback) {
         mImageSource = imageSource;
         mImageViewReference = new WeakReference<>(imageView);
-        mImageLoadCallback = imageLoadCallback;
         mImageLoader = imageLoader;
+        mPauseWorkLock = pauseWorkLock;
+        mImageLoadCallback = imageLoadCallback;
     }
 
     public void loadImage() {
-        Bitmap image = null;
-        synchronized (mImageLoader.getPauseWorkLock()) {
+        synchronized (mPauseWorkLock) {
             while (mImageLoader.isPauseWork() && !isCancelled()) {
                 try {
-                    mImageLoader.getPauseWorkLock().wait();
+                    mPauseWorkLock.wait();
                 } catch (InterruptedException ignored) {
                 }
             }
         }
-        if (!isCancelled() && getAttachedImageView() != null &&
-                !mImageLoader.isExitTasksEarly()) {
-            StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
-            if (storageImageCache != null) {
-                image = storageImageCache.get(mImageSource.getKey());
-                if (image != null && mImageLoadCallback != null) {
-                    mImageLoadCallback.onImageLoaded(image, false, true);
-                }
+        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() != null) {
+            return;
+        }
+        Bitmap image = null;
+        StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
+        if (storageImageCache != null) {
+            image = storageImageCache.get(mImageSource.getKey());
+            if (image != null && mImageLoadCallback != null) {
+                mImageLoadCallback.onImageLoaded(image, false, true);
             }
-            if (image == null) {
-                BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
-                if (bitmapLoader != null) {
-                    image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
+        }
+        if (image == null) {
+            BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
+            if (bitmapLoader != null) {
+                image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
+            }
+            if (image != null) {
+                if (mImageLoadCallback != null) {
+                    mImageLoadCallback.onImageLoaded(image, false, false);
                 }
-                if (image != null) {
-                    if (mImageLoadCallback != null) {
-                        mImageLoadCallback.onImageLoaded(image, false, false);
-                    }
-                    if (storageImageCache != null) {
-                        storageImageCache.put(mImageSource.getKey(), image);
-                    }
+                if (storageImageCache != null) {
+                    storageImageCache.put(mImageSource.getKey(), image);
                 }
             }
         }
@@ -98,6 +98,9 @@ final class LoadImageAction<T> {
             if (memoryImageCache != null) {
                 memoryImageCache.put(mImageSource.getKey(), drawable);
             }
+        }
+        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() != null) {
+            return;
         }
         ThreadUtils.runOnMainThread(
                 new SetImageAction(drawable, mImageLoader, mImageLoadCallback, this));
@@ -118,17 +121,16 @@ final class LoadImageAction<T> {
         return null;
     }
 
-    public boolean execute(@NonNull ExecutorService executor) {
+    public boolean execute() {
         if (!isCancelled() && !isFinished() && mSubmitted.compareAndSet(false, true)) {
-            mFuture = executor.submit(new Callable<Void>() {
+            mFuture.set(AndroidWheelsExecutors.getImageLoaderExecutor().submit(new Runnable() {
                 @Override
-                public Void call() throws Exception {
+                public void run() {
                     loadImage();
-                    mFinished = true;
+                    mFinished.set(true);
                     mSubmitted.set(false);
-                    return null;
                 }
-            });
+            }));
             return true;
         } else {
             return false;
@@ -136,20 +138,18 @@ final class LoadImageAction<T> {
     }
 
     public void cancel() {
-        if (mFuture != null) {
-            mFuture.cancel(true);
-        }
-        mCancelled = true;
-        synchronized (mImageLoader.getPauseWorkLock()) {
-            mImageLoader.getPauseWorkLock().notifyAll();
+        mCancelled.set(true);
+        Future<?> future = mFuture.get();
+        if (future != null) {
+            future.cancel(false);
         }
     }
 
     public boolean reset() {
         if (isFinished() || isCancelled()) {
-            mFuture = null;
-            mFinished = false;
-            mCancelled = false;
+            mFuture.set(null);
+            mFinished.set(false);
+            mCancelled.set(false);
             mSubmitted.set(false);
             return true;
         } else {
@@ -158,10 +158,10 @@ final class LoadImageAction<T> {
     }
 
     public boolean isFinished() {
-        return mFinished;
+        return mFinished.get();
     }
 
     public boolean isCancelled() {
-        return mCancelled;
+        return mCancelled.get();
     }
 }

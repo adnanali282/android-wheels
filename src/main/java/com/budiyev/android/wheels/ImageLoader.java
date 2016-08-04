@@ -106,11 +106,6 @@ public class ImageLoader<T> {
         mStorageImageCache = storageImageCache;
     }
 
-    @NonNull
-    Object getPauseWorkLock() {
-        return mPauseWorkLock;
-    }
-
     /**
      * Context of this {@link ImageLoader} instance
      */
@@ -122,18 +117,18 @@ public class ImageLoader<T> {
     /**
      * Whether to pause image loading
      */
-    protected boolean isPauseWork() {
+    public boolean isPauseWork() {
         return mPauseWork;
     }
 
     /**
      * Whether to pause image loading
      */
-    protected void setPauseWork(boolean pauseWork) {
-        synchronized (getPauseWorkLock()) {
+    public void setPauseWork(boolean pauseWork) {
+        synchronized (mPauseWorkLock) {
             mPauseWork = pauseWork;
             if (!isPauseWork()) {
-                getPauseWorkLock().notifyAll();
+                mPauseWorkLock.notifyAll();
             }
         }
     }
@@ -163,13 +158,14 @@ public class ImageLoader<T> {
                     new SimpleSetImageAction(imageView, drawable, imageLoadCallback));
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
-                    new LoadImageAction<>(imageSource, imageView, imageLoadCallback, this);
+                    new LoadImageAction<>(imageSource, imageView, this, mPauseWorkLock,
+                            imageLoadCallback);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
             ThreadUtils.runOnMainThread(
                     new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
-            loadAction.execute(AndroidWheelsExecutors.getImageLoaderExecutor());
+            loadAction.execute();
         }
     }
 
