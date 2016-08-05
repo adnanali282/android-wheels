@@ -500,6 +500,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code iterable} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static <T> IterableCompat<T> wrap(@NonNull final Iterable<T> iterable) {
@@ -508,6 +510,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static <T> IterableCompat<T> wrap(@NonNull T[] array) {
@@ -516,6 +520,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Boolean> wrap(@NonNull final boolean[] array) {
@@ -535,6 +541,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Byte> wrap(@NonNull final byte[] array) {
@@ -554,6 +562,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Short> wrap(@NonNull final short[] array) {
@@ -573,6 +583,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Integer> wrap(@NonNull final int[] array) {
@@ -592,6 +604,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Long> wrap(@NonNull final long[] array) {
@@ -611,6 +625,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Float> wrap(@NonNull final float[] array) {
@@ -630,6 +646,8 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Wrap specified {@code array} into {@link IterableCompat}
+     * <br>
+     * <b>Lazy evaluation</b>
      */
     @NonNull
     public static IterableCompat<Double> wrap(@NonNull final double[] array) {
