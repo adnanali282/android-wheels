@@ -336,7 +336,31 @@ public final class IterableCompat<T> implements Iterable<T> {
         for (T element : list) {
             converted.add(converter.apply(element));
         }
-        return new IterableCompat<>(converted);
+        IterableCompat<H> iterableCompat = new IterableCompat<>();
+        iterableCompat.setList(converted);
+        return iterableCompat;
+    }
+
+    /**
+     * Convert all elements to many elements using specified {@code converter}
+     */
+    @NonNull
+    public <H> IterableCompat<H> convertToMany(@NonNull ConverterCompat<T, Iterable<H>> converter) {
+        List<T> source = executeTasks();
+        List<H> converted = new ArrayList<>();
+        for (T element : source) {
+            Iterable<H> convertResult = converter.apply(element);
+            if (convertResult instanceof Collection) {
+                converted.addAll((Collection<H>) convertResult);
+            } else {
+                for (H convertedElement : convertResult) {
+                    converted.add(convertedElement);
+                }
+            }
+        }
+        IterableCompat<H> iterableCompat = new IterableCompat<>();
+        iterableCompat.setList(converted);
+        return iterableCompat;
     }
 
     /**
