@@ -340,7 +340,7 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @NonNull
     public <H> IterableCompat<H> convertToMany(
-            @NonNull final ConverterCompat<T, Iterable<H>> converter) {
+            @NonNull final ConverterToManyCompat<T, H> converter) {
         final IterableCompat<H> iterableCompat = new IterableCompat<>();
         iterableCompat.enqueueTask(new Runnable() {
             @Override
