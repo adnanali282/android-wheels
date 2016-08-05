@@ -88,8 +88,6 @@ public final class IterableCompat<T> implements Iterable<T> {
     private IterableCompat() {
     }
 
-    //region Non-terminal methods
-
     /**
      * Add specified {@code element} to end of sequence
      * <br>
@@ -313,9 +311,59 @@ public final class IterableCompat<T> implements Iterable<T> {
         return this;
     }
 
-    //endregion
+    /**
+     * Convert all elements using specified {@code converter}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
+    @NonNull
+    public <H> IterableCompat<H> convert(@NonNull final ConverterCompat<T, H> converter) {
+        final IterableCompat<H> iterableCompat = new IterableCompat<>();
+        iterableCompat.enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> list = executeTasks();
+                List<H> converted = new ArrayList<>();
+                for (T element : list) {
+                    converted.add(converter.apply(element));
+                }
+                iterableCompat.setList(converted);
+            }
+        });
+        return iterableCompat;
+    }
 
-    //region Terminal methods
+    /**
+     * Convert all elements to many elements using specified {@code converter}
+     * <br>
+     * <b>Lazy evaluation</b>
+     */
+    @NonNull
+    public <H> IterableCompat<H> convertToMany(
+            @NonNull final ConverterCompat<T, Iterable<H>> converter) {
+        final IterableCompat<H> iterableCompat = new IterableCompat<>();
+        iterableCompat.enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> source = executeTasks();
+                List<H> converted = new ArrayList<>();
+                for (T element : source) {
+                    Iterable<H> convertResult = converter.apply(element);
+                    if (convertResult instanceof IterableCompat) {
+                        converted.addAll(((IterableCompat<H>) convertResult).asList());
+                    } else if (convertResult instanceof Collection) {
+                        converted.addAll((Collection<H>) convertResult);
+                    } else {
+                        for (H convertedElement : convertResult) {
+                            converted.add(convertedElement);
+                        }
+                    }
+                }
+                iterableCompat.setList(converted);
+            }
+        });
+        return iterableCompat;
+    }
 
     /**
      * {@inheritDoc}
@@ -324,45 +372,6 @@ public final class IterableCompat<T> implements Iterable<T> {
     public Iterator<T> iterator() {
         Iterable<T> iterable = executeTasks();
         return iterable.iterator();
-    }
-
-    /**
-     * Convert all elements using specified {@code converter}
-     */
-    @NonNull
-    public <H> IterableCompat<H> convert(@NonNull ConverterCompat<T, H> converter) {
-        List<T> list = executeTasks();
-        List<H> converted = new ArrayList<>();
-        for (T element : list) {
-            converted.add(converter.apply(element));
-        }
-        IterableCompat<H> iterableCompat = new IterableCompat<>();
-        iterableCompat.setList(converted);
-        return iterableCompat;
-    }
-
-    /**
-     * Convert all elements to many elements using specified {@code converter}
-     */
-    @NonNull
-    public <H> IterableCompat<H> convertToMany(@NonNull ConverterCompat<T, Iterable<H>> converter) {
-        List<T> source = executeTasks();
-        List<H> converted = new ArrayList<>();
-        for (T element : source) {
-            Iterable<H> convertResult = converter.apply(element);
-            if (convertResult instanceof IterableCompat) {
-                converted.addAll(((IterableCompat<H>) convertResult).asList());
-            } else if (convertResult instanceof Collection) {
-                converted.addAll((Collection<H>) convertResult);
-            } else {
-                for (H convertedElement : convertResult) {
-                    converted.add(convertedElement);
-                }
-            }
-        }
-        IterableCompat<H> iterableCompat = new IterableCompat<>();
-        iterableCompat.setList(converted);
-        return iterableCompat;
     }
 
     /**
@@ -489,8 +498,6 @@ public final class IterableCompat<T> implements Iterable<T> {
     public List<T> asList() {
         return executeTasks();
     }
-
-    //endregion
 
     @NonNull
     private List<T> getList() {
