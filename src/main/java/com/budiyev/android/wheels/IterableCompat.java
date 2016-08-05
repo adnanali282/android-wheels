@@ -504,7 +504,7 @@ public final class IterableCompat<T> implements Iterable<T> {
      * <b>Lazy evaluation</b>
      */
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull final Iterable<T> iterable) {
+    public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
         return new IterableCompat<>(iterable);
     }
 
