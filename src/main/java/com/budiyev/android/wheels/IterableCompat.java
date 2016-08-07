@@ -495,9 +495,8 @@ public final class IterableCompat<T> implements Iterable<T> {
     private List<T> executeTasks() {
         mTasksLock.lock();
         try {
-            for (Runnable operation = mTasksQueue.poll(); operation != null;
-                    operation = mTasksQueue.poll()) {
-                operation.run();
+            for (Runnable task = mTasksQueue.poll(); task != null; task = mTasksQueue.poll()) {
+                task.run();
             }
             return getList();
         } finally {
