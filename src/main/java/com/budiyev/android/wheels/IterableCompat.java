@@ -56,35 +56,6 @@ public final class IterableCompat<T> implements Iterable<T> {
     private final Lock mTasksLock = new ReentrantLock(true);
     private volatile List<T> mList;
 
-    private IterableCompat(@NonNull final Iterable<T> iterable) {
-        enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<T> list;
-                if (iterable instanceof Collection) {
-                    list = new ArrayList<>(((Collection<T>) iterable).size());
-                } else {
-                    list = new ArrayList<>();
-                }
-                for (T element : iterable) {
-                    list.add(element);
-                }
-                setList(list);
-            }
-        });
-    }
-
-    private IterableCompat(@NonNull final T[] array) {
-        enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<T> list = new ArrayList<>(array.length);
-                Collections.addAll(list, array);
-                setList(list);
-            }
-        });
-    }
-
     private IterableCompat() {
     }
 
@@ -537,8 +508,26 @@ public final class IterableCompat<T> implements Iterable<T> {
      * <b>Lazy evaluation</b>
      */
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull Iterable<T> iterable) {
-        return new IterableCompat<>(iterable);
+    public static <T> IterableCompat<T> wrap(@NonNull final Iterable<T> iterable) {
+        final IterableCompat<T> iterableCompat = new IterableCompat<>();
+        iterableCompat.enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> list;
+                if (iterable instanceof Collection) {
+                    Collection<T> collection = (Collection<T>) iterable;
+                    list = new ArrayList<>(collection.size());
+                    list.addAll(collection);
+                } else {
+                    list = new ArrayList<>();
+                    for (T element : iterable) {
+                        list.add(element);
+                    }
+                }
+                iterableCompat.setList(list);
+            }
+        });
+        return iterableCompat;
     }
 
     /**
@@ -547,8 +536,17 @@ public final class IterableCompat<T> implements Iterable<T> {
      * <b>Lazy evaluation</b>
      */
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull T[] array) {
-        return new IterableCompat<>(array);
+    public static <T> IterableCompat<T> wrap(@NonNull final T[] array) {
+        final IterableCompat<T> iterableCompat = new IterableCompat<>();
+        iterableCompat.enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> list = new ArrayList<>(array.length);
+                Collections.addAll(list, array);
+                iterableCompat.setList(list);
+            }
+        });
+        return iterableCompat;
     }
 
     /**
