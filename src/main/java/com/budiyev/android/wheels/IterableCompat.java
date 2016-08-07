@@ -114,14 +114,15 @@ public final class IterableCompat<T> implements Iterable<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
+                List<T> source = getList();
                 List<T> filtered = new ArrayList<>();
-                for (T element : list) {
+                for (T element : source) {
                     if (predicate.apply(element)) {
                         filtered.add(element);
                     }
                 }
                 setList(filtered);
+                source.clear();
             }
         });
         return this;
@@ -293,12 +294,13 @@ public final class IterableCompat<T> implements Iterable<T> {
         iterableCompat.enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = executeTasks();
+                List<T> source = executeTasks();
                 List<H> converted = new ArrayList<>();
-                for (T element : list) {
+                for (T element : source) {
                     converted.add(converter.apply(element));
                 }
                 iterableCompat.setList(converted);
+                source.clear();
             }
         });
         return iterableCompat;
@@ -331,6 +333,7 @@ public final class IterableCompat<T> implements Iterable<T> {
                     }
                 }
                 iterableCompat.setList(converted);
+                source.clear();
             }
         });
         return iterableCompat;
