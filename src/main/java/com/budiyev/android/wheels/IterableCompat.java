@@ -323,7 +323,7 @@ public final class IterableCompat<T> implements Iterable<T> {
                 for (T element : source) {
                     Iterable<H> convertResult = converter.apply(element);
                     if (convertResult instanceof IterableCompat) {
-                        converted.addAll(((IterableCompat<H>) convertResult).asList());
+                        converted.addAll(((IterableCompat<H>) convertResult).executeTasks());
                     } else if (convertResult instanceof Collection) {
                         converted.addAll((Collection<H>) convertResult);
                     } else {
