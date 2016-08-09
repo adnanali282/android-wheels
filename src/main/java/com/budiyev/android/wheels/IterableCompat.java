@@ -348,6 +348,43 @@ public final class IterableCompat<T> implements Iterable<T> {
         return iterable.iterator();
     }
 
+    @Nullable
+    public T aggregate(@NonNull AggregatorCompat<T, T> aggregator) {
+        List<T> list = executeTasks();
+        boolean first = true;
+        T accumulator = null;
+        for (T element : list) {
+            if (first) {
+                accumulator = element;
+                first = false;
+                continue;
+            }
+            accumulator = aggregator.apply(accumulator, element);
+        }
+        return accumulator;
+    }
+
+    @Nullable
+    public <A> A aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator) {
+        List<T> list = executeTasks();
+        A accumulator = seed;
+        for (T element : list) {
+            accumulator = aggregator.apply(accumulator, element);
+        }
+        return accumulator;
+    }
+
+    @Nullable
+    public <A, H> H aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator,
+            @NonNull ConverterCompat<A, H> converter) {
+        List<T> list = executeTasks();
+        A accumulator = seed;
+        for (T element : list) {
+            accumulator = aggregator.apply(accumulator, element);
+        }
+        return converter.apply(accumulator);
+    }
+
     /**
      * First element, or {@code null} if there are no elements
      */
