@@ -398,10 +398,14 @@ public class CollectionUtils {
                 if (end > listSize) {
                     end = listSize;
                 }
-                for (int i = start; i < end; i++) {
-                    if (i >= position - previousOffset && i <= position + previousOffset) {
-                        continue;
+                int startOffset = position - previousOffset;
+                for (int i = start; i < startOffset; i++) {
+                    if (Objects.equals(item, list.get(i))) {
+                        return i;
                     }
+                }
+                int endOffset = position + previousOffset + 1;
+                for (int i = endOffset; i < end; i++) {
                     if (Objects.equals(item, list.get(i))) {
                         return i;
                     }
