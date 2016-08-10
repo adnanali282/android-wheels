@@ -46,6 +46,7 @@ import java.util.List;
  * @see IterableQuery#from(long[])
  * @see IterableQuery#from(float[])
  * @see IterableQuery#from(double[])
+ * @see IterableQuery#from(char[])
  */
 public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     private IterableQuery() {
