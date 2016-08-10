@@ -75,7 +75,7 @@ final class PostHttpRequest extends HttpRequest {
             try {
                 String boundary = "===" + System.currentTimeMillis() + "===";
                 String query = mUrl;
-                if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
+                if (!CollectionUtils.isNullOrEmpty(mQueryParameters)) {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);

@@ -54,7 +54,7 @@ final class GetHttpRequest extends HttpRequest {
             RequestResult result = new RequestResult();
             try {
                 String query = mUrl;
-                if (!CommonUtils.isNullOrEmpty(mQueryParameters)) {
+                if (!CollectionUtils.isNullOrEmpty(mQueryParameters)) {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
