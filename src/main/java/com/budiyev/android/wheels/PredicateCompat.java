@@ -26,13 +26,13 @@ package com.budiyev.android.wheels;
 /**
  * Predicate
  *
- * @see IterableCompat#filter(PredicateCompat)
- * @see IterableCompat#takeWhile(PredicateCompat)
- * @see IterableCompat#skipWhile(PredicateCompat)
- * @see IterableCompat#first(PredicateCompat)
- * @see IterableCompat#all(PredicateCompat)
- * @see IterableCompat#none(PredicateCompat)
- * @see IterableCompat#has(PredicateCompat)
+ * @see IterableQuery#filter(PredicateCompat)
+ * @see IterableQuery#takeWhile(PredicateCompat)
+ * @see IterableQuery#skipWhile(PredicateCompat)
+ * @see IterableQuery#first(PredicateCompat)
+ * @see IterableQuery#all(PredicateCompat)
+ * @see IterableQuery#none(PredicateCompat)
+ * @see IterableQuery#has(PredicateCompat)
  */
 public interface PredicateCompat<T> {
     boolean apply(T value);

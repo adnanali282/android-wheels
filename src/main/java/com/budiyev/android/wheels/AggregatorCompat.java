@@ -23,6 +23,20 @@
  */
 package com.budiyev.android.wheels;
 
+/**
+ * Accumulator function
+ *
+ * @see IterableQuery#aggregate(AggregatorCompat)
+ * @see IterableQuery#aggregate(Object, AggregatorCompat)
+ * @see IterableQuery#aggregate(Object, AggregatorCompat, ConverterCompat)
+ */
 public interface AggregatorCompat<A, T> {
+    /**
+     * Apply function
+     *
+     * @param accumulator Accumulated value
+     * @param value       Next value from sequence
+     * @return Accumulated value
+     */
     A apply(A accumulator, T value);
 }

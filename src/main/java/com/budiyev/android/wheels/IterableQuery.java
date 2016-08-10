@@ -32,44 +32,35 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Object query API
  *
- * @see IterableCompat#wrap(Iterable)
- * @see IterableCompat#wrap(Object[])
- * @see IterableCompat#wrap(boolean[])
- * @see IterableCompat#wrap(byte[])
- * @see IterableCompat#wrap(short[])
- * @see IterableCompat#wrap(int[])
- * @see IterableCompat#wrap(long[])
- * @see IterableCompat#wrap(float[])
- * @see IterableCompat#wrap(double[])
+ * @see IterableQuery#from(Iterable)
+ * @see IterableQuery#from(Object[])
+ * @see IterableQuery#from(boolean[])
+ * @see IterableQuery#from(byte[])
+ * @see IterableQuery#from(short[])
+ * @see IterableQuery#from(int[])
+ * @see IterableQuery#from(long[])
+ * @see IterableQuery#from(float[])
+ * @see IterableQuery#from(double[])
  */
-public final class IterableCompat<T> implements Iterable<T> {
-    private final Queue<Runnable> mTasksQueue = new LinkedList<>();
-    private final Lock mTasksLock = new ReentrantLock(true);
-    private volatile List<T> mList;
-
-    private IterableCompat() {
+public final class IterableQuery<T> extends AbstractIterableQuery<T> {
+    private IterableQuery() {
     }
 
     /**
      * Add specified {@code element} to end of sequence
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> add(@Nullable final T element) {
+    public IterableQuery<T> add(@Nullable final T element) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                getList().add(element);
+                makeIterableMutable();
+                ((List<T>) getIterable()).add(element);
             }
         });
         return this;
@@ -77,21 +68,20 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Add all elements of specified {@code iterable} to end of sequence
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> add(@NonNull final Iterable<T> iterable) {
+    public IterableQuery<T> add(@NonNull final Iterable<T> iterable) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
                 Iterable<T> operand;
-                if (iterable instanceof IterableCompat) {
-                    operand = ((IterableCompat<T>) iterable).executeTasks();
+                if (iterable instanceof IterableQuery) {
+                    operand = ((IterableQuery<T>) iterable).executeTasks();
                 } else {
                     operand = iterable;
                 }
-                List<T> list = getList();
+                makeIterableMutable();
+                List<T> list = (List<T>) getIterable();
                 if (operand instanceof Collection) {
                     list.addAll((Collection<T>) operand);
                 } else {
@@ -106,23 +96,23 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Remove all elements that doesn't match specified {@code predicate}
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> filter(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> filter(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> source = getList();
+                Iterable<T> source = getIterable();
                 List<T> filtered = new ArrayList<>();
                 for (T element : source) {
                     if (predicate.apply(element)) {
                         filtered.add(element);
                     }
                 }
-                setList(filtered);
-                source.clear();
+                setIterable(filtered);
+                if (isIterableMutable()) {
+                    ((List<T>) source).clear();
+                }
             }
         });
         return this;
@@ -130,15 +120,13 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Apply specified {@code function} to all elements
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> apply(@NonNull final FunctionCompat<T> function) {
+    public IterableQuery<T> apply(@NonNull final FunctionCompat<T> function) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
+                Iterable<T> list = getIterable();
                 for (T element : list) {
                     function.apply(element);
                 }
@@ -149,20 +137,33 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Retain only first {@code count} of elements
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
-        if (count < 0) {
+    public IterableQuery<T> take(@IntRange(from = 1, to = Integer.MAX_VALUE) final int count) {
+        if (count < 1) {
             throw new IllegalArgumentException();
         }
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
-                if (count > 0 && count < list.size()) {
-                    setList(list.subList(0, count));
+                Iterable<T> iterable = getIterable();
+                if (iterable instanceof List) {
+                    List<T> list = (List<T>) iterable;
+                    if (count > 0 && count < list.size()) {
+                        setIterable(list.subList(0, count));
+                    }
+                } else {
+                    List<T> taken = new ArrayList<>(count);
+                    int added = 0;
+                    for (T element : iterable) {
+                        taken.add(element);
+                        added++;
+                        if (added >= count) {
+                            break;
+                        }
+                    }
+                    setIterable(taken);
+                    setIterableMutable(true);
                 }
             }
         });
@@ -171,26 +172,38 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Retain only first sequence of elements that matches specified {@code predicate}
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> takeWhile(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> takeWhile(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
-                int size = list.size();
-                int count = 0;
-                for (int i = 0; i < size; i++) {
-                    if (predicate.apply(list.get(i))) {
-                        count = i + 1;
-                    } else {
-                        break;
+                Iterable<T> iterable = getIterable();
+                if (iterable instanceof List) {
+                    List<T> list = (List<T>) iterable;
+                    int size = list.size();
+                    int count = 0;
+                    for (int i = 0; i < size; i++) {
+                        if (predicate.apply(list.get(i))) {
+                            count = i + 1;
+                        } else {
+                            break;
+                        }
                     }
-                }
-                if (count > 0 && count < size) {
-                    setList(list.subList(0, count));
+                    if (count > 0 && count < size) {
+                        setIterable(list.subList(0, count));
+                    }
+                } else {
+                    List<T> taken = new ArrayList<>();
+                    for (T element : iterable) {
+                        if (predicate.apply(element)) {
+                            taken.add(element);
+                        } else {
+                            break;
+                        }
+                    }
+                    setIterable(taken);
+                    setIterableMutable(true);
                 }
             }
         });
@@ -199,23 +212,40 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Remove first {@code count} of elements
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
+    public IterableQuery<T> skip(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
         if (count < 0) {
             throw new IllegalArgumentException();
         }
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
-                int size = list.size();
-                if (count >= size) {
-                    list.clear();
+                Iterable<T> iterable = getIterable();
+                if (iterable instanceof List) {
+                    List<T> list = (List<T>) iterable;
+                    int size = list.size();
+                    if (count >= size) {
+                        if (isIterableMutable()) {
+                            list.clear();
+                        } else {
+                            setIterable(new ArrayList<T>());
+                            setIterableMutable(true);
+                        }
+                    } else {
+                        setIterable(list.subList(count, size));
+                    }
                 } else {
-                    setList(list.subList(count, size));
+                    List<T> rest = new ArrayList<>();
+                    int position = 0;
+                    for (T element : iterable) {
+                        if (position >= count) {
+                            rest.add(element);
+                        }
+                        position++;
+                    }
+                    setIterable(rest);
+                    setIterableMutable(true);
                 }
             }
         });
@@ -224,25 +254,39 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Remove first sequence of elements that matches specified {@code predicate}
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> skipWhile(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> skipWhile(@NonNull final PredicateCompat<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> list = getList();
-                int size = list.size();
-                int start = 0;
-                for (int i = 0; i < size; i++) {
-                    if (!predicate.apply(list.get(i))) {
-                        start = i;
-                        break;
+                Iterable<T> iterable = getIterable();
+                if (iterable instanceof List) {
+                    List<T> list = (List<T>) iterable;
+                    int size = list.size();
+                    int start = 0;
+                    for (int i = 0; i < size; i++) {
+                        if (!predicate.apply(list.get(i))) {
+                            start = i;
+                            break;
+                        }
                     }
-                }
-                if (start > 0) {
-                    setList(list.subList(start, size));
+                    if (start > 0) {
+                        setIterable(list.subList(start, size));
+                    }
+                } else {
+                    List<T> rest = new ArrayList<>();
+                    boolean skip = true;
+                    for (T element : iterable) {
+                        if (skip) {
+                            skip = predicate.apply(element);
+                        }
+                        if (!skip) {
+                            rest.add(element);
+                        }
+                    }
+                    setIterable(rest);
+                    setIterableMutable(true);
                 }
             }
         });
@@ -253,15 +297,14 @@ public final class IterableCompat<T> implements Iterable<T> {
      * Sort using specified {@code comparator}
      * <br>
      * Sorting algorithm is <b>unstable</b> (Heapsort)
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> sort(@NonNull final Comparator<T> comparator) {
+    public IterableQuery<T> sort(@NonNull final Comparator<T> comparator) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                CommonUtils.sort(getList(), comparator);
+                makeIterableMutable();
+                CommonUtils.sort((List<T>) getIterable(), comparator);
             }
         });
         return this;
@@ -269,15 +312,14 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Reverse elements order
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public IterableCompat<T> reverse() {
+    public IterableQuery<T> reverse() {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Collections.reverse(getList());
+                makeIterableMutable();
+                Collections.reverse((List<T>) getIterable());
             }
         });
         return this;
@@ -285,46 +327,43 @@ public final class IterableCompat<T> implements Iterable<T> {
 
     /**
      * Convert all elements using specified {@code converter}
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public <H> IterableCompat<H> convert(@NonNull final ConverterCompat<T, H> converter) {
-        final IterableCompat<H> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public <H> IterableQuery<H> convert(@NonNull final ConverterCompat<T, H> converter) {
+        final IterableQuery<H> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> source = executeTasks();
+                Iterable<T> source = executeTasks();
                 List<H> converted = new ArrayList<>();
                 for (T element : source) {
                     converted.add(converter.apply(element));
                 }
-                iterableCompat.setList(converted);
-                source.clear();
+                query.setIterable(converted);
+                query.setIterableMutable(true);
+                if (isIterableMutable()) {
+                    ((List<T>) source).clear();
+                }
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
      * Convert all elements to many elements using specified {@code converter}
-     * <br>
-     * <b>Lazy evaluation</b>
      */
     @NonNull
-    public <H> IterableCompat<H> convertToMany(
+    public <H> IterableQuery<H> convertToMany(
             @NonNull final ConverterToManyCompat<T, H> converter) {
-        final IterableCompat<H> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+        final IterableQuery<H> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
-                List<T> source = executeTasks();
+                Iterable<T> source = executeTasks();
                 List<H> converted = new ArrayList<>();
                 for (T element : source) {
                     Iterable<H> convertResult = converter.apply(element);
-                    if (convertResult instanceof IterableCompat) {
-                        converted.addAll(((IterableCompat<H>) convertResult).executeTasks());
-                    } else if (convertResult instanceof Collection) {
+                    if (convertResult instanceof Collection) {
                         converted.addAll((Collection<H>) convertResult);
                     } else {
                         for (H convertedElement : convertResult) {
@@ -332,11 +371,14 @@ public final class IterableCompat<T> implements Iterable<T> {
                         }
                     }
                 }
-                iterableCompat.setList(converted);
-                source.clear();
+                query.setIterable(converted);
+                query.setIterableMutable(true);
+                if (isIterableMutable()) {
+                    ((List<T>) source).clear();
+                }
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
@@ -344,16 +386,20 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @Override
     public Iterator<T> iterator() {
-        Iterable<T> iterable = executeTasks();
-        return iterable.iterator();
+        return executeTasks().iterator();
     }
 
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
     @Nullable
     public T aggregate(@NonNull AggregatorCompat<T, T> aggregator) {
-        List<T> list = executeTasks();
         boolean first = true;
         T accumulator = null;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             if (first) {
                 accumulator = element;
                 first = false;
@@ -364,22 +410,35 @@ public final class IterableCompat<T> implements Iterable<T> {
         return accumulator;
     }
 
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
     @Nullable
     public <A> A aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator) {
-        List<T> list = executeTasks();
         A accumulator = seed;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             accumulator = aggregator.apply(accumulator, element);
         }
         return accumulator;
     }
 
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @param converter  Converter form accumulated value to result value
+     * @return Converted accumulated value
+     */
     @Nullable
     public <A, H> H aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator,
             @NonNull ConverterCompat<A, H> converter) {
-        List<T> list = executeTasks();
         A accumulator = seed;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             accumulator = aggregator.apply(accumulator, element);
         }
         return converter.apply(accumulator);
@@ -390,9 +449,9 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @Nullable
     public T first() {
-        List<T> list = executeTasks();
-        if (list.size() > 0) {
-            return list.get(1);
+        Iterator<T> iterator = executeTasks().iterator();
+        if (iterator.hasNext()) {
+            return iterator.next();
         } else {
             return null;
         }
@@ -404,8 +463,7 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @Nullable
     public T first(@NonNull PredicateCompat<T> predicate) {
-        List<T> list = executeTasks();
-        for (T element : list) {
+        for (T element : executeTasks()) {
             if (predicate.apply(element)) {
                 return element;
             }
@@ -419,10 +477,9 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @Nullable
     public T min(@NonNull Comparator<T> comparator) {
-        List<T> list = executeTasks();
         T min = null;
         boolean first = true;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             if (first) {
                 min = element;
                 first = false;
@@ -441,10 +498,9 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @Nullable
     public T max(@NonNull Comparator<T> comparator) {
-        List<T> list = executeTasks();
         T max = null;
         boolean first = true;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             if (first) {
                 max = element;
                 first = false;
@@ -461,9 +517,8 @@ public final class IterableCompat<T> implements Iterable<T> {
      * Whether all elements match specified predicate
      */
     public boolean all(@NonNull PredicateCompat<T> predicate) {
-        List<T> list = executeTasks();
         boolean all = true;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             all &= predicate.apply(element);
         }
         return all;
@@ -473,9 +528,8 @@ public final class IterableCompat<T> implements Iterable<T> {
      * Whether no elements match specified predicate
      */
     public boolean none(@NonNull PredicateCompat<T> predicate) {
-        List<T> list = executeTasks();
         boolean none = true;
-        for (T element : list) {
+        for (T element : executeTasks()) {
             none &= !predicate.apply(element);
         }
         return none;
@@ -485,8 +539,7 @@ public final class IterableCompat<T> implements Iterable<T> {
      * Whether any elements match specified predicate
      */
     public boolean has(@NonNull PredicateCompat<T> predicate) {
-        Iterable<T> iterable = executeTasks();
-        for (T element : iterable) {
+        for (T element : executeTasks()) {
             if (predicate.apply(element)) {
                 return true;
             }
@@ -498,8 +551,16 @@ public final class IterableCompat<T> implements Iterable<T> {
      * Count elements
      */
     public int size() {
-        List<T> list = executeTasks();
-        return list.size();
+        Iterable<T> iterable = executeTasks();
+        if (iterable instanceof Collection) {
+            return ((Collection) iterable).size();
+        } else {
+            int count = 0;
+            for (T element : iterable) {
+                count++;
+            }
+            return count;
+        }
     }
 
     /**
@@ -507,231 +568,184 @@ public final class IterableCompat<T> implements Iterable<T> {
      */
     @NonNull
     public List<T> asList() {
-        return executeTasks();
-    }
-
-    @NonNull
-    private List<T> getList() {
-        return mList;
-    }
-
-    private void setList(@NonNull List<T> list) {
-        mList = list;
-    }
-
-    private void enqueueTask(@NonNull Runnable task) {
-        mTasksLock.lock();
-        try {
-            mTasksQueue.offer(task);
-        } finally {
-            mTasksLock.unlock();
-        }
-    }
-
-    @NonNull
-    private List<T> executeTasks() {
-        mTasksLock.lock();
-        try {
-            for (Runnable task = mTasksQueue.poll(); task != null; task = mTasksQueue.poll()) {
-                task.run();
+        Iterable<T> iterable = executeTasks();
+        if (iterable instanceof List) {
+            return (List<T>) iterable;
+        } else {
+            List<T> list = new ArrayList<>();
+            for (T element : iterable) {
+                list.add(element);
             }
-            return getList();
-        } finally {
-            mTasksLock.unlock();
+            setIterableMutable(true);
+            return list;
         }
     }
 
     /**
-     * Wrap specified {@code iterable} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code iterable}
      */
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull final Iterable<T> iterable) {
-        final IterableCompat<T> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<T> list;
-                if (iterable instanceof Collection) {
-                    Collection<T> collection = (Collection<T>) iterable;
-                    list = new ArrayList<>(collection.size());
-                    list.addAll(collection);
-                } else {
-                    list = new ArrayList<>();
-                    for (T element : iterable) {
-                        list.add(element);
-                    }
-                }
-                iterableCompat.setList(list);
-            }
-        });
-        return iterableCompat;
+    public static <T> IterableQuery<T> from(@NonNull Iterable<T> iterable) {
+        IterableQuery<T> query = new IterableQuery<>();
+        query.setIterable(iterable);
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static <T> IterableCompat<T> wrap(@NonNull final T[] array) {
-        final IterableCompat<T> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static <T> IterableQuery<T> from(@NonNull final T[] array) {
+        final IterableQuery<T> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<T> list = new ArrayList<>(array.length);
                 Collections.addAll(list, array);
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Boolean> wrap(@NonNull final boolean[] array) {
-        final IterableCompat<Boolean> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Boolean> from(@NonNull final boolean[] array) {
+        final IterableQuery<Boolean> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Boolean> list = new ArrayList<>(array.length);
                 for (boolean element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Byte> wrap(@NonNull final byte[] array) {
-        final IterableCompat<Byte> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Byte> from(@NonNull final byte[] array) {
+        final IterableQuery<Byte> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Byte> list = new ArrayList<>(array.length);
                 for (byte element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Short> wrap(@NonNull final short[] array) {
-        final IterableCompat<Short> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Short> from(@NonNull final short[] array) {
+        final IterableQuery<Short> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Short> list = new ArrayList<>(array.length);
                 for (short element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Integer> wrap(@NonNull final int[] array) {
-        final IterableCompat<Integer> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Integer> from(@NonNull final int[] array) {
+        final IterableQuery<Integer> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Integer> list = new ArrayList<>(array.length);
                 for (int element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Long> wrap(@NonNull final long[] array) {
-        final IterableCompat<Long> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Long> from(@NonNull final long[] array) {
+        final IterableQuery<Long> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Long> list = new ArrayList<>(array.length);
                 for (long element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Float> wrap(@NonNull final float[] array) {
-        final IterableCompat<Float> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Float> from(@NonNull final float[] array) {
+        final IterableQuery<Float> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Float> list = new ArrayList<>(array.length);
                 for (float element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 
     /**
-     * Wrap specified {@code array} into {@link IterableCompat}
-     * <br>
-     * <b>Lazy evaluation</b>
+     * Query from specified {@code array}
      */
     @NonNull
-    public static IterableCompat<Double> wrap(@NonNull final double[] array) {
-        final IterableCompat<Double> iterableCompat = new IterableCompat<>();
-        iterableCompat.enqueueTask(new Runnable() {
+    public static IterableQuery<Double> from(@NonNull final double[] array) {
+        final IterableQuery<Double> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
             @Override
             public void run() {
                 List<Double> list = new ArrayList<>(array.length);
                 for (double element : array) {
                     list.add(element);
                 }
-                iterableCompat.setList(list);
+                query.setIterable(list);
+                query.setIterableMutable(true);
             }
         });
-        return iterableCompat;
+        return query;
     }
 }

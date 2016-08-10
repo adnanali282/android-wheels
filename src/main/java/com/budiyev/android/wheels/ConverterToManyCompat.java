@@ -26,7 +26,7 @@ package com.budiyev.android.wheels;
 /**
  * Converter to many elements
  *
- * @see IterableCompat#convertToMany(ConverterToManyCompat)
+ * @see IterableQuery#convertToMany(ConverterToManyCompat)
  */
 public interface ConverterToManyCompat<T, H> {
     Iterable<H> apply(T value);
