@@ -59,8 +59,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                makeIterableMutable();
-                ((List<T>) getIterable()).add(element);
+                getMutableIterable().add(element);
             }
         });
         return this;
@@ -80,8 +79,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 } else {
                     operand = iterable;
                 }
-                makeIterableMutable();
-                List<T> list = (List<T>) getIterable();
+                List<T> list = getMutableIterable();
                 if (operand instanceof Collection) {
                     list.addAll((Collection<T>) operand);
                 } else {
@@ -109,10 +107,10 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         filtered.add(element);
                     }
                 }
-                setIterable(filtered);
                 if (isIterableMutable()) {
                     ((List<T>) source).clear();
                 }
+                setMutableIterable(filtered);
             }
         });
         return this;
@@ -139,32 +137,23 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Retain only first {@code count} of elements
      */
     @NonNull
-    public IterableQuery<T> take(@IntRange(from = 1, to = Integer.MAX_VALUE) final int count) {
-        if (count < 1) {
+    public IterableQuery<T> take(@IntRange(from = 0, to = Integer.MAX_VALUE) final int count) {
+        if (count < 0) {
             throw new IllegalArgumentException();
         }
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> iterable = getIterable();
-                if (iterable instanceof List) {
-                    List<T> list = (List<T>) iterable;
-                    if (count > 0 && count < list.size()) {
-                        setIterable(list.subList(0, count));
+                int added = 0;
+                List<T> taken = new ArrayList<>(count);
+                for (T element : getIterable()) {
+                    if (added == count) {
+                        break;
                     }
-                } else {
-                    List<T> taken = new ArrayList<>(count);
-                    int added = 0;
-                    for (T element : iterable) {
-                        taken.add(element);
-                        added++;
-                        if (added >= count) {
-                            break;
-                        }
-                    }
-                    setIterable(taken);
-                    setIterableMutable(true);
+                    taken.add(element);
+                    added++;
                 }
+                setMutableIterable(taken);
             }
         });
         return this;
@@ -178,33 +167,15 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> iterable = getIterable();
-                if (iterable instanceof List) {
-                    List<T> list = (List<T>) iterable;
-                    int size = list.size();
-                    int count = 0;
-                    for (int i = 0; i < size; i++) {
-                        if (predicate.apply(list.get(i))) {
-                            count = i + 1;
-                        } else {
-                            break;
-                        }
+                List<T> taken = new ArrayList<>();
+                for (T element : getIterable()) {
+                    if (predicate.apply(element)) {
+                        taken.add(element);
+                    } else {
+                        break;
                     }
-                    if (count > 0 && count < size) {
-                        setIterable(list.subList(0, count));
-                    }
-                } else {
-                    List<T> taken = new ArrayList<>();
-                    for (T element : iterable) {
-                        if (predicate.apply(element)) {
-                            taken.add(element);
-                        } else {
-                            break;
-                        }
-                    }
-                    setIterable(taken);
-                    setIterableMutable(true);
                 }
+                setMutableIterable(taken);
             }
         });
         return this;
@@ -221,32 +192,15 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> iterable = getIterable();
-                if (iterable instanceof List) {
-                    List<T> list = (List<T>) iterable;
-                    int size = list.size();
-                    if (count >= size) {
-                        if (isIterableMutable()) {
-                            list.clear();
-                        } else {
-                            setIterable(new ArrayList<T>());
-                            setIterableMutable(true);
-                        }
-                    } else {
-                        setIterable(list.subList(count, size));
+                int position = 0;
+                List<T> rest = new ArrayList<>();
+                for (T element : getIterable()) {
+                    if (position >= count) {
+                        rest.add(element);
                     }
-                } else {
-                    List<T> rest = new ArrayList<>();
-                    int position = 0;
-                    for (T element : iterable) {
-                        if (position >= count) {
-                            rest.add(element);
-                        }
-                        position++;
-                    }
-                    setIterable(rest);
-                    setIterableMutable(true);
+                    position++;
                 }
+                setMutableIterable(rest);
             }
         });
         return this;
@@ -260,34 +214,17 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> iterable = getIterable();
-                if (iterable instanceof List) {
-                    List<T> list = (List<T>) iterable;
-                    int size = list.size();
-                    int start = 0;
-                    for (int i = 0; i < size; i++) {
-                        if (!predicate.apply(list.get(i))) {
-                            start = i;
-                            break;
-                        }
+                boolean skip = true;
+                List<T> rest = new ArrayList<>();
+                for (T element : getIterable()) {
+                    if (skip) {
+                        skip = predicate.apply(element);
                     }
-                    if (start > 0) {
-                        setIterable(list.subList(start, size));
+                    if (!skip) {
+                        rest.add(element);
                     }
-                } else {
-                    List<T> rest = new ArrayList<>();
-                    boolean skip = true;
-                    for (T element : iterable) {
-                        if (skip) {
-                            skip = predicate.apply(element);
-                        }
-                        if (!skip) {
-                            rest.add(element);
-                        }
-                    }
-                    setIterable(rest);
-                    setIterableMutable(true);
                 }
+                setMutableIterable(rest);
             }
         });
         return this;
@@ -303,8 +240,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                makeIterableMutable();
-                CommonUtils.sort((List<T>) getIterable(), comparator);
+                CommonUtils.sort(getMutableIterable(), comparator);
             }
         });
         return this;
@@ -318,8 +254,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                makeIterableMutable();
-                Collections.reverse((List<T>) getIterable());
+                Collections.reverse(getMutableIterable());
             }
         });
         return this;
@@ -339,8 +274,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (T element : source) {
                     converted.add(converter.apply(element));
                 }
-                query.setIterable(converted);
-                query.setIterableMutable(true);
+                query.setMutableIterable(converted);
                 if (isIterableMutable()) {
                     ((List<T>) source).clear();
                 }
@@ -371,22 +305,13 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         }
                     }
                 }
-                query.setIterable(converted);
-                query.setIterableMutable(true);
+                query.setMutableIterable(converted);
                 if (isIterableMutable()) {
                     ((List<T>) source).clear();
                 }
             }
         });
         return query;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return executeTasks().iterator();
     }
 
     /**
@@ -576,7 +501,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
             for (T element : iterable) {
                 list.add(element);
             }
-            setIterableMutable(true);
+            setMutableIterable(list);
             return list;
         }
     }
@@ -602,8 +527,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
             public void run() {
                 List<T> list = new ArrayList<>(array.length);
                 Collections.addAll(list, array);
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -622,8 +546,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (boolean element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -642,8 +565,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (byte element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -662,8 +584,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (short element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -682,8 +603,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (int element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -702,8 +622,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (long element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -722,8 +641,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (float element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;
@@ -742,8 +660,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (double element : array) {
                     list.add(element);
                 }
-                query.setIterable(list);
-                query.setIterableMutable(true);
+                query.setMutableIterable(list);
             }
         });
         return query;

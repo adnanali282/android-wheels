@@ -59,16 +59,10 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
         mIterable = iterable;
     }
 
-    protected boolean isIterableMutable() {
-        return mIterableMutable;
-    }
-
-    protected void setIterableMutable(boolean mutable) {
-        mIterableMutable = mutable;
-    }
-
-    protected void makeIterableMutable() {
-        if (!isIterableMutable()) {
+    protected List<T> getMutableIterable() {
+        if (isIterableMutable()) {
+            return (List<T>) getIterable();
+        } else {
             Iterable<T> iterable = getIterable();
             List<T> list;
             if (iterable instanceof Collection) {
@@ -81,9 +75,18 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
                     list.add(element);
                 }
             }
-            setIterable(list);
-            setIterableMutable(true);
+            setMutableIterable(list);
+            return list;
         }
+    }
+
+    protected void setMutableIterable(@NonNull List<T> iterable) {
+        setIterable(iterable);
+        mIterableMutable = true;
+    }
+
+    protected boolean isIterableMutable() {
+        return mIterableMutable;
     }
 
     protected void enqueueTask(@NonNull Runnable task) {

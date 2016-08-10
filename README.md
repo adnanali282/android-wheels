@@ -10,12 +10,12 @@ Some useful tools for Android
 * CsvParser - Parser/encoder of CSV format
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * CommonUtils - Common useful tools
-* IterableCompat - Object query API
+* IterableQuery - Object query API
 * and more...
 
 ### Usage
 ```
 dependencies {
-    compile 'com.budiyev.android:android-wheels:2.9.2'
+    compile 'com.budiyev.android:android-wheels:3.0.0'
 }
 ```
