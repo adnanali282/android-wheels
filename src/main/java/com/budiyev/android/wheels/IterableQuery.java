@@ -356,6 +356,102 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      *
      * @param seed       Initial accumulator value
      * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public boolean aggregate(boolean seed, @NonNull AggregatorCompat<Boolean, T> aggregator) {
+        Boolean accumulated = aggregate(Boolean.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public byte aggregate(byte seed, @NonNull AggregatorCompat<Byte, T> aggregator) {
+        Byte accumulated = aggregate(Byte.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public short aggregate(short seed, @NonNull AggregatorCompat<Short, T> aggregator) {
+        Short accumulated = aggregate(Short.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public int aggregate(int seed, @NonNull AggregatorCompat<Integer, T> aggregator) {
+        Integer accumulated = aggregate(Integer.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public long aggregate(long seed, @NonNull AggregatorCompat<Long, T> aggregator) {
+        Long accumulated = aggregate(Long.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public float aggregate(float seed, @NonNull AggregatorCompat<Float, T> aggregator) {
+        Float accumulated = aggregate(Float.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public double aggregate(double seed, @NonNull AggregatorCompat<Double, T> aggregator) {
+        Double accumulated = aggregate(Double.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
+     * @return Accumulated value
+     */
+    public char aggregate(char seed, @NonNull AggregatorCompat<Character, T> aggregator) {
+        Character accumulated = aggregate(Character.valueOf(seed), aggregator);
+        return accumulated == null ? seed : accumulated;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     *
+     * @param seed       Initial accumulator value
+     * @param aggregator Accumulator function
      * @param converter  Converter form accumulated value to result value
      * @return Converted accumulated value
      */
@@ -658,6 +754,25 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
             public void run() {
                 List<Double> list = new ArrayList<>(array.length);
                 for (double element : array) {
+                    list.add(element);
+                }
+                query.setMutableIterable(list);
+            }
+        });
+        return query;
+    }
+
+    /**
+     * Query from specified {@code array}
+     */
+    @NonNull
+    public static IterableQuery<Character> from(@NonNull final char[] array) {
+        final IterableQuery<Character> query = new IterableQuery<>();
+        query.enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<Character> list = new ArrayList<>(array.length);
+                for (char element : array) {
                     list.add(element);
                 }
                 query.setMutableIterable(list);
