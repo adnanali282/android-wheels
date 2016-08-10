@@ -28,6 +28,14 @@ package com.budiyev.android.wheels;
  *
  * @see IterableQuery#aggregate(AggregatorCompat)
  * @see IterableQuery#aggregate(Object, AggregatorCompat)
+ * @see IterableQuery#aggregate(boolean, AggregatorCompat)
+ * @see IterableQuery#aggregate(byte, AggregatorCompat)
+ * @see IterableQuery#aggregate(short, AggregatorCompat)
+ * @see IterableQuery#aggregate(int, AggregatorCompat)
+ * @see IterableQuery#aggregate(long, AggregatorCompat)
+ * @see IterableQuery#aggregate(float, AggregatorCompat)
+ * @see IterableQuery#aggregate(double, AggregatorCompat)
+ * @see IterableQuery#aggregate(char, AggregatorCompat)
  * @see IterableQuery#aggregate(Object, AggregatorCompat, ConverterCompat)
  */
 public interface AggregatorCompat<A, T> {
