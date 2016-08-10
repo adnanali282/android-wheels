@@ -10,6 +10,7 @@ Some useful tools for Android
 * CsvParser - Parser/encoder of CSV format
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * CommonUtils - Common useful tools
+* ArrayUtils - Tools for arrays
 * IterableQuery - Object query API
 * and more...
 
