@@ -616,16 +616,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static <T> IterableQuery<T> from(@NonNull final T[] array) {
-        final IterableQuery<T> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<T> list = new ArrayList<>(array.length);
-                Collections.addAll(list, array);
-                query.setMutableIterable(list);
-            }
-        });
+    public static <T> IterableQuery<T> from(@NonNull T[] array) {
+        IterableQuery<T> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -633,18 +626,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Boolean> from(@NonNull final boolean[] array) {
-        final IterableQuery<Boolean> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Boolean> list = new ArrayList<>(array.length);
-                for (boolean element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Boolean> from(@NonNull boolean[] array) {
+        IterableQuery<Boolean> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -652,18 +636,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Byte> from(@NonNull final byte[] array) {
-        final IterableQuery<Byte> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Byte> list = new ArrayList<>(array.length);
-                for (byte element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Byte> from(@NonNull byte[] array) {
+        IterableQuery<Byte> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -671,18 +646,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Short> from(@NonNull final short[] array) {
-        final IterableQuery<Short> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Short> list = new ArrayList<>(array.length);
-                for (short element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Short> from(@NonNull short[] array) {
+        IterableQuery<Short> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -690,18 +656,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Integer> from(@NonNull final int[] array) {
-        final IterableQuery<Integer> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Integer> list = new ArrayList<>(array.length);
-                for (int element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Integer> from(@NonNull int[] array) {
+        IterableQuery<Integer> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -709,18 +666,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Long> from(@NonNull final long[] array) {
-        final IterableQuery<Long> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Long> list = new ArrayList<>(array.length);
-                for (long element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Long> from(@NonNull long[] array) {
+        IterableQuery<Long> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -728,18 +676,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Float> from(@NonNull final float[] array) {
-        final IterableQuery<Float> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Float> list = new ArrayList<>(array.length);
-                for (float element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Float> from(@NonNull float[] array) {
+        IterableQuery<Float> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -747,18 +686,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Double> from(@NonNull final double[] array) {
-        final IterableQuery<Double> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Double> list = new ArrayList<>(array.length);
-                for (double element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Double> from(@NonNull double[] array) {
+        IterableQuery<Double> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 
@@ -766,18 +696,9 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Query from specified {@code array}
      */
     @NonNull
-    public static IterableQuery<Character> from(@NonNull final char[] array) {
-        final IterableQuery<Character> query = new IterableQuery<>();
-        query.enqueueTask(new Runnable() {
-            @Override
-            public void run() {
-                List<Character> list = new ArrayList<>(array.length);
-                for (char element : array) {
-                    list.add(element);
-                }
-                query.setMutableIterable(list);
-            }
-        });
+    public static IterableQuery<Character> from(@NonNull char[] array) {
+        IterableQuery<Character> query = new IterableQuery<>();
+        query.setIterable(ArrayUtils.asIterable(array));
         return query;
     }
 }
