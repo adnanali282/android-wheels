@@ -274,10 +274,10 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (T element : source) {
                     converted.add(converter.apply(element));
                 }
-                query.setMutableIterable(converted);
                 if (isIterableMutable()) {
                     ((List<T>) source).clear();
                 }
+                query.setMutableIterable(converted);
             }
         });
         return query;
@@ -305,10 +305,10 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         }
                     }
                 }
-                query.setMutableIterable(converted);
                 if (isIterableMutable()) {
                     ((List<T>) source).clear();
                 }
+                query.setMutableIterable(converted);
             }
         });
         return query;
