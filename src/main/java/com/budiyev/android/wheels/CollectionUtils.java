@@ -366,23 +366,46 @@ public class CollectionUtils {
     }
 
     /**
-     * Search {@code item} in {@code list}
+     * Search {@code item} in {@code list}, starting from specified {@code position}
+     * in both directions
      * <br>
-     * The algorithm searches for an element in the list in both directions, starting from
-     * {@code position}. Such approach is very effective if approximate position
-     * of an element in the list is known.
+     * Such approach is effective if approximate position of an element in the list is known
+     *
+     * @param list     List of items
+     * @param item     Item to search for
+     * @param position Search start position
+     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
+     */
+    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position) {
+        int step = Math.round(list.size() * 0.1F);
+        if (step < 4) {
+            step = 4;
+        } else if (step > 16) {
+            step = 16;
+        }
+        return search(list, item, position, step);
+    }
+
+    /**
+     * Search {@code item} in {@code list}, starting from specified {@code position}
+     * in both directions
+     * <br>
+     * Such approach is effective if approximate position of an element in the list is known
      * <br>
      * Starting from {@code position} it checks {@code step} of elements on the left
      * and at the right, if {@code item} is not found among them, another {@code step} of
-     * elements on the left and at the right, and so on while {@code item} found or list ended.
+     * elements on the left and at the right, and so on while {@code item} found or list ended
      *
      * @param list     List of items
      * @param item     Item to search for
      * @param position Search start position
      * @param step     Search step
-     * @return Position of item in list or -1
+     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
      */
     public static <T> int search(@NonNull List<T> list, @Nullable T item, int position, int step) {
+        if (position < 0 || step < 1) {
+            throw new IllegalArgumentException();
+        }
         if (Objects.equals(item, list.get(position))) {
             return position;
         } else {
@@ -398,8 +421,8 @@ public class CollectionUtils {
                 if (end > listSize) {
                     end = listSize;
                 }
-                int startOffset = position - previousOffset;
-                for (int i = start; i < startOffset; i++) {
+                int startOffset = position - previousOffset - 1;
+                for (int i = startOffset; i >= start; i--) {
                     if (Objects.equals(item, list.get(i))) {
                         return i;
                     }
