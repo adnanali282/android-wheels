@@ -108,9 +108,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         filtered.add(element);
                     }
                 }
-                if (isIterableMutable()) {
-                    ((List<T>) source).clear();
-                }
+                clearMutableIterable();
                 setMutableIterable(filtered);
             }
         });
@@ -154,6 +152,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                     taken.add(element);
                     added++;
                 }
+                clearMutableIterable();
                 setMutableIterable(taken);
             }
         });
@@ -176,6 +175,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         break;
                     }
                 }
+                clearMutableIterable();
                 setMutableIterable(taken);
             }
         });
@@ -201,6 +201,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                     }
                     position++;
                 }
+                clearMutableIterable();
                 setMutableIterable(rest);
             }
         });
@@ -225,6 +226,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         rest.add(element);
                     }
                 }
+                clearMutableIterable();
                 setMutableIterable(rest);
             }
         });
@@ -275,9 +277,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 for (T element : source) {
                     converted.add(converter.apply(element));
                 }
-                if (isIterableMutable()) {
-                    ((List<T>) source).clear();
-                }
+                clearMutableIterable();
                 query.setMutableIterable(converted);
             }
         });
@@ -306,9 +306,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                         }
                     }
                 }
-                if (isIterableMutable()) {
-                    ((List<T>) source).clear();
-                }
+                clearMutableIterable();
                 query.setMutableIterable(converted);
             }
         });

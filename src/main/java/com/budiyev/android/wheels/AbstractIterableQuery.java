@@ -88,8 +88,10 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
         mIterableMutable = true;
     }
 
-    protected final boolean isIterableMutable() {
-        return mIterableMutable;
+    protected final void clearMutableIterable() {
+        if (mIterableMutable) {
+            ((List<T>) mIterable).clear();
+        }
     }
 
     protected final void enqueueTask(@NonNull Runnable task) {
