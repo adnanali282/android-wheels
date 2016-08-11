@@ -46,58 +46,61 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
      * {@inheritDoc}
      */
     @Override
-    public Iterator<T> iterator() {
+    public final Iterator<T> iterator() {
         return executeTasks().iterator();
     }
 
     @NonNull
-    protected Iterable<T> getIterable() {
+    protected final Iterable<T> getIterable() {
         return mIterable;
     }
 
-    protected void setIterable(@NonNull Iterable<T> iterable) {
+    protected final void setImmutableIterable(@NonNull Iterable<T> iterable) {
         mIterable = iterable;
+        mIterableMutable = false;
     }
 
-    protected List<T> getMutableIterable() {
-        if (isIterableMutable()) {
-            return (List<T>) getIterable();
+    @NonNull
+    protected final List<T> getMutableIterable() {
+        Iterable<T> iterable = mIterable;
+        if (mIterableMutable) {
+            return (List<T>) iterable;
         } else {
-            Iterable<T> iterable = getIterable();
-            List<T> list;
+            List<T> mutableList;
             if (iterable instanceof Collection) {
-                Collection<T> collection = (Collection<T>) iterable;
-                list = new ArrayList<>(collection.size());
-                list.addAll(collection);
+                Collection<T> immutableCollection = (Collection<T>) iterable;
+                mutableList = new ArrayList<>(immutableCollection.size());
+                mutableList.addAll(immutableCollection);
             } else {
-                list = new ArrayList<>();
+                mutableList = new ArrayList<>();
                 for (T element : iterable) {
-                    list.add(element);
+                    mutableList.add(element);
                 }
             }
-            setMutableIterable(list);
-            return list;
+            mIterable = mutableList;
+            mIterableMutable = true;
+            return mutableList;
         }
     }
 
-    protected void setMutableIterable(@NonNull List<T> iterable) {
-        setIterable(iterable);
+    protected final void setMutableIterable(@NonNull List<T> mutableList) {
+        mIterable = mutableList;
         mIterableMutable = true;
     }
 
-    protected boolean isIterableMutable() {
+    protected final boolean isIterableMutable() {
         return mIterableMutable;
     }
 
-    protected void enqueueTask(@NonNull Runnable task) {
+    protected final void enqueueTask(@NonNull Runnable task) {
         mTasksQueue.offer(task);
     }
 
     @NonNull
-    protected Iterable<T> executeTasks() {
+    protected final Iterable<T> executeTasks() {
         for (Runnable task = mTasksQueue.poll(); task != null; task = mTasksQueue.poll()) {
             task.run();
         }
-        return getIterable();
+        return mIterable;
     }
 }
