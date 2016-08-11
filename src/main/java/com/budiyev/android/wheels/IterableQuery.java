@@ -456,6 +456,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param converter  Converter form accumulated value to result value
      * @return Converted accumulated value (returned by {@code converter})
      */
+    @Nullable
     public <A, H> H aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator,
             @NonNull ConverterCompat<A, H> converter) {
         A accumulator = seed;
