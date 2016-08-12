@@ -48,27 +48,17 @@ final class MainThreadExecutor extends AbstractExecutorService {
         mThread = mainLooper.getThread();
     }
 
-    @NonNull
-    public Handler getHandler() {
-        return mHandler;
-    }
-
-    @NonNull
-    public Thread getThread() {
-        return mThread;
-    }
-
     @Override
-    public void execute(@NonNull Runnable command) {
+    public void execute(@NonNull Runnable task) {
         if (Thread.currentThread() == mThread) {
-            command.run();
+            wrapTask(task).run();
         } else {
-            execute(command, 0);
+            execute(task, 0);
         }
     }
 
-    public void execute(@NonNull Runnable command, long delay) {
-        mHandler.postDelayed(command, delay);
+    public void execute(@NonNull Runnable task, long delay) {
+        mHandler.postDelayed(wrapTask(task), delay);
     }
 
     @NonNull
@@ -109,5 +99,25 @@ final class MainThreadExecutor extends AbstractExecutorService {
     @Override
     public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) {
         throw new UnsupportedOperationException();
+    }
+
+    private void afterExecute(Runnable runnable, Throwable throwable) {
+        ThreadUtils.throwExecutionExceptionIfNeeded(runnable, throwable);
+    }
+
+    private Runnable wrapTask(@NonNull final Runnable task) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                Throwable error = null;
+                try {
+                    task.run();
+                } catch (Throwable t) {
+                    error = t;
+                } finally {
+                    afterExecute(task, error);
+                }
+            }
+        };
     }
 }

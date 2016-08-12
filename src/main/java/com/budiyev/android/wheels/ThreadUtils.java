@@ -29,12 +29,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
  * Tools for asynchronous tasks in Android
  */
 public final class ThreadUtils {
+    private static volatile boolean sThrowExecutionExceptions;
+
     private ThreadUtils() {
     }
 
@@ -73,10 +77,19 @@ public final class ThreadUtils {
         return new Runnable() {
             @Override
             public void run() {
-                asyncTask.executeOnExecutor(AndroidWheelsExecutors.getThreadUtilsExecutor(),
-                        parameters);
+                asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
             }
         };
+    }
+
+    /**
+     * Get current name prefix of background threads (threads named like [prefix][number])
+     *
+     * @return Thread name prefix
+     */
+    @NonNull
+    public static String getBackgroundThreadNamePrefix() {
+        return AsyncThreadFactory.getThreadNamePrefix();
     }
 
     /**
@@ -91,17 +104,21 @@ public final class ThreadUtils {
      * @param prefix Thread name prefix
      */
     public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
-        AndroidWheelsThreadFactory.setThreadNamePrefix(prefix);
+        AsyncThreadFactory.setThreadNamePrefix(prefix);
     }
 
     /**
-     * Get current name prefix of background threads (threads named like [prefix][number])
-     *
-     * @return Thread name prefix
+     * Whether to rethrow exceptions that has been thrown in tasks
      */
-    @NonNull
-    public static String getBackgroundThreadNamePrefix() {
-        return AndroidWheelsThreadFactory.getThreadNamePrefix();
+    public static boolean isThrowExecutionExceptions() {
+        return sThrowExecutionExceptions;
+    }
+
+    /**
+     * Whether to rethrow exceptions that has been thrown in tasks
+     */
+    public static void setThrowExecutionExceptions(boolean throwExecutionExceptions) {
+        sThrowExecutionExceptions = throwExecutionExceptions;
     }
 
     /**
@@ -112,7 +129,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runAsync(@NonNull Runnable task) {
-        return AndroidWheelsExecutors.getThreadUtilsExecutor().submit(task);
+        return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -123,7 +140,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
-        return AndroidWheelsExecutors.getThreadUtilsExecutor().submit(task);
+        return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
 
     /**
@@ -135,7 +152,7 @@ public final class ThreadUtils {
     @SafeVarargs
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
-        AndroidWheelsExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
+        InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
     }
 
     /**
@@ -145,7 +162,7 @@ public final class ThreadUtils {
      * @param delay Delay
      */
     public static void runAsync(@NonNull final Runnable task, long delay) {
-        AndroidWheelsExecutors.getMainThreadExecutor().execute(new Runnable() {
+        InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 runAsync(task);
@@ -174,8 +191,7 @@ public final class ThreadUtils {
     public static <Parameters, Progress, Result> void runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
-        AndroidWheelsExecutors.getMainThreadExecutor()
-                .execute(wrapAsyncTask(task, parameters), delay);
+        InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
     }
 
     /**
@@ -186,7 +202,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task) {
-        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task);
+        return InternalExecutors.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -197,7 +213,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task) {
-        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task);
+        return InternalExecutors.getMainThreadExecutor().submit(task);
     }
 
     /**
@@ -209,7 +225,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static Future<?> runOnMainThread(@NonNull Runnable task, long delay) {
-        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task, delay);
+        return InternalExecutors.getMainThreadExecutor().submit(task, delay);
     }
 
     /**
@@ -221,7 +237,7 @@ public final class ThreadUtils {
      */
     @NonNull
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
-        return AndroidWheelsExecutors.getMainThreadExecutor().submit(task, delay);
+        return InternalExecutors.getMainThreadExecutor().submit(task, delay);
     }
 
     /**
@@ -242,6 +258,27 @@ public final class ThreadUtils {
     public static void requireMainThread() {
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new NotMainThreadException();
+        }
+    }
+
+    static void throwExecutionExceptionIfNeeded(@Nullable Runnable runnable,
+            @Nullable Throwable throwable) {
+        if (sThrowExecutionExceptions) {
+            if (throwable == null) {
+                if (runnable instanceof Future<?>) {
+                    try {
+                        ((Future) runnable).get();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } catch (CancellationException e) {
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e.getCause());
+                    }
+                }
+            } else {
+                throw new RuntimeException(throwable);
+            }
         }
     }
 }

@@ -124,7 +124,7 @@ final class LoadImageAction<T> {
 
     public boolean execute() {
         if (!isCancelled() && !isFinished() && mSubmitted.compareAndSet(false, true)) {
-            mFuture.set(AndroidWheelsExecutors.getImageLoaderExecutor().submit(new Runnable() {
+            mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
                 @Override
                 public void run() {
                     loadImage();

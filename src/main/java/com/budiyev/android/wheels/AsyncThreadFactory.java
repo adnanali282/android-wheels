@@ -33,22 +33,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Thread factory for internal usage in AndroidWheels
  */
-final class AndroidWheelsThreadFactory implements ThreadFactory {
+final class AsyncThreadFactory implements ThreadFactory {
     private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(1);
     private static volatile String sThreadNamePrefix = "AndroidWheels-background-thread-";
     private final int mThreadPriority;
     private final boolean mDaemonThread;
 
-    public AndroidWheelsThreadFactory() {
+    public AsyncThreadFactory() {
         this(Thread.NORM_PRIORITY, false);
     }
 
-    public AndroidWheelsThreadFactory(
+    public AsyncThreadFactory(
             @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority) {
         this(threadPriority, false);
     }
 
-    public AndroidWheelsThreadFactory(
+    public AsyncThreadFactory(
             @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
             boolean daemonThread) {
         mThreadPriority = threadPriority;
@@ -69,7 +69,7 @@ final class AndroidWheelsThreadFactory implements ThreadFactory {
     }
 
     /**
-     * Can be accessed via {@link ThreadUtils#getBackgroundThreadNamePrefix()}
+     * Accessible via {@link ThreadUtils#getBackgroundThreadNamePrefix()}
      */
     @NonNull
     public static String getThreadNamePrefix() {
@@ -77,7 +77,7 @@ final class AndroidWheelsThreadFactory implements ThreadFactory {
     }
 
     /**
-     * Can be accessed via {@link ThreadUtils#setBackgroundThreadNamePrefix(String)}
+     * Accessible via {@link ThreadUtils#setBackgroundThreadNamePrefix(String)}
      */
     public static void setThreadNamePrefix(@NonNull String prefix) {
         sThreadNamePrefix = Objects.requireNonNull(prefix);

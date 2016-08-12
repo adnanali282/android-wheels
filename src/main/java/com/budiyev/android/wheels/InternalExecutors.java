@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Executors for internal usage in AndroidWheels
  */
-final class AndroidWheelsExecutors {
+final class InternalExecutors {
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
@@ -47,7 +47,7 @@ final class AndroidWheelsExecutors {
     private static volatile ThreadPoolExecutor sStorageImageCacheExecutor;
     private static volatile MainThreadExecutor sMainThreadExecutor;
 
-    private AndroidWheelsExecutors() {
+    private InternalExecutors() {
     }
 
     @NonNull
@@ -58,8 +58,8 @@ final class AndroidWheelsExecutors {
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 90, TimeUnit.SECONDS,
-                            new SynchronousQueue<Runnable>(), new AndroidWheelsThreadFactory());
+                    executor = new AsyncExecutor(0, Integer.MAX_VALUE, 90, TimeUnit.SECONDS,
+                            new SynchronousQueue<Runnable>(), new AsyncThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
@@ -78,9 +78,8 @@ final class AndroidWheelsExecutors {
                 executor = sHttpRequestExecutor;
                 if (executor == null) {
                     int threadCount = Runtime.getRuntime().availableProcessors();
-                    executor = new ThreadPoolExecutor(threadCount, threadCount, 0,
-                            TimeUnit.NANOSECONDS, new LinkedBlockingQueue<Runnable>(),
-                            new AndroidWheelsThreadFactory());
+                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
+                            new LinkedBlockingQueue<Runnable>(), new AsyncThreadFactory());
                     sHttpRequestExecutor = executor;
                 }
             } finally {
@@ -99,9 +98,9 @@ final class AndroidWheelsExecutors {
                 executor = sImageLoaderExecutor;
                 if (executor == null) {
                     int threadCount = Math.round(Runtime.getRuntime().availableProcessors() * 1.5F);
-                    executor = new ThreadPoolExecutor(threadCount, threadCount, 0,
-                            TimeUnit.NANOSECONDS, new LinkedBlockingQueue<Runnable>(),
-                            new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
+                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
+                            new LinkedBlockingQueue<Runnable>(),
+                            new AsyncThreadFactory(Thread.MIN_PRIORITY));
                     sImageLoaderExecutor = executor;
                 }
             } finally {
@@ -119,9 +118,9 @@ final class AndroidWheelsExecutors {
             try {
                 executor = sStorageImageCacheExecutor;
                 if (executor == null) {
-                    executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
+                    executor = new AsyncExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
                             new LinkedBlockingQueue<Runnable>(),
-                            new AndroidWheelsThreadFactory(Thread.MIN_PRIORITY));
+                            new AsyncThreadFactory(Thread.MIN_PRIORITY));
                     sStorageImageCacheExecutor = executor;
                 }
             } finally {
