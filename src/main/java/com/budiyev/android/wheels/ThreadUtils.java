@@ -268,12 +268,12 @@ public final class ThreadUtils {
                 if (runnable instanceof Future<?>) {
                     try {
                         ((Future) runnable).get();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
                     } catch (CancellationException e) {
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
                         throw new RuntimeException(e.getCause());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
                 }
             } else {

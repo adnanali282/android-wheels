@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -101,10 +102,11 @@ final class MainThreadExecutor extends AbstractExecutorService {
         throw new UnsupportedOperationException();
     }
 
-    private void afterExecute(Runnable runnable, Throwable throwable) {
+    private void afterExecute(@NonNull Runnable runnable, @Nullable Throwable throwable) {
         ThreadUtils.throwExecutionExceptionIfNeeded(runnable, throwable);
     }
 
+    @NonNull
     private Runnable wrapTask(@NonNull final Runnable task) {
         return new Runnable() {
             @Override

@@ -23,6 +23,9 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,13 +35,14 @@ import java.util.concurrent.TimeUnit;
  * Executor for background tasks in AndroidWheels
  */
 final class AsyncExecutor extends ThreadPoolExecutor {
-    public AsyncExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-            BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+    public AsyncExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+            @NonNull TimeUnit unit, @NonNull BlockingQueue<Runnable> workQueue,
+            @NonNull ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
     }
 
     @Override
-    protected void afterExecute(Runnable runnable, Throwable throwable) {
+    protected void afterExecute(@NonNull Runnable runnable, @Nullable Throwable throwable) {
         ThreadUtils.throwExecutionExceptionIfNeeded(runnable, throwable);
     }
 }
