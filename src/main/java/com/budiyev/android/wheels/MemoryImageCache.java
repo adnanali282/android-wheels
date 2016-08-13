@@ -30,6 +30,8 @@ import android.support.annotation.Nullable;
 /**
  * Memory image cache for {@link ImageLoader}
  *
+ * @see ImageLoader#getMemoryImageCache()
+ * @see ImageLoader#setMemoryImageCache(MemoryImageCache)
  * @see ImageLoader#newMemoryImageCache()
  * @see ImageLoader#newMemoryImageCache(int)
  */

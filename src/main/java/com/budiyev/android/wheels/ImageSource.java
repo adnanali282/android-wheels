@@ -25,11 +25,14 @@ package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.widget.ImageView;
 
 /**
  * Source data and key to cache loaded bitmaps
  *
  * @param <T> Type of source data
+ * @see ImageLoader#loadImage(ImageSource, ImageView)
+ * @see ImageLoader#loadImage(ImageSource, ImageView, ImageLoadCallback)
  * @see ImageLoader#newImageSource(Object)
  */
 public interface ImageSource<T> {

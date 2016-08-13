@@ -30,6 +30,8 @@ import android.widget.ImageView;
 
 /**
  * Callback of image loading
+ *
+ * @see ImageLoader#loadImage(ImageSource, ImageView, ImageLoadCallback)
  */
 public interface ImageLoadCallback {
     /**

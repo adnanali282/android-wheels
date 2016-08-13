@@ -28,6 +28,7 @@ import android.support.annotation.NonNull;
 /**
  * Callback of {@link FadeDrawable}
  *
+ * @see FadeDrawable#getFadeCallback()
  * @see FadeDrawable#setFadeCallback(FadeCallback)
  */
 public interface FadeCallback {
