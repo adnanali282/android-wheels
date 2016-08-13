@@ -23,11 +23,15 @@
  */
 package com.budiyev.android.wheels;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
  * Row of {@link Table}
+ *
+ * @see CsvParser#parse(InputStream, char, String)
+ * @see CsvParser#parse(String, char)
  */
 public class Row implements Iterable<String> {
     private final ArrayList<String> mCells = new ArrayList<>();

@@ -32,6 +32,9 @@ import java.util.Iterator;
 
 /**
  * String table, used with {@link CsvParser}
+ *
+ * @see CsvParser#parse(InputStream, char, String)
+ * @see CsvParser#parse(String, char)
  */
 public class Table implements Iterable<Row> {
     private final ArrayList<Row> mRows = new ArrayList<>();
