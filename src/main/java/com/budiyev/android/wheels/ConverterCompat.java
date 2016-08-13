@@ -27,6 +27,7 @@ package com.budiyev.android.wheels;
  * Converter
  *
  * @see IterableQuery#convert(ConverterCompat)
+ * @see IterableQuery#aggregate(Object, AggregatorCompat, ConverterCompat)
  */
 public interface ConverterCompat<T, H> {
     H apply(T value);
