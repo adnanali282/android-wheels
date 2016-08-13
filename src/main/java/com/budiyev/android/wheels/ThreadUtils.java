@@ -43,46 +43,6 @@ public final class ThreadUtils {
     }
 
     /**
-     * Wrap {@link Callable} into {@link Runnable}
-     *
-     * @param callable Callable
-     * @return Runnable
-     */
-    @NonNull
-    private static Runnable wrapCallable(@NonNull final Callable<?> callable) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    callable.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-    }
-
-    /**
-     * Wrap {@link AsyncTask} into {@link Runnable}
-     *
-     * @param asyncTask  AsyncTask
-     * @param parameters AsyncTask parameters
-     * @return Runnable
-     */
-    @SafeVarargs
-    @NonNull
-    private static <Parameters, Progress, Result> Runnable wrapAsyncTask(
-            @NonNull final AsyncTask<Parameters, Progress, Result> asyncTask,
-            final Parameters... parameters) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
-            }
-        };
-    }
-
-    /**
      * Get current name prefix of background threads (threads named like [prefix][number])
      *
      * @return Thread name prefix
@@ -280,5 +240,32 @@ public final class ThreadUtils {
                 throw new RuntimeException(throwable);
             }
         }
+    }
+
+    @NonNull
+    private static Runnable wrapCallable(@NonNull final Callable<?> callable) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    callable.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    @SafeVarargs
+    @NonNull
+    private static <Parameters, Progress, Result> Runnable wrapAsyncTask(
+            @NonNull final AsyncTask<Parameters, Progress, Result> asyncTask,
+            final Parameters... parameters) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
+            }
+        };
     }
 }
