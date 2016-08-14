@@ -45,7 +45,7 @@ public final class ThreadUtils {
     /**
      * Get current name prefix of background threads (threads named like [prefix][number])
      * <br><br>
-     * <b>Affects</b>:
+     * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
@@ -68,7 +68,7 @@ public final class ThreadUtils {
      * Name prefix of {@link ImageLoader} and {@link HttpRequest} threads can't be
      * changed after their usage
      * <br><br>
-     * <b>Affects</b>:
+     * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
@@ -84,7 +84,7 @@ public final class ThreadUtils {
     /**
      * Whether to rethrow exceptions that has been thrown in tasks
      * <br><br>
-     * <b>Affects</b>:
+     * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
      * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
@@ -99,7 +99,7 @@ public final class ThreadUtils {
     /**
      * Whether to rethrow exceptions that has been thrown in tasks
      * <br><br>
-     * <b>Affects</b>:
+     * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
      * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
