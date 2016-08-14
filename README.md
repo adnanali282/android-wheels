@@ -17,6 +17,6 @@ Some useful tools for Android
 ### Usage
 ```
 dependencies {
-    compile 'com.budiyev.android:android-wheels:3.4.2'
+    compile 'com.budiyev.android:android-wheels:3.5.0'
 }
 ```
