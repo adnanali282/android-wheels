@@ -111,13 +111,14 @@ final class MainThreadExecutor extends AbstractExecutorService {
         return new Runnable() {
             @Override
             public void run() {
-                Throwable error = null;
+                Throwable thrown = null;
                 try {
                     task.run();
                 } catch (Throwable t) {
-                    error = t;
+                    thrown = t;
+                    throw t;
                 } finally {
-                    afterExecute(task, error);
+                    afterExecute(task, thrown);
                 }
             }
         };

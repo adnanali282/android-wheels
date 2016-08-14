@@ -37,13 +37,21 @@ import java.util.concurrent.Future;
  * Tools for asynchronous tasks in Android
  */
 public final class ThreadUtils {
-    private static volatile boolean sThrowExecutionExceptions;
+    private static volatile boolean sThrowExecutionExceptions = true;
 
     private ThreadUtils() {
     }
 
     /**
      * Get current name prefix of background threads (threads named like [prefix][number])
+     * <br><br>
+     * <b>Affects</b>:
+     * <ul>
+     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
+     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ImageLoader}</li>
+     * <li>{@link HttpRequest}</li>
+     * </ul>
      *
      * @return Thread name prefix
      */
@@ -60,6 +68,14 @@ public final class ThreadUtils {
      * <br>
      * Name prefix of {@link ImageLoader} and {@link HttpRequest} threads can't be
      * changed after their usage
+     * <br><br>
+     * <b>Affects</b>:
+     * <ul>
+     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
+     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ImageLoader}</li>
+     * <li>{@link HttpRequest}</li>
+     * </ul>
      *
      * @param prefix Thread name prefix
      */
@@ -69,6 +85,14 @@ public final class ThreadUtils {
 
     /**
      * Whether to rethrow exceptions that has been thrown in tasks
+     * <br><br>
+     * <b>Affects</b>:
+     * <ul>
+     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
+     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ImageLoader}</li>
+     * <li>{@link HttpRequest}</li>
+     * </ul>
      */
     public static boolean isThrowExecutionExceptions() {
         return sThrowExecutionExceptions;
@@ -76,6 +100,14 @@ public final class ThreadUtils {
 
     /**
      * Whether to rethrow exceptions that has been thrown in tasks
+     * <br><br>
+     * <b>Affects</b>:
+     * <ul>
+     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
+     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ImageLoader}</li>
+     * <li>{@link HttpRequest}</li>
+     * </ul>
      */
     public static void setThrowExecutionExceptions(boolean throwExecutionExceptions) {
         sThrowExecutionExceptions = throwExecutionExceptions;
@@ -108,11 +140,14 @@ public final class ThreadUtils {
      *
      * @param task       Task
      * @param parameters Parameters
+     * @return Task
      */
+    @NonNull
     @SafeVarargs
-    public static <Parameters, Progress, Result> void runAsync(
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
+        return task;
     }
 
     /**
@@ -146,12 +181,15 @@ public final class ThreadUtils {
      * @param task       Task
      * @param delay      Delay
      * @param parameters Parameters
+     * @return Task
      */
+    @NonNull
     @SafeVarargs
-    public static <Parameters, Progress, Result> void runAsync(
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
+        return task;
     }
 
     /**
