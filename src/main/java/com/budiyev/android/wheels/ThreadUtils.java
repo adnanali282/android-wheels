@@ -47,8 +47,7 @@ public final class ThreadUtils {
      * <br><br>
      * <b>Affects</b>:
      * <ul>
-     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
-     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * </ul>
@@ -71,8 +70,7 @@ public final class ThreadUtils {
      * <br><br>
      * <b>Affects</b>:
      * <ul>
-     * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
-     * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
+     * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * </ul>
