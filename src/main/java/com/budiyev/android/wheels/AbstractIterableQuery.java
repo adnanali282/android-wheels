@@ -67,7 +67,7 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
             return (List<T>) iterable;
         } else {
             List<T> mutableList;
-            if (iterable instanceof Collection) {
+            if (iterable instanceof Collection<?>) {
                 Collection<T> immutableCollection = (Collection<T>) iterable;
                 mutableList = new ArrayList<>(immutableCollection.size());
                 mutableList.addAll(immutableCollection);

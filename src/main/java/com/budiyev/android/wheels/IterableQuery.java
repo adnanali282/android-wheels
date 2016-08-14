@@ -75,13 +75,13 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
             @Override
             public void run() {
                 Iterable<T> operand;
-                if (iterable instanceof IterableQuery) {
+                if (iterable instanceof IterableQuery<?>) {
                     operand = ((IterableQuery<T>) iterable).executeTasks();
                 } else {
                     operand = iterable;
                 }
                 List<T> list = getMutableIterable();
-                if (operand instanceof Collection) {
+                if (operand instanceof Collection<?>) {
                     list.addAll((Collection<T>) operand);
                 } else {
                     for (T element : operand) {
@@ -298,7 +298,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 List<H> converted = new ArrayList<>();
                 for (T element : source) {
                     Iterable<H> convertResult = converter.apply(element);
-                    if (convertResult instanceof Collection) {
+                    if (convertResult instanceof Collection<?>) {
                         converted.addAll((Collection<H>) convertResult);
                     } else {
                         for (H convertedElement : convertResult) {
@@ -572,7 +572,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      */
     public int size() {
         Iterable<T> iterable = executeTasks();
-        if (iterable instanceof Collection) {
+        if (iterable instanceof Collection<?>) {
             return ((Collection) iterable).size();
         } else {
             int count = 0;
@@ -589,7 +589,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     @NonNull
     public List<T> asList() {
         Iterable<T> iterable = executeTasks();
-        if (iterable instanceof List) {
+        if (iterable instanceof List<?>) {
             return (List<T>) iterable;
         } else {
             List<T> list = new ArrayList<>();
