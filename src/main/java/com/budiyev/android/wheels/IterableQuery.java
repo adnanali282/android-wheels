@@ -537,22 +537,24 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Whether all elements match specified predicate
      */
     public boolean all(@NonNull PredicateCompat<T> predicate) {
-        boolean all = true;
         for (T element : executeTasks()) {
-            all &= predicate.apply(element);
+            if (!predicate.apply(element)) {
+                return false;
+            }
         }
-        return all;
+        return true;
     }
 
     /**
      * Whether no elements match specified predicate
      */
     public boolean none(@NonNull PredicateCompat<T> predicate) {
-        boolean none = true;
         for (T element : executeTasks()) {
-            none &= !predicate.apply(element);
+            if (predicate.apply(element)) {
+                return false;
+            }
         }
-        return none;
+        return true;
     }
 
     /**
@@ -573,7 +575,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     public int size() {
         Iterable<T> iterable = executeTasks();
         if (iterable instanceof Collection<?>) {
-            return ((Collection) iterable).size();
+            return ((Collection<?>) iterable).size();
         } else {
             int count = 0;
             for (T element : iterable) {
