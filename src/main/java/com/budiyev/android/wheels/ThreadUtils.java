@@ -263,7 +263,7 @@ public final class ThreadUtils {
             if (throwable == null) {
                 if (runnable instanceof Future<?>) {
                     try {
-                        ((Future) runnable).get();
+                        ((Future<?>) runnable).get();
                     } catch (InterruptedException | CancellationException ignored) {
                     } catch (ExecutionException e) {
                         throw new RuntimeException(e.getCause());
