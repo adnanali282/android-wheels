@@ -38,7 +38,6 @@ public final class GetRequestBuilder {
     private List<HeaderParameter> mHeaderParameters;
     private List<QueryParameter> mQueryParameters;
     private List<RequestCallback> mCallbacks;
-    private int mDataType = RequestResult.STRING;
 
     GetRequestBuilder(@NonNull String url) {
         mUrl = url;
@@ -78,19 +77,10 @@ public final class GetRequestBuilder {
     }
 
     /**
-     * Set request result data type
-     * Default - {@link RequestResult#STRING}
-     */
-    public GetRequestBuilder setDataType(@RequestResult.DataType int dataType) {
-        mDataType = dataType;
-        return this;
-    }
-
-    /**
      * Build request
      */
     @NonNull
     public HttpRequest build() {
-        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks, mDataType);
+        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks);
     }
 }

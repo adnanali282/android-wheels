@@ -41,7 +41,6 @@ public final class PostRequestBuilder {
     private List<QueryParameter> mQueryParameters;
     private List<PostParameter> mPostParameters;
     private List<RequestCallback> mCallbacks;
-    private int mDataType = RequestResult.STRING;
 
     PostRequestBuilder(@NonNull String url) {
         mUrl = url;
@@ -116,20 +115,11 @@ public final class PostRequestBuilder {
     }
 
     /**
-     * Set request result data type
-     * Default - {@link RequestResult#STRING}
-     */
-    public PostRequestBuilder setDataType(@RequestResult.DataType int dataType) {
-        mDataType = dataType;
-        return this;
-    }
-
-    /**
      * Build request
      */
     @NonNull
     public HttpRequest build() {
         return new PostHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mPostParameters,
-                mCallbacks, mDataType);
+                mCallbacks);
     }
 }

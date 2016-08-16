@@ -48,7 +48,6 @@ public abstract class HttpRequest {
     protected static final String REQUEST_METHOD_POST = "POST";
     protected static final String KEY_ACCEPT_CHARSET = "Accept-Charset";
     protected static final int CONNECTION_TIMEOUT = 10000;
-    protected static final int BUFFER_SIZE = 8192;
 
     HttpRequest() {
     }
@@ -111,14 +110,13 @@ public abstract class HttpRequest {
      * @param headerParameters Request header parameters
      * @param queryParameters  Query string parameters
      * @param callbacks        Response callbacks
-     * @param dataType         Type of request result data
      */
     @NonNull
     public static HttpRequest newGetRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
-        return new GetHttpRequest(url, headerParameters, queryParameters, callbacks, dataType);
+            @Nullable Iterable<RequestCallback> callbacks) {
+        return new GetHttpRequest(url, headerParameters, queryParameters, callbacks);
     }
 
     /**
@@ -140,16 +138,15 @@ public abstract class HttpRequest {
      * @param queryParameters  Query string parameters
      * @param postParameters   Request body multipart/form-data parameters
      * @param callbacks        Response callbacks
-     * @param dataType         Type of request result data
      */
     @NonNull
     public static HttpRequest newPostRequest(@NonNull String url,
             @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
             @Nullable Iterable<PostParameter> postParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
+            @Nullable Iterable<RequestCallback> callbacks) {
         return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
-                callbacks, dataType);
+                callbacks);
     }
 
     /**

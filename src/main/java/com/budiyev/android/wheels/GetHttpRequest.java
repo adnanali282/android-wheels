@@ -26,9 +26,7 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -45,7 +43,6 @@ final class GetHttpRequest extends HttpRequest {
     private final Iterable<HeaderParameter> mHeaderParameters;
     private final Iterable<QueryParameter> mQueryParameters;
     private final Iterable<RequestCallback> mCallbacks;
-    private final int mDataType;
 
     private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
         @Override
@@ -70,43 +67,10 @@ final class GetHttpRequest extends HttpRequest {
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    switch (mDataType) {
-                        case RequestResult.NONE: {
-                            result.setResultType(RequestResult.SUCCESS);
-                            result.setConnection(connection);
-                            result.setHttpCode(responseCode);
-                            break;
-                        }
-                        case RequestResult.STRING: {
-                            try (BufferedReader bufferedReader = new BufferedReader(
-                                    new InputStreamReader(connection.getInputStream()))) {
-                                StringBuilder responseBuilder = new StringBuilder();
-                                char[] buffer = new char[BUFFER_SIZE];
-                                for (; ; ) {
-                                    int read = bufferedReader.read(buffer);
-                                    if (read > -1) {
-                                        responseBuilder.append(buffer, 0, read);
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                result.setResultType(RequestResult.SUCCESS);
-                                result.setDataType(RequestResult.STRING);
-                                result.setConnection(connection);
-                                result.setHttpCode(responseCode);
-                                result.setString(responseBuilder.toString());
-                            }
-                            break;
-                        }
-                        case RequestResult.STREAM: {
-                            result.setResultType(RequestResult.SUCCESS);
-                            result.setDataType(RequestResult.STREAM);
-                            result.setConnection(connection);
-                            result.setHttpCode(responseCode);
-                            result.setStream(connection.getInputStream());
-                            break;
-                        }
-                    }
+                    result.setResultType(RequestResult.SUCCESS);
+                    result.setConnection(connection);
+                    result.setHttpCode(responseCode);
+                    result.setDataStream(connection.getInputStream());
                 } else {
                     result.setResultType(RequestResult.ERROR_HTTP);
                     result.setConnection(connection);
@@ -146,12 +110,11 @@ final class GetHttpRequest extends HttpRequest {
 
     GetHttpRequest(@NonNull String url, @Nullable Iterable<HeaderParameter> headerParameters,
             @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<RequestCallback> callbacks, @RequestResult.DataType int dataType) {
+            @Nullable Iterable<RequestCallback> callbacks) {
         mUrl = Objects.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
         mCallbacks = callbacks;
-        mDataType = dataType;
     }
 
     @NonNull
