@@ -24,10 +24,13 @@
 package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -35,10 +38,11 @@ import java.io.OutputStreamWriter;
  * Parser of CSV format
  */
 public final class CsvParser {
-    static final String QUOTE_STRING = "\"";
-    static final String DOUBLE_QUOTE_STRING = "\"\"";
-    static final char QUOTE = '\"';
-    static final char LF = '\n';
+    private static final String QUOTE_STRING = "\"";
+    private static final String DOUBLE_QUOTE_STRING = "\"\"";
+    private static final char QUOTE = '\"';
+    private static final char LF = '\n';
+    private static final int BUFFER_SIZE = 8192;
 
     private CsvParser() {
     }
@@ -52,8 +56,8 @@ public final class CsvParser {
      * @param encoding     Text encoding
      * @return true if success, false otherwise
      */
-    public static boolean encode(Table table, OutputStream outputStream, char separator,
-            String encoding) {
+    public static boolean encode(@NonNull Table table, @NonNull OutputStream outputStream,
+            char separator, String encoding) {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, encoding))) {
             for (Row row : table) {
@@ -82,7 +86,7 @@ public final class CsvParser {
      * @return Encoded string
      */
     @NonNull
-    public static String encode(Table table, char separator) {
+    public static String encode(@NonNull Table table, char separator) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Row row : table) {
             int size = row.size();
@@ -107,9 +111,39 @@ public final class CsvParser {
      * @param encoding    Text encoding
      * @return Table
      */
-    @NonNull
-    public static Table parse(InputStream inputStream, char separator, String encoding) {
-        return new Table(inputStream, separator, encoding);
+    @Nullable
+    public static Table parse(@NonNull InputStream inputStream, char separator,
+            @NonNull String encoding) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, encoding))) {
+            Table table = new Table();
+            StringBuilder row = new StringBuilder();
+            boolean inQuotes = false;
+            char[] buffer = new char[BUFFER_SIZE];
+            for (; ; ) {
+                int read = reader.read(buffer);
+                if (read == -1) {
+                    if (row.length() > 0) {
+                        table.add(parseRow(row.toString(), separator));
+                    }
+                    break;
+                }
+                for (int i = 0; i < read; i++) {
+                    if (buffer[i] == CsvParser.LF && !inQuotes) {
+                        table.add(parseRow(row.toString(), separator));
+                        row.delete(0, row.length());
+                    } else {
+                        if (buffer[i] == CsvParser.QUOTE) {
+                            inQuotes = !inQuotes;
+                        }
+                        row.append(buffer[i]);
+                    }
+                }
+            }
+            return table;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**
@@ -120,7 +154,59 @@ public final class CsvParser {
      * @return Table
      */
     @NonNull
-    public static Table parse(String string, char separator) {
-        return new Table(string, separator);
+    public static Table parse(@NonNull String string, char separator) {
+        Table table = new Table();
+        StringBuilder row = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0, l = string.length(); i < l; i++) {
+            char current = string.charAt(i);
+            if (current == CsvParser.LF && !inQuotes) {
+                table.add(parseRow(row.toString(), separator));
+                row.delete(0, row.length());
+            } else {
+                if (current == CsvParser.QUOTE) {
+                    inQuotes = !inQuotes;
+                }
+                row.append(current);
+            }
+        }
+        if (row.length() > 0) {
+            table.add(parseRow(row.toString(), separator));
+        }
+        return table;
+    }
+
+    @NonNull
+    private static Row parseRow(@NonNull String rowString, char separator) {
+        Row row = new Row();
+        StringBuilder cell = new StringBuilder();
+        boolean inQuotes = false;
+        boolean inElementQuotes = false;
+        int length = rowString.length();
+        for (int i = 0; i < length; i++) {
+            char current = rowString.charAt(i);
+            if (current == separator && !inElementQuotes) {
+                row.add(cell.toString());
+                cell.delete(0, cell.length());
+            } else if (current == CsvParser.QUOTE) {
+                int n = i + 1;
+                int p = i - 1;
+                if ((p > -1 && rowString.charAt(p) == separator || i == 0) && !inElementQuotes) {
+                    inElementQuotes = true;
+                } else if ((n < length && rowString.charAt(n) == separator || n == length) &&
+                        inElementQuotes) {
+                    inElementQuotes = false;
+                } else if (n < length && rowString.charAt(n) == CsvParser.QUOTE) {
+                    cell.append(current);
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else {
+                cell.append(current);
+            }
+        }
+        row.add(cell.toString());
+        return row;
     }
 }

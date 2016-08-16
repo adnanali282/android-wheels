@@ -23,10 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -38,52 +35,6 @@ import java.util.Iterator;
  */
 public class Table implements Iterable<Row> {
     private final ArrayList<Row> mRows = new ArrayList<>();
-
-    Table(String table, char separator) {
-        StringBuilder row = new StringBuilder();
-        boolean inQuotes = false;
-        int length = table.length();
-        for (int i = 0; i < length; i++) {
-            char current = table.charAt(i);
-            if (current == CsvParser.LF && !inQuotes) {
-                mRows.add(new Row(row.toString(), separator));
-                row.delete(0, row.length());
-            } else {
-                if (current == CsvParser.QUOTE) {
-                    inQuotes = !inQuotes;
-                }
-                row.append(current);
-            }
-        }
-        mRows.add(new Row(row.toString(), separator));
-    }
-
-    Table(InputStream table, char separator, String charset) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(table, charset))) {
-            StringBuilder row = new StringBuilder();
-            boolean inQuotes = false;
-            for (; ; ) {
-                int c = reader.read();
-                char current;
-                if (c == -1) {
-                    break;
-                } else {
-                    current = (char) c;
-                }
-                if (current == CsvParser.LF && !inQuotes) {
-                    mRows.add(new Row(row.toString(), separator));
-                    row.delete(0, row.length());
-                } else {
-                    if (current == CsvParser.QUOTE) {
-                        inQuotes = !inQuotes;
-                    }
-                    row.append(current);
-                }
-            }
-            mRows.add(new Row(row.toString(), separator));
-        } catch (IOException ignored) {
-        }
-    }
 
     public Table() {
     }

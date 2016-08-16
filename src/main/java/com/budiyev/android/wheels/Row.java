@@ -36,37 +36,6 @@ import java.util.Iterator;
 public class Row implements Iterable<String> {
     private final ArrayList<String> mCells = new ArrayList<>();
 
-    Row(String row, char separator) {
-        StringBuilder cell = new StringBuilder();
-        boolean inQuotes = false;
-        boolean inElementQuotes = false;
-        int length = row.length();
-        for (int i = 0; i < length; i++) {
-            char current = row.charAt(i);
-            if (current == separator && !inElementQuotes) {
-                mCells.add(cell.toString());
-                cell.delete(0, cell.length());
-            } else if (current == CsvParser.QUOTE) {
-                int n = i + 1;
-                int p = i - 1;
-                if ((p > -1 && row.charAt(p) == separator || i == 0) && !inElementQuotes) {
-                    inElementQuotes = true;
-                } else if ((n < length && row.charAt(n) == separator || n == length) &&
-                        inElementQuotes) {
-                    inElementQuotes = false;
-                } else if (n < length && row.charAt(n) == CsvParser.QUOTE) {
-                    cell.append(current);
-                    i++;
-                } else {
-                    inQuotes = !inQuotes;
-                }
-            } else {
-                cell.append(current);
-            }
-        }
-        mCells.add(cell.toString());
-    }
-
     public Row() {
     }
 
