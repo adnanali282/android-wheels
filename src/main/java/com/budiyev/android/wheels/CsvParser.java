@@ -57,7 +57,7 @@ public final class CsvParser {
      * @return true if success, false otherwise
      */
     public static boolean encode(@NonNull Table table, @NonNull OutputStream outputStream,
-            char separator, String encoding) {
+            char separator, @NonNull String encoding) {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, encoding))) {
             for (Row row : table) {
