@@ -74,4 +74,9 @@ public final class SizeCompat {
             return false;
         }
     }
+
+    @Override
+    public int hashCode() {
+        return mWidth ^ mHeight;
+    }
 }
