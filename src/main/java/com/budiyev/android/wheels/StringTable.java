@@ -23,9 +23,12 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * String table, used with {@link CsvParser}
@@ -33,32 +36,32 @@ import java.util.Iterator;
  * @see CsvParser#parse(InputStream, char, String)
  * @see CsvParser#parse(String, char)
  */
-public class Table implements Iterable<Row> {
-    private final ArrayList<Row> mRows = new ArrayList<>();
+public class StringTable implements Iterable<StringRow> {
+    private final ArrayList<StringRow> mRows = new ArrayList<>();
 
-    public Table() {
+    public StringTable() {
     }
 
-    public Table(int rows, int columns) {
+    public StringTable(int rows, int columns) {
         for (int i = 0; i < rows; i++) {
-            add(new Row(columns));
+            add(new StringRow(columns));
         }
     }
 
-    public Table(Row... rows) {
-        for (Row row : rows) {
+    public StringTable(@NonNull StringRow... rows) {
+        for (StringRow row : rows) {
             add(row);
         }
     }
 
-    public Table(Iterable<Row> rows) {
-        for (Row row : rows) {
+    public StringTable(@NonNull Iterable<StringRow> rows) {
+        for (StringRow row : rows) {
             add(row);
         }
     }
 
     @Override
-    public Iterator<Row> iterator() {
+    public Iterator<StringRow> iterator() {
         return mRows.iterator();
     }
 
@@ -68,7 +71,8 @@ public class Table implements Iterable<Row> {
      * @param index Row position in table
      * @return Row at index
      */
-    public Row row(int index) {
+    @NonNull
+    public StringRow row(int index) {
         return mRows.get(index);
     }
 
@@ -76,7 +80,7 @@ public class Table implements Iterable<Row> {
      * Add empty row
      */
     public void add() {
-        mRows.add(new Row());
+        mRows.add(new StringRow());
     }
 
     /**
@@ -84,8 +88,16 @@ public class Table implements Iterable<Row> {
      *
      * @param row Row
      */
-    public void add(Row row) {
-        mRows.add(row);
+    public void add(@NonNull StringRow row) {
+        mRows.add(Objects.requireNonNull(row));
+    }
+
+    public void add(@NonNull Object... cells) {
+        mRows.add(new StringRow(cells));
+    }
+
+    public void add(@NonNull Iterable<Object> cells) {
+        mRows.add(new StringRow(cells));
     }
 
     /**
@@ -94,7 +106,8 @@ public class Table implements Iterable<Row> {
      * @param index Row index
      * @return Removed row
      */
-    public Row remove(int index) {
+    @NonNull
+    public StringRow remove(int index) {
         return mRows.remove(index);
     }
 

@@ -48,7 +48,7 @@ public final class CsvParser {
     }
 
     /**
-     * Encode {@link Table} in CSV format
+     * Encode {@link StringTable} in CSV format
      *
      * @param table        Table
      * @param outputStream Stream to save result
@@ -56,11 +56,11 @@ public final class CsvParser {
      * @param encoding     Text encoding
      * @return true if success, false otherwise
      */
-    public static boolean encode(@NonNull Table table, @NonNull OutputStream outputStream,
+    public static boolean encode(@NonNull StringTable table, @NonNull OutputStream outputStream,
             char separator, @NonNull String encoding) {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, encoding))) {
-            for (Row row : table) {
+            for (StringRow row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
                     writer.append(QUOTE)
@@ -79,16 +79,16 @@ public final class CsvParser {
     }
 
     /**
-     * Encode {@link Table} in CSV format
+     * Encode {@link StringTable} in CSV format
      *
      * @param table     Table
      * @param separator Column separator
      * @return Encoded string
      */
     @NonNull
-    public static String encode(@NonNull Table table, char separator) {
+    public static String encode(@NonNull StringTable table, char separator) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (Row row : table) {
+        for (StringRow row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
                 stringBuilder.append(QUOTE)
@@ -104,7 +104,7 @@ public final class CsvParser {
     }
 
     /**
-     * Parse CSV into {@link Table}
+     * Parse CSV into {@link StringTable}
      *
      * @param inputStream Source data stream
      * @param separator   Column separator
@@ -112,11 +112,11 @@ public final class CsvParser {
      * @return Table
      */
     @Nullable
-    public static Table parse(@NonNull InputStream inputStream, char separator,
+    public static StringTable parse(@NonNull InputStream inputStream, char separator,
             @NonNull String encoding) {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, encoding))) {
-            Table table = new Table();
+            StringTable table = new StringTable();
             StringBuilder row = new StringBuilder();
             boolean inQuotes = false;
             char[] buffer = new char[BUFFER_SIZE];
@@ -147,15 +147,15 @@ public final class CsvParser {
     }
 
     /**
-     * Parse CSV into {@link Table}
+     * Parse CSV into {@link StringTable}
      *
      * @param string    Source string
      * @param separator Column separator
      * @return Table
      */
     @NonNull
-    public static Table parse(@NonNull String string, char separator) {
-        Table table = new Table();
+    public static StringTable parse(@NonNull String string, char separator) {
+        StringTable table = new StringTable();
         StringBuilder row = new StringBuilder();
         boolean inQuotes = false;
         for (int i = 0, l = string.length(); i < l; i++) {
@@ -177,8 +177,8 @@ public final class CsvParser {
     }
 
     @NonNull
-    private static Row parseRow(@NonNull String rowString, char separator) {
-        Row row = new Row();
+    private static StringRow parseRow(@NonNull String rowString, char separator) {
+        StringRow row = new StringRow();
         StringBuilder cell = new StringBuilder();
         boolean inQuotes = false;
         boolean inElementQuotes = false;

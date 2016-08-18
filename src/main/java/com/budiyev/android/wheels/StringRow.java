@@ -23,35 +23,39 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.NonNull;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
- * Row of {@link Table}
+ * Row of {@link StringTable}
  *
  * @see CsvParser#parse(InputStream, char, String)
  * @see CsvParser#parse(String, char)
  */
-public class Row implements Iterable<String> {
+public class StringRow implements Iterable<String> {
+    private static final String EMPTY = "";
     private final ArrayList<String> mCells = new ArrayList<>();
 
-    public Row() {
+    public StringRow() {
     }
 
-    public Row(int cells) {
+    public StringRow(int cells) {
         for (int i = 0; i < cells; i++) {
             add();
         }
     }
 
-    public Row(Object... cells) {
+    public StringRow(@NonNull Object... cells) {
         for (Object cell : cells) {
             add(String.valueOf(cell));
         }
     }
 
-    public Row(Iterable<Object> cells) {
+    public StringRow(@NonNull Iterable<Object> cells) {
         for (Object cell : cells) {
             add(String.valueOf(cell));
         }
@@ -68,6 +72,7 @@ public class Row implements Iterable<String> {
      * @param index Column position in row
      * @return Column at index
      */
+    @NonNull
     public String cell(int index) {
         return mCells.get(index);
     }
@@ -76,7 +81,7 @@ public class Row implements Iterable<String> {
      * Add cell with null value to row
      */
     public void add() {
-        mCells.add(null);
+        mCells.add(EMPTY);
     }
 
     /**
@@ -84,8 +89,34 @@ public class Row implements Iterable<String> {
      *
      * @param cell Cell value
      */
-    public void add(String cell) {
-        mCells.add(cell);
+    public void add(@NonNull String cell) {
+        mCells.add(Objects.requireNonNull(cell));
+    }
+
+    /**
+     * Set or add cell to specified position (column)
+     * <br>
+     * If {@code position} is greater than or equal to {@link StringRow#size()},
+     * empty cells will be inserted.
+     *
+     * @param position Position to set cell value
+     * @param cell     Cell value
+     */
+    public void set(int position, @NonNull String cell) {
+        if (position < 0) {
+            throw new IllegalArgumentException();
+        }
+        Objects.requireNonNull(cell);
+        int size = mCells.size();
+        if (position >= size) {
+            int empty = position - size;
+            for (int i = 0; i < empty; i++) {
+                mCells.add(EMPTY);
+            }
+            mCells.add(cell);
+        } else {
+            mCells.set(position, cell);
+        }
     }
 
     /**
@@ -94,6 +125,7 @@ public class Row implements Iterable<String> {
      * @param index Column index
      * @return Removed cell value
      */
+    @NonNull
     public String remove(int index) {
         return mCells.remove(index);
     }
