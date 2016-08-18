@@ -92,10 +92,20 @@ public class StringTable implements Iterable<StringRow> {
         mRows.add(Objects.requireNonNull(row));
     }
 
+    /**
+     * Add row that contains specified cells
+     *
+     * @param cells Cells
+     */
     public void add(@NonNull Object... cells) {
         mRows.add(new StringRow(cells));
     }
 
+    /**
+     * Add row that contains specified cells
+     *
+     * @param cells Cells
+     */
     public void add(@NonNull Iterable<Object> cells) {
         mRows.add(new StringRow(cells));
     }
