@@ -26,6 +26,8 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -306,6 +308,28 @@ public class CollectionUtils {
                 };
             }
         };
+    }
+
+    /**
+     * Copy all elements of the specified iterable to the new list
+     *
+     * @param iterable Source collection
+     * @return New {@link List}, containing all elements of {@code iterable}
+     */
+    @NonNull
+    public static <T> List<T> copy(@NonNull Iterable<T> iterable) {
+        List<T> copy;
+        if (iterable instanceof Collection<?>) {
+            Collection<T> collection = (Collection<T>) iterable;
+            copy = new ArrayList<>(collection.size());
+            copy.addAll(collection);
+        } else {
+            copy = new ArrayList<>();
+            for (T element : iterable) {
+                copy.add(element);
+            }
+        }
+        return copy;
     }
 
     /**
