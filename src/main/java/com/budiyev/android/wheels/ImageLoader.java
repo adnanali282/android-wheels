@@ -811,7 +811,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static <T> ImageSource<T> newImageSource(@NonNull final T data) {
-        final String key = CommonUtils.generateMD5(String.valueOf(data));
+        final String key = CommonUtils.generateSHA512(String.valueOf(data));
         return new ImageSource<T>() {
             @Override
             public T getData() {
