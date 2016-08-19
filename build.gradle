@@ -28,12 +28,13 @@ ext {
     bintrayRepo = 'maven'
     bintrayName = 'android-wheels'
     licenseName = 'The MIT License (MIT)'
-    allLicenses = ["MIT"]
+    allLicenses = ['MIT']
 }
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '23.0.3'
+    resourcePrefix 'android_wheels_'
 
     defaultConfig {
         minSdkVersion 19
@@ -52,7 +53,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-annotations:23.4.0'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
 }
@@ -121,8 +121,8 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
+    user = properties.getProperty('bintray.user')
+    key = properties.getProperty('bintray.apikey')
     configurations = ['archives']
 
     pkg {
