@@ -54,8 +54,8 @@ public class CircularProgressBar extends View {
     private static final float DEFAULT_BACKGROUND_WIDTH_DP = 1F;
     private static final float DEFAULT_START_ANGLE = -90F;
     private static final float DEFAULT_INDETERMINATE_MINIMUM_ANGLE = 45F;
-    private static final int DEFAULT_FOREGROUND_COLOR = Color.BLUE;
-    private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
+    private static final int DEFAULT_FOREGROUND_STROKE_COLOR = Color.BLUE;
+    private static final int DEFAULT_BACKGROUND_STROKE_COLOR = Color.BLACK;
     private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 500;
     private static final int DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION = 2000;
     private static final int DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION = 1000;
@@ -125,10 +125,10 @@ public class CircularProgressBar extends View {
             mAnimateProgress = DEFAULT_ANIMATE_PROGRESS;
             mDrawBackgroundStroke = DEFAULT_DRAW_BACKGROUND_STROKE;
             mIndeterminateAppearingMode = false;
-            mForegroundStrokePaint.setColor(DEFAULT_FOREGROUND_COLOR);
+            mForegroundStrokePaint.setColor(DEFAULT_FOREGROUND_STROKE_COLOR);
             mForegroundStrokePaint
                     .setStrokeWidth(DEFAULT_FOREGROUND_WIDTH_DP * displayMetrics.density);
-            mBackgroundStrokePaint.setColor(DEFAULT_BACKGROUND_COLOR);
+            mBackgroundStrokePaint.setColor(DEFAULT_BACKGROUND_STROKE_COLOR);
             mBackgroundStrokePaint
                     .setStrokeWidth(DEFAULT_BACKGROUND_WIDTH_DP * displayMetrics.density);
             mIndeterminateGrowAnimator.setDuration(DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION);
@@ -159,10 +159,10 @@ public class CircularProgressBar extends View {
                         DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION));
                 mForegroundStrokePaint.setColor(attributes
                         .getColor(R.styleable.CircularProgressBar_foregroundStrokeColor,
-                                DEFAULT_FOREGROUND_COLOR));
+                                DEFAULT_FOREGROUND_STROKE_COLOR));
                 mBackgroundStrokePaint.setColor(attributes
                         .getColor(R.styleable.CircularProgressBar_backgroundStrokeColor,
-                                DEFAULT_BACKGROUND_COLOR));
+                                DEFAULT_BACKGROUND_STROKE_COLOR));
                 mForegroundStrokePaint.setStrokeWidth(attributes.getDimensionPixelSize(
                         R.styleable.CircularProgressBar_foregroundStrokeWidth,
                         Math.round(DEFAULT_FOREGROUND_WIDTH_DP * displayMetrics.density)));
