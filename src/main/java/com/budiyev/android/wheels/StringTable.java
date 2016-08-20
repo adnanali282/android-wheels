@@ -129,4 +129,35 @@ public class StringTable implements Iterable<StringRow> {
     public int size() {
         return mRows.size();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof StringTable) {
+            StringTable other = ((StringTable) o);
+            int size = size();
+            if (other.size() == size) {
+                for (int i = 0; i < size; i++) {
+                    if (!Objects.equals(other.row(i), row(i))) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = Integer.MAX_VALUE;
+        for (StringRow row : this) {
+            hashCode ^= row.hashCode();
+        }
+        return hashCode;
+    }
 }

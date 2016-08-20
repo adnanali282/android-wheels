@@ -138,4 +138,35 @@ public class StringRow implements Iterable<String> {
     public int size() {
         return mCells.size();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof StringRow) {
+            StringRow other = (StringRow) o;
+            int size = size();
+            if (other.size() == size) {
+                for (int i = 0; i < size; i++) {
+                    if (!Objects.equals(other.cell(i), cell(i))) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = Integer.MAX_VALUE;
+        for (String cell : this) {
+            hashCode ^= cell.hashCode();
+        }
+        return hashCode;
+    }
 }
