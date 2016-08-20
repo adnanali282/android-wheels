@@ -590,14 +590,14 @@ public class CircularProgressBar extends View {
     }
 
     /**
-     * Duration of start angle animation in indeterminate mode
+     * Duration of grow animation in indeterminate mode
      */
     public long getIndeterminateGrowAnimationDuration() {
         return mIndeterminateGrowAnimator.getDuration();
     }
 
     /**
-     * Duration of start angle animation in indeterminate mode
+     * Duration of grow animation in indeterminate mode
      */
     public void setIndeterminateGrowAnimationDuration(long duration) {
         stopIndeterminateAnimations();
@@ -609,14 +609,14 @@ public class CircularProgressBar extends View {
     }
 
     /**
-     * Duration of sweep angle animation in indeterminate mode
+     * Duration of sweep animation in indeterminate mode
      */
     public long getIndeterminateSweepAnimationDuration() {
         return mIndeterminateSweepAnimator.getDuration();
     }
 
     /**
-     * Duration of sweep angle animation in indeterminate mode
+     * Duration of sweep animation in indeterminate mode
      */
     public void setIndeterminateSweepAnimationDuration(long duration) {
         stopIndeterminateAnimations();
