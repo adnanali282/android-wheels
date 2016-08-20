@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -108,6 +109,65 @@ public class StringTable implements Iterable<StringRow> {
      */
     public void add(@NonNull Iterable<Object> cells) {
         mRows.add(new StringRow(cells));
+    }
+
+    /**
+     * Set or add row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to set row
+     * @param cells    Cells
+     * @return Previous value or {@code null}
+     */
+    @Nullable
+    public StringRow set(int position, @NonNull Object... cells) {
+        return set(position, new StringRow(cells));
+    }
+
+    /**
+     * Set or add row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to set row
+     * @param cells    Cells
+     * @return Previous value or {@code null}
+     */
+    @Nullable
+    public StringRow set(int position, @NonNull Iterable<Object> cells) {
+        return set(position, new StringRow(cells));
+    }
+
+    /**
+     * Set or add row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to set row
+     * @param row      Row
+     * @return Previous value or {@code null}
+     */
+    @Nullable
+    public StringRow set(int position, @NonNull StringRow row) {
+        if (position < 0) {
+            throw new IllegalArgumentException();
+        }
+        Objects.requireNonNull(row);
+        int size = mRows.size();
+        if (position >= size) {
+            int empty = position - size;
+            for (int i = 0; i < empty; i++) {
+                mRows.add(new StringRow());
+            }
+            mRows.add(row);
+            return null;
+        } else {
+            return mRows.set(position, row);
+        }
     }
 
     /**

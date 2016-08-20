@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -101,8 +102,10 @@ public class StringRow implements Iterable<String> {
      *
      * @param position Position to set cell value
      * @param cell     Cell value
+     * @return Previous value or {@code null}
      */
-    public void set(int position, @NonNull String cell) {
+    @Nullable
+    public String set(int position, @NonNull String cell) {
         if (position < 0) {
             throw new IllegalArgumentException();
         }
@@ -114,8 +117,9 @@ public class StringRow implements Iterable<String> {
                 mCells.add(EMPTY);
             }
             mCells.add(cell);
+            return null;
         } else {
-            mCells.set(position, cell);
+            return mCells.set(position, cell);
         }
     }
 
