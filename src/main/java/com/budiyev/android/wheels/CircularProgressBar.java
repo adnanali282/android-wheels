@@ -57,7 +57,7 @@ public class CircularProgressBar extends View {
     private static final int DEFAULT_FOREGROUND_COLOR = Color.BLUE;
     private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
     private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 500;
-    private static final int DEFAULT_INDETERMINATE_START_ANIMATION_DURATION = 2000;
+    private static final int DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION = 2000;
     private static final int DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION = 1000;
     private static final boolean DEFAULT_ANIMATE_PROGRESS = true;
     private static final boolean DEFAULT_DRAW_BACKGROUND_STROKE = true;
@@ -131,7 +131,7 @@ public class CircularProgressBar extends View {
             mBackgroundStrokePaint.setColor(DEFAULT_BACKGROUND_COLOR);
             mBackgroundStrokePaint
                     .setStrokeWidth(DEFAULT_BACKGROUND_WIDTH_DP * displayMetrics.density);
-            mIndeterminateGrowAnimator.setDuration(DEFAULT_INDETERMINATE_START_ANIMATION_DURATION);
+            mIndeterminateGrowAnimator.setDuration(DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION);
             mIndeterminateSweepAnimator.setDuration(DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION);
         } else {
             TypedArray attributes = null;
@@ -153,7 +153,7 @@ public class CircularProgressBar extends View {
                                 DEFAULT_PROGRESS_ANIMATION_DURATION));
                 mIndeterminateGrowAnimator.setDuration(attributes.getInteger(
                         R.styleable.CircularProgressBar_indeterminateGrowAnimationDuration,
-                        DEFAULT_INDETERMINATE_START_ANIMATION_DURATION));
+                        DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION));
                 mIndeterminateSweepAnimator.setDuration(attributes.getInteger(
                         R.styleable.CircularProgressBar_indeterminateSweepAnimationDuration,
                         DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION));
