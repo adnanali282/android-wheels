@@ -212,7 +212,7 @@ public final class HttpRequestResult {
      * the requested file has not been found on the remote server. This stream
      * can be used to read the data the server will send back.
      *
-     * @return The error input stream returned by the server.
+     * @return The error input stream returned by the server
      */
     @Nullable
     public InputStream getErrorStream() {
