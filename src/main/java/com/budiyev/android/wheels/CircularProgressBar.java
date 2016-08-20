@@ -56,7 +56,7 @@ public class CircularProgressBar extends View {
     private static final float DEFAULT_INDETERMINATE_MINIMUM_ANGLE = 45F;
     private static final int DEFAULT_FOREGROUND_COLOR = Color.BLUE;
     private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
-    private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 250;
+    private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 500;
     private static final int DEFAULT_INDETERMINATE_START_ANIMATION_DURATION = 2000;
     private static final int DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION = 750;
     private static final boolean DEFAULT_ANIMATE_PROGRESS = true;
