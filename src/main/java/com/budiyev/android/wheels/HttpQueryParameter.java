@@ -31,11 +31,11 @@ import java.util.Objects;
 /**
  * Query string request parameter
  */
-public final class QueryParameter {
+public final class HttpQueryParameter {
     final String key;
     final String value;
 
-    QueryParameter(@NonNull String key, @Nullable String value) {
+    HttpQueryParameter(@NonNull String key, @Nullable String value) {
         this.key = Objects.requireNonNull(key);
         this.value = value;
     }

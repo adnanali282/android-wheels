@@ -26,30 +26,27 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Builder for POST HTTP requests
+ * Builder for GET HTTP requests
  */
-public final class PostRequestBuilder {
+public final class GetHttpRequestBuilder {
     private final String mUrl;
-    private List<HeaderParameter> mHeaderParameters;
-    private List<QueryParameter> mQueryParameters;
-    private List<PostParameter> mPostParameters;
-    private List<RequestCallback> mCallbacks;
+    private List<HttpHeaderParameter> mHeaderParameters;
+    private List<HttpQueryParameter> mQueryParameters;
+    private List<HttpRequestCallback> mCallbacks;
 
-    PostRequestBuilder(@NonNull String url) {
+    GetHttpRequestBuilder(@NonNull String url) {
         mUrl = url;
     }
 
     /**
      * Append HTTP header parameter
      */
-    public PostRequestBuilder appendHeaderParameter(@NonNull String key, @NonNull String value) {
+    public GetHttpRequestBuilder appendHeaderParameter(@NonNull String key, @NonNull String value) {
         if (mHeaderParameters == null) {
             mHeaderParameters = new ArrayList<>();
         }
@@ -60,7 +57,7 @@ public final class PostRequestBuilder {
     /**
      * Append query string parameter
      */
-    public PostRequestBuilder appendQueryParameter(@NonNull String key, @Nullable String value) {
+    public GetHttpRequestBuilder appendQueryParameter(@NonNull String key, @Nullable String value) {
         if (mQueryParameters == null) {
             mQueryParameters = new ArrayList<>();
         }
@@ -69,44 +66,9 @@ public final class PostRequestBuilder {
     }
 
     /**
-     * Append request body parameter
-     */
-    public PostRequestBuilder appendPostParameter(@NonNull String key, @NonNull String value) {
-        if (mPostParameters == null) {
-            mPostParameters = new ArrayList<>();
-        }
-        mPostParameters.add(HttpRequest.newPostParameter(key, value));
-        return this;
-    }
-
-    /**
-     * Append request body parameter
-     */
-    public PostRequestBuilder appendPostParameter(@NonNull String key, @NonNull File file) {
-        if (mPostParameters == null) {
-            mPostParameters = new ArrayList<>();
-        }
-        mPostParameters.add(HttpRequest.newPostParameter(key, file));
-        return this;
-    }
-
-    /**
-     * Append request body parameter
-     */
-    public PostRequestBuilder appendPostParameter(@NonNull String key,
-            @NonNull InputStream inputStream, @NonNull String fileName,
-            @NonNull String contentType) {
-        if (mPostParameters == null) {
-            mPostParameters = new ArrayList<>();
-        }
-        mPostParameters.add(HttpRequest.newPostParameter(key, inputStream, fileName, contentType));
-        return this;
-    }
-
-    /**
      * Add request callback
      */
-    public PostRequestBuilder addCallback(@NonNull RequestCallback callback) {
+    public GetHttpRequestBuilder addCallback(@NonNull HttpRequestCallback callback) {
         if (mCallbacks == null) {
             mCallbacks = new ArrayList<>();
         }
@@ -119,7 +81,6 @@ public final class PostRequestBuilder {
      */
     @NonNull
     public HttpRequest build() {
-        return new PostHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mPostParameters,
-                mCallbacks);
+        return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks);
     }
 }

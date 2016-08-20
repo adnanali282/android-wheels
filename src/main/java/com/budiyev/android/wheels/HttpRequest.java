@@ -53,11 +53,11 @@ public abstract class HttpRequest {
     }
 
     @NonNull
-    protected static String buildParamsUrlString(@NonNull Iterable<QueryParameter> params,
+    protected static String buildParamsUrlString(@NonNull Iterable<HttpQueryParameter> params,
             @NonNull String charset) throws UnsupportedEncodingException {
         StringBuilder dataBuilder = new StringBuilder();
         boolean firstEntry = true;
-        for (QueryParameter queryParameter : params) {
+        for (HttpQueryParameter queryParameter : params) {
             if (firstEntry) {
                 firstEntry = false;
             } else {
@@ -113,9 +113,9 @@ public abstract class HttpRequest {
      */
     @NonNull
     public static HttpRequest newGetRequest(@NonNull String url,
-            @Nullable Iterable<HeaderParameter> headerParameters,
-            @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<RequestCallback> callbacks) {
+            @Nullable Iterable<HttpHeaderParameter> headerParameters,
+            @Nullable Iterable<HttpQueryParameter> queryParameters,
+            @Nullable Iterable<HttpRequestCallback> callbacks) {
         return new GetHttpRequest(url, headerParameters, queryParameters, callbacks);
     }
 
@@ -126,8 +126,8 @@ public abstract class HttpRequest {
      * @return New GET request builder instance
      */
     @NonNull
-    public static GetRequestBuilder newGetBuilder(@NonNull String url) {
-        return new GetRequestBuilder(url);
+    public static GetHttpRequestBuilder newGetBuilder(@NonNull String url) {
+        return new GetHttpRequestBuilder(url);
     }
 
     /**
@@ -136,16 +136,16 @@ public abstract class HttpRequest {
      * @param url              URL-address
      * @param headerParameters Request header parameters
      * @param queryParameters  Query string parameters
-     * @param postParameters   Request body multipart/form-data parameters
+     * @param bodyParameters   Request body multipart/form-data parameters
      * @param callbacks        Response callbacks
      */
     @NonNull
     public static HttpRequest newPostRequest(@NonNull String url,
-            @Nullable Iterable<HeaderParameter> headerParameters,
-            @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<PostParameter> postParameters,
-            @Nullable Iterable<RequestCallback> callbacks) {
-        return new PostHttpRequest(url, headerParameters, queryParameters, postParameters,
+            @Nullable Iterable<HttpHeaderParameter> headerParameters,
+            @Nullable Iterable<HttpQueryParameter> queryParameters,
+            @Nullable Iterable<HttpBodyParameter> bodyParameters,
+            @Nullable Iterable<HttpRequestCallback> callbacks) {
+        return new PostHttpRequest(url, headerParameters, queryParameters, bodyParameters,
                 callbacks);
     }
 
@@ -156,8 +156,8 @@ public abstract class HttpRequest {
      * @return New POST request instance
      */
     @NonNull
-    public static PostRequestBuilder newPostBuilder(@NonNull String url) {
-        return new PostRequestBuilder(url);
+    public static PostHttpRequestBuilder newPostBuilder(@NonNull String url) {
+        return new PostHttpRequestBuilder(url);
     }
 
     /**
@@ -168,8 +168,9 @@ public abstract class HttpRequest {
      * @return New request header parameter
      */
     @NonNull
-    public static HeaderParameter newHeaderParameter(@NonNull String key, @NonNull String value) {
-        return new HeaderParameter(key, value);
+    public static HttpHeaderParameter newHeaderParameter(@NonNull String key,
+            @NonNull String value) {
+        return new HttpHeaderParameter(key, value);
     }
 
     /**
@@ -180,36 +181,37 @@ public abstract class HttpRequest {
      * @return New query string request parameter
      */
     @NonNull
-    public static QueryParameter newQueryParameter(@NonNull String key, @Nullable String value) {
-        return new QueryParameter(key, value);
+    public static HttpQueryParameter newQueryParameter(@NonNull String key,
+            @Nullable String value) {
+        return new HttpQueryParameter(key, value);
     }
 
     /**
-     * Create new POST  request body parameter
+     * Create new POST request body parameter
      *
      * @param key   Key
      * @param value Value
      * @return New POST request body parameter
      */
     @NonNull
-    public static PostParameter newPostParameter(@NonNull String key, @NonNull String value) {
-        return new PostParameter(key, value);
+    public static HttpBodyParameter newBodyParameter(@NonNull String key, @NonNull String value) {
+        return new HttpBodyParameter(key, value);
     }
 
     /**
-     * Create new POST  request body parameter
+     * Create new POST request body parameter
      *
      * @param key  Key
      * @param file File
      * @return New POST request body parameter
      */
     @NonNull
-    public static PostParameter newPostParameter(@NonNull String key, @NonNull File file) {
-        return new PostParameter(key, file);
+    public static HttpBodyParameter newBodyParameter(@NonNull String key, @NonNull File file) {
+        return new HttpBodyParameter(key, file);
     }
 
     /**
-     * Create new POST  request body parameter
+     * Create new POST request body parameter
      *
      * @param key         Key
      * @param inputStream Input stream
@@ -218,10 +220,10 @@ public abstract class HttpRequest {
      * @return New POST request body parameter
      */
     @NonNull
-    public static PostParameter newPostParameter(@NonNull String key,
+    public static HttpBodyParameter newBodyParameter(@NonNull String key,
             @NonNull InputStream inputStream, @NonNull String fileName,
             @NonNull String contentType) {
-        return new PostParameter(key, inputStream, fileName, contentType);
+        return new HttpBodyParameter(key, inputStream, fileName, contentType);
     }
 
     /**
@@ -230,7 +232,7 @@ public abstract class HttpRequest {
      * @return a {@link Future} representing pending completion of the request
      */
     @NonNull
-    public abstract Future<RequestResult> submit();
+    public abstract Future<HttpRequestResult> submit();
 
     /**
      * Execute request immediately
@@ -238,5 +240,5 @@ public abstract class HttpRequest {
      * @return Request result
      */
     @NonNull
-    public abstract RequestResult execute();
+    public abstract HttpRequestResult execute();
 }

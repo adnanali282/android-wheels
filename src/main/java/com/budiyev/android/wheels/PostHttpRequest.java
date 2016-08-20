@@ -60,16 +60,16 @@ final class PostHttpRequest extends HttpRequest {
     private static final String BINARY = "binary";
     private static final int BUFFER_SIZE = 8192;
     private final String mUrl;
-    private final Iterable<HeaderParameter> mHeaderParameters;
-    private final Iterable<QueryParameter> mQueryParameters;
-    private final Iterable<PostParameter> mPostParameters;
-    private final Iterable<RequestCallback> mCallbacks;
+    private final Iterable<HttpHeaderParameter> mHeaderParameters;
+    private final Iterable<HttpQueryParameter> mQueryParameters;
+    private final Iterable<HttpBodyParameter> mBodyParameters;
+    private final Iterable<HttpRequestCallback> mCallbacks;
 
-    private final Callable<RequestResult> mRequestAction = new Callable<RequestResult>() {
+    private final Callable<HttpRequestResult> mRequestAction = new Callable<HttpRequestResult>() {
         @Override
-        public RequestResult call() throws Exception {
+        public HttpRequestResult call() throws Exception {
             HttpURLConnection connection = null;
-            RequestResult result = new RequestResult();
+            HttpRequestResult result = new HttpRequestResult();
             try {
                 String boundary = "===" + System.currentTimeMillis() + "===";
                 String query = mUrl;
@@ -85,7 +85,7 @@ final class PostHttpRequest extends HttpRequest {
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                 connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
                 if (mHeaderParameters != null) {
-                    for (HeaderParameter parameter : mHeaderParameters) {
+                    for (HttpHeaderParameter parameter : mHeaderParameters) {
                         if (parameter.key != null && parameter.value != null) {
                             connection.setRequestProperty(parameter.key, parameter.value);
                         }
@@ -95,8 +95,8 @@ final class PostHttpRequest extends HttpRequest {
                 OutputStream outputStream = connection.getOutputStream();
                 try (BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
-                    if (mPostParameters != null) {
-                        for (PostParameter postParameter : mPostParameters) {
+                    if (mBodyParameters != null) {
+                        for (HttpBodyParameter postParameter : mBodyParameters) {
                             if (postParameter.key != null) {
                                 if (postParameter.value != null) {
                                     writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
@@ -152,38 +152,38 @@ final class PostHttpRequest extends HttpRequest {
                 }
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    result.setResultType(RequestResult.SUCCESS);
+                    result.setResultType(HttpRequestResult.SUCCESS);
                     result.setConnection(connection);
                     result.setHttpCode(responseCode);
                     result.setDataStream(connection.getInputStream());
                 } else {
-                    result.setResultType(RequestResult.ERROR_HTTP);
+                    result.setResultType(HttpRequestResult.ERROR_HTTP);
                     result.setConnection(connection);
                     result.setHttpCode(responseCode);
                 }
             } catch (MalformedURLException e) {
-                result.setResultType(RequestResult.ERROR_MALFORMED_URL);
+                result.setResultType(HttpRequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (UnsupportedEncodingException e) {
-                result.setResultType(RequestResult.ERROR_UNSUPPORTED_ENCODING);
+                result.setResultType(HttpRequestResult.ERROR_UNSUPPORTED_ENCODING);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (ProtocolException e) {
-                result.setResultType(RequestResult.ERROR_PROTOCOL);
+                result.setResultType(HttpRequestResult.ERROR_PROTOCOL);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (IOException e) {
-                result.setResultType(RequestResult.ERROR_IO);
+                result.setResultType(HttpRequestResult.ERROR_IO);
                 result.setConnection(connection);
                 result.setException(e);
             } catch (Exception e) {
-                result.setResultType(RequestResult.ERROR_UNEXPECTED);
+                result.setResultType(HttpRequestResult.ERROR_UNEXPECTED);
                 result.setConnection(connection);
                 result.setException(e);
             }
             if (mCallbacks != null) {
-                for (RequestCallback callback : mCallbacks) {
+                for (HttpRequestCallback callback : mCallbacks) {
                     if (callback != null) {
                         callback.onResult(result);
                     }
@@ -193,26 +193,26 @@ final class PostHttpRequest extends HttpRequest {
         }
     };
 
-    PostHttpRequest(@NonNull String url, @Nullable Iterable<HeaderParameter> headerParameters,
-            @Nullable Iterable<QueryParameter> queryParameters,
-            @Nullable Iterable<PostParameter> postParameters,
-            @Nullable Iterable<RequestCallback> callbacks) {
+    PostHttpRequest(@NonNull String url, @Nullable Iterable<HttpHeaderParameter> headerParameters,
+            @Nullable Iterable<HttpQueryParameter> queryParameters,
+            @Nullable Iterable<HttpBodyParameter> bodyParameters,
+            @Nullable Iterable<HttpRequestCallback> callbacks) {
         mUrl = Objects.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
-        mPostParameters = postParameters;
+        mBodyParameters = bodyParameters;
         mCallbacks = callbacks;
     }
 
     @NonNull
     @Override
-    public Future<RequestResult> submit() {
+    public Future<HttpRequestResult> submit() {
         return InternalExecutors.getHttpRequestExecutor().submit(mRequestAction);
     }
 
     @NonNull
     @Override
-    public RequestResult execute() {
+    public HttpRequestResult execute() {
         try {
             return mRequestAction.call();
         } catch (Exception e) {

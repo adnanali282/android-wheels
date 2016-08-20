@@ -25,14 +25,17 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
+import java.util.Objects;
+
 /**
- * Request callback for {@link HttpRequest}
+ * Query header request parameter
  */
-public interface RequestCallback {
-    /**
-     * Called when result of the request becomes available
-     *
-     * @param requestResult Request result
-     */
-    void onResult(@NonNull RequestResult requestResult);
+public final class HttpHeaderParameter {
+    final String key;
+    final String value;
+
+    HttpHeaderParameter(@NonNull String key, @NonNull String value) {
+        this.key = Objects.requireNonNull(key);
+        this.value = Objects.requireNonNull(value);
+    }
 }

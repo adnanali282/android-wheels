@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * Parameter of HTTP request (multipart/form-data)
  */
-public final class PostParameter {
+public final class HttpBodyParameter {
     final String key;
     final String value;
     final File file;
@@ -40,7 +40,7 @@ public final class PostParameter {
     final String fileName;
     final String contentType;
 
-    PostParameter(@NonNull String key, @NonNull String value) {
+    HttpBodyParameter(@NonNull String key, @NonNull String value) {
         this.key = Objects.requireNonNull(key);
         this.value = Objects.requireNonNull(value);
         this.file = null;
@@ -49,7 +49,7 @@ public final class PostParameter {
         this.contentType = null;
     }
 
-    PostParameter(@NonNull String key, @NonNull File file) {
+    HttpBodyParameter(@NonNull String key, @NonNull File file) {
         this.key = Objects.requireNonNull(key);
         this.value = null;
         this.file = Objects.requireNonNull(file);
@@ -58,7 +58,7 @@ public final class PostParameter {
         this.contentType = null;
     }
 
-    PostParameter(@NonNull String key, @NonNull InputStream stream, @NonNull String fileName,
+    HttpBodyParameter(@NonNull String key, @NonNull InputStream stream, @NonNull String fileName,
             @NonNull String contentType) {
         this.key = Objects.requireNonNull(key);
         this.value = null;
