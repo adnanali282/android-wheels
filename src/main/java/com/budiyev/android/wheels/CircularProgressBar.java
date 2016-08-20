@@ -68,7 +68,7 @@ public class CircularProgressBar extends View {
     private float mIndeterminateGrowAngle;
     private float mIndeterminateSweepAngle;
     private float mIndeterminateMinimumAngle;
-    private float mIndeterminateStartAngleOffset;
+    private float mIndeterminateGrowAngleOffset;
     private boolean mIndeterminate;
     private boolean mAnimateProgress;
     private boolean mDrawBackgroundStroke;
@@ -230,8 +230,8 @@ public class CircularProgressBar extends View {
             public void onAnimationRepeat(Animator animation) {
                 mIndeterminateAppearingMode = !mIndeterminateAppearingMode;
                 if (mIndeterminateAppearingMode) {
-                    mIndeterminateStartAngleOffset =
-                            (mIndeterminateStartAngleOffset + mIndeterminateMinimumAngle * 2F) %
+                    mIndeterminateGrowAngleOffset =
+                            (mIndeterminateGrowAngleOffset + mIndeterminateMinimumAngle * 2F) %
                                     360F;
                 }
             }
@@ -364,11 +364,11 @@ public class CircularProgressBar extends View {
             float startAngle;
             float sweepAngle;
             if (mIndeterminateAppearingMode) {
-                startAngle = mIndeterminateGrowAngle - mIndeterminateStartAngleOffset;
+                startAngle = mIndeterminateGrowAngle - mIndeterminateGrowAngleOffset;
                 sweepAngle = mIndeterminateSweepAngle + mIndeterminateMinimumAngle;
             } else {
                 startAngle = mIndeterminateGrowAngle + mIndeterminateSweepAngle -
-                        mIndeterminateStartAngleOffset;
+                        mIndeterminateGrowAngleOffset;
                 sweepAngle = 360F - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
             }
             canvas.drawArc(mDrawRect, startAngle, sweepAngle, false, mForegroundStrokePaint);
