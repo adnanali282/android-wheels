@@ -527,6 +527,17 @@ public class CircularProgressBar extends View {
     }
 
     /**
+     * Progress change animation duration
+     *
+     * @see CircularProgressBar#setProgressAnimationDuration(long)
+     * @deprecated
+     */
+    @Deprecated
+    public void setAnimationDuration(long duration) {
+        setProgressAnimationDuration(duration);
+    }
+
+    /**
      * Progress animation state
      */
     public boolean isAnimating() {
