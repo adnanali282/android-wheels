@@ -56,7 +56,7 @@ public class CircularProgressBar extends View {
     private static final float DEFAULT_INDETERMINATE_MINIMUM_ANGLE = 45F;
     private static final int DEFAULT_FOREGROUND_COLOR = Color.BLUE;
     private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
-    private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 1000;
+    private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 250;
     private static final int DEFAULT_INDETERMINATE_START_ANIMATION_DURATION = 2000;
     private static final int DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION = 750;
     private static final boolean DEFAULT_ANIMATE_PROGRESS = true;
@@ -69,7 +69,6 @@ public class CircularProgressBar extends View {
     private float mIndeterminateSweepAngle;
     private float mIndeterminateMinimumAngle;
     private float mIndeterminateStartAngleOffset;
-    private long mProgressAnimationDuration;
     private boolean mIndeterminate;
     private boolean mAnimateProgress;
     private boolean mDrawBackgroundStroke;
@@ -121,7 +120,7 @@ public class CircularProgressBar extends View {
             mIndeterminateGrowAngle = 0F;
             mIndeterminateSweepAngle = 0F;
             mIndeterminateMinimumAngle = DEFAULT_INDETERMINATE_MINIMUM_ANGLE;
-            mProgressAnimationDuration = DEFAULT_PROGRESS_ANIMATION_DURATION;
+            mProgressAnimator.setDuration(DEFAULT_PROGRESS_ANIMATION_DURATION);
             mIndeterminate = DEFAULT_INDETERMINATE;
             mAnimateProgress = DEFAULT_ANIMATE_PROGRESS;
             mDrawBackgroundStroke = DEFAULT_DRAW_BACKGROUND_STROKE;
@@ -149,9 +148,9 @@ public class CircularProgressBar extends View {
                 mIndeterminateMinimumAngle = attributes
                         .getFloat(R.styleable.CircularProgressBar_indeterminateMinimumAngle,
                                 DEFAULT_INDETERMINATE_MINIMUM_ANGLE);
-                mProgressAnimationDuration = attributes
+                mProgressAnimator.setDuration(attributes
                         .getInteger(R.styleable.CircularProgressBar_progressAnimationDuration,
-                                DEFAULT_PROGRESS_ANIMATION_DURATION);
+                                DEFAULT_PROGRESS_ANIMATION_DURATION));
                 mIndeterminateGrowAnimator.setDuration(attributes.getInteger(
                         R.styleable.CircularProgressBar_indeterminateGrowAnimationDuration,
                         DEFAULT_INDETERMINATE_START_ANIMATION_DURATION));
@@ -185,7 +184,6 @@ public class CircularProgressBar extends View {
                 }
             }
         }
-
         mProgressAnimator.setInterpolator(new DecelerateInterpolator());
         mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -421,7 +419,6 @@ public class CircularProgressBar extends View {
         } else {
             if (mAnimateProgress && isLaidOutCompat()) {
                 mProgressAnimator.setFloatValues(mProgress, progress);
-                mProgressAnimator.setDuration(mProgressAnimationDuration);
                 mProgressAnimator.start();
             } else {
                 setProgressInternal(progress);
@@ -519,14 +516,14 @@ public class CircularProgressBar extends View {
      * Progress change animation duration
      */
     public long getProgressAnimationDuration() {
-        return mProgressAnimationDuration;
+        return mProgressAnimator.getDuration();
     }
 
     /**
      * Progress change animation duration
      */
     public void setProgressAnimationDuration(long duration) {
-        mProgressAnimationDuration = duration;
+        mProgressAnimator.setDuration(duration);
     }
 
     /**
