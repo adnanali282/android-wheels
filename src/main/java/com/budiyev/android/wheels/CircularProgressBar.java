@@ -72,7 +72,7 @@ public class CircularProgressBar extends View {
     private boolean mIndeterminate;
     private boolean mAnimateProgress;
     private boolean mDrawBackgroundStroke;
-    private boolean mIndeterminateAppearingMode;
+    private boolean mIndeterminateGrowMode;
     private Paint mForegroundStrokePaint;
     private Paint mBackgroundStrokePaint;
     private RectF mDrawRect;
@@ -124,7 +124,6 @@ public class CircularProgressBar extends View {
             mIndeterminate = DEFAULT_INDETERMINATE;
             mAnimateProgress = DEFAULT_ANIMATE_PROGRESS;
             mDrawBackgroundStroke = DEFAULT_DRAW_BACKGROUND_STROKE;
-            mIndeterminateAppearingMode = false;
             mForegroundStrokePaint.setColor(DEFAULT_FOREGROUND_STROKE_COLOR);
             mForegroundStrokePaint
                     .setStrokeWidth(DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density);
@@ -228,8 +227,8 @@ public class CircularProgressBar extends View {
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-                mIndeterminateAppearingMode = !mIndeterminateAppearingMode;
-                if (mIndeterminateAppearingMode) {
+                mIndeterminateGrowMode = !mIndeterminateGrowMode;
+                if (mIndeterminateGrowMode) {
                     mIndeterminateGrowAngleOffset =
                             (mIndeterminateGrowAngleOffset + mIndeterminateMinimumAngle * 2F) %
                                     360F;
@@ -358,7 +357,7 @@ public class CircularProgressBar extends View {
         if (mIndeterminate) {
             float startAngle;
             float sweepAngle;
-            if (mIndeterminateAppearingMode) {
+            if (mIndeterminateGrowMode) {
                 startAngle = mIndeterminateGrowAngle - mIndeterminateGrowAngleOffset;
                 sweepAngle = mIndeterminateSweepAngle + mIndeterminateMinimumAngle;
             } else {
