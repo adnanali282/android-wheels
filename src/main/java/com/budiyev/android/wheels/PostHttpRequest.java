@@ -77,6 +77,7 @@ final class PostHttpRequest extends HttpRequest {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
+                connection.setDoInput(true);
                 connection.setRequestMethod(REQUEST_METHOD_POST);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);

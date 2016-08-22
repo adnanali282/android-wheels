@@ -56,6 +56,7 @@ final class GetHttpRequest extends HttpRequest {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
+                connection.setDoInput(true);
                 connection.setRequestMethod(REQUEST_METHOD_GET);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 if (!CollectionUtils.isNullOrEmpty(mHeaderParameters)) {
