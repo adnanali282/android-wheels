@@ -78,6 +78,7 @@ final class PostHttpRequest extends HttpRequest {
                 }
                 connection = openHttpUrlConnection(query);
                 connection.setDoInput(true);
+                connection.setDoOutput(true);
                 connection.setRequestMethod(REQUEST_METHOD_POST);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
@@ -87,7 +88,6 @@ final class PostHttpRequest extends HttpRequest {
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 if (!CollectionUtils.isNullOrEmpty(mBodyParameters)) {
-                    connection.setDoOutput(true);
                     OutputStream outputStream = connection.getOutputStream();
                     try (BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
