@@ -30,7 +30,6 @@ import android.widget.ImageView;
 /**
  * Source data and key to cache loaded bitmaps
  *
- * @param <T> Type of source data
  * @see ImageLoader#loadImage(ImageSource, ImageView)
  * @see ImageLoader#loadImage(ImageSource, ImageView, ImageLoadCallback)
  * @see ImageLoader#newImageSource(Object)

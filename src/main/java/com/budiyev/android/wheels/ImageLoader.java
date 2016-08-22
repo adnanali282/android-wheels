@@ -55,8 +55,6 @@ import java.util.Objects;
  * provides automatic memory and storage caching. ImageLoader is usable without caches,
  * with one of them, or both (without caches, caching is not available). Also, ImageLoader
  * is usable without bitmapLoader (loading new bitmaps is not available in this case).
- *
- * @param <T> Source data type
  */
 public class ImageLoader<T> {
     private final Object mPauseWorkLock = new Object();
@@ -581,17 +579,20 @@ public class ImageLoader<T> {
     @Nullable
     public static Bitmap loadSampledBitmapFromUri(@NonNull Context context, @NonNull Uri uri,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
+        BitmapFactory.Options options = null;
+        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+            options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
+                BitmapFactory.decodeStream(inputStream, null, options);
+            } catch (IOException e) {
+                return null;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize =
+                    calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                            requiredHeight, ignoreTotalNumberOfPixels);
         }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
         try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
@@ -612,17 +613,20 @@ public class ImageLoader<T> {
     @Nullable
     public static Bitmap loadSampledBitmapFromFile(@NonNull File file, int requiredWidth,
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = new FileInputStream(file)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
+        BitmapFactory.Options options = null;
+        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+            options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            try (InputStream inputStream = new FileInputStream(file)) {
+                BitmapFactory.decodeStream(inputStream, null, options);
+            } catch (IOException e) {
+                return null;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize =
+                    calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                            requiredHeight, ignoreTotalNumberOfPixels);
         }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
         try (InputStream inputStream = new FileInputStream(file)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
@@ -643,17 +647,20 @@ public class ImageLoader<T> {
     @Nullable
     public static Bitmap loadSampledBitmapFromFileDescriptor(@NonNull FileDescriptor fileDescriptor,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
-            BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (IOException e) {
-            return null;
+        BitmapFactory.Options options = null;
+        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+            options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
+                BitmapFactory.decodeStream(inputStream, null, options);
+            } catch (IOException e) {
+                return null;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize =
+                    calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                            requiredHeight, ignoreTotalNumberOfPixels);
         }
-        options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
         try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
@@ -690,9 +697,11 @@ public class ImageLoader<T> {
             return null;
         }
         options.inJustDecodeBounds = false;
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
+        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+            options.inSampleSize =
+                    calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                            requiredHeight, ignoreTotalNumberOfPixels);
+        }
         try (InputStream inputStream = resources.openRawResource(resourceId, typedValue)) {
             return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
@@ -713,13 +722,16 @@ public class ImageLoader<T> {
     @Nullable
     public static Bitmap loadSampledBitmapFromByteArray(@NonNull byte[] byteArray,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
-        options.inSampleSize =
-                calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
-                        requiredHeight, ignoreTotalNumberOfPixels);
-        options.inJustDecodeBounds = false;
+        BitmapFactory.Options options = null;
+        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+            options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
+            options.inSampleSize =
+                    calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
+                            requiredHeight, ignoreTotalNumberOfPixels);
+            options.inJustDecodeBounds = false;
+        }
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
     }
 
@@ -806,7 +818,6 @@ public class ImageLoader<T> {
      * Create new common image source that is usable in most cases
      *
      * @param data Source data
-     * @param <T>  Source data type
      * @return Image source
      */
     @NonNull

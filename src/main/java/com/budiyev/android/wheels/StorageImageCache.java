@@ -33,8 +33,8 @@ import java.io.File;
 /**
  * Storage image cache for {@link ImageLoader}
  *
- * @see ImageLoader#getMemoryImageCache()
- * @see ImageLoader#setMemoryImageCache(MemoryImageCache)
+ * @see ImageLoader#getStorageImageCache() ()
+ * @see ImageLoader#setStorageImageCache(StorageImageCache)
  * @see ImageLoader#newStorageImageCache(Context)
  * @see ImageLoader#newStorageImageCache(File)
  * @see ImageLoader#newStorageImageCache(File, long, Bitmap.CompressFormat, int)
