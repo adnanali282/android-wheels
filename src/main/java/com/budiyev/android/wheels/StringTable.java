@@ -220,4 +220,14 @@ public class StringTable implements Iterable<StringRow> {
         }
         return hashCode;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("StringTable [");
+        for (int i = 0, s = size(); i < s; i++) {
+            stringBuilder.append(System.lineSeparator()).append(row(i));
+        }
+        return stringBuilder.append(']').toString();
+    }
 }

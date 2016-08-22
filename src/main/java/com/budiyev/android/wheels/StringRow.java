@@ -173,4 +173,18 @@ public class StringRow implements Iterable<String> {
         }
         return hashCode;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("StringRow [");
+        for (int i = 0, s = size(); i < s; i++) {
+            stringBuilder.append(cell(i));
+            if (i < s - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+        stringBuilder.append(']');
+        return stringBuilder.toString();
+    }
 }
