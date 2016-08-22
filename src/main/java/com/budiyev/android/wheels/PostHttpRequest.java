@@ -77,8 +77,6 @@ final class PostHttpRequest extends HttpRequest {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
-                connection.setDoOutput(true);
-                connection.setDoInput(true);
                 connection.setRequestMethod(REQUEST_METHOD_POST);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
@@ -87,63 +85,60 @@ final class PostHttpRequest extends HttpRequest {
                     addHeaderParameters(connection, mHeaderParameters);
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
-                OutputStream outputStream = connection.getOutputStream();
-                try (BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
-                    if (mBodyParameters != null) {
-                        for (HttpBodyParameter postParameter : mBodyParameters) {
-                            if (postParameter.key != null) {
-                                if (postParameter.value != null) {
-                                    writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                            .append(CONTENT_DISPOSITION).append(postParameter.key)
-                                            .append(QUOTE).append(LINE_END)
-                                            .append(CONTENT_TYPE_REQUEST).append(PLAIN_TEXT)
-                                            .append(LINE_END).append(LINE_END)
-                                            .append(postParameter.value).append(LINE_END);
-                                } else if (postParameter.file != null) {
-                                    String fileName = postParameter.file.getName();
-                                    String contentType =
-                                            URLConnection.guessContentTypeFromName(fileName);
-                                    writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                            .append(CONTENT_DISPOSITION).append(postParameter.key)
-                                            .append(QUOTE).append(FILENAME).append(fileName)
-                                            .append(QUOTE).append(LINE_END)
-                                            .append(CONTENT_TYPE_REQUEST).append(contentType)
-                                            .append(LINE_END).append(CONTENT_TRANSFER_ENCODING)
-                                            .append(BINARY).append(LINE_END).append(LINE_END)
-                                            .flush();
-                                    try (FileInputStream fileInput = new FileInputStream(
-                                            postParameter.file)) {
-                                        byte[] buffer = new byte[BUFFER_SIZE];
-                                        for (int read; (read = fileInput.read(buffer)) != -1; ) {
-                                            outputStream.write(buffer, 0, read);
-                                        }
+                if (!CollectionUtils.isNullOrEmpty(mBodyParameters)) {
+                    connection.setDoOutput(true);
+                    OutputStream outputStream = connection.getOutputStream();
+                    try (BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
+                        for (HttpBodyParameter bodyParameter : mBodyParameters) {
+                            if (bodyParameter.value != null) {
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
+                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
+                                        .append(QUOTE).append(LINE_END).append(CONTENT_TYPE_REQUEST)
+                                        .append(PLAIN_TEXT).append(LINE_END).append(LINE_END)
+                                        .append(bodyParameter.value).append(LINE_END);
+                            } else if (bodyParameter.file != null) {
+                                String fileName = bodyParameter.file.getName();
+                                String contentType =
+                                        URLConnection.guessContentTypeFromName(fileName);
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
+                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
+                                        .append(QUOTE).append(FILENAME).append(fileName)
+                                        .append(QUOTE).append(LINE_END).append(CONTENT_TYPE_REQUEST)
+                                        .append(contentType).append(LINE_END)
+                                        .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
+                                        .append(LINE_END).append(LINE_END).flush();
+                                try (FileInputStream fileInput = new FileInputStream(
+                                        bodyParameter.file)) {
+                                    byte[] buffer = new byte[BUFFER_SIZE];
+                                    for (int read; (read = fileInput.read(buffer)) != -1; ) {
+                                        outputStream.write(buffer, 0, read);
                                     }
-                                    writer.append(LINE_END);
-                                } else if (postParameter.stream != null &&
-                                        postParameter.fileName != null &&
-                                        postParameter.contentType != null) {
-                                    writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                            .append(CONTENT_DISPOSITION).append(postParameter.key)
-                                            .append(QUOTE).append(FILENAME)
-                                            .append(postParameter.fileName).append(QUOTE)
-                                            .append(LINE_END).append(CONTENT_TYPE_REQUEST)
-                                            .append(postParameter.contentType).append(LINE_END)
-                                            .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
-                                            .append(LINE_END).append(LINE_END).flush();
-                                    try (InputStream inputStream = postParameter.stream) {
-                                        byte[] buffer = new byte[BUFFER_SIZE];
-                                        for (int read; (read = inputStream.read(buffer)) != -1; ) {
-                                            outputStream.write(buffer, 0, read);
-                                        }
-                                    }
-                                    writer.append(LINE_END);
                                 }
+                                writer.append(LINE_END);
+                            } else if (bodyParameter.stream != null &&
+                                    bodyParameter.fileName != null &&
+                                    bodyParameter.contentType != null) {
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
+                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
+                                        .append(QUOTE).append(FILENAME)
+                                        .append(bodyParameter.fileName).append(QUOTE)
+                                        .append(LINE_END).append(CONTENT_TYPE_REQUEST)
+                                        .append(bodyParameter.contentType).append(LINE_END)
+                                        .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
+                                        .append(LINE_END).append(LINE_END).flush();
+                                try (InputStream inputStream = bodyParameter.stream) {
+                                    byte[] buffer = new byte[BUFFER_SIZE];
+                                    for (int read; (read = inputStream.read(buffer)) != -1; ) {
+                                        outputStream.write(buffer, 0, read);
+                                    }
+                                }
+                                writer.append(LINE_END);
                             }
                         }
+                        writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH)
+                                .append(LINE_END).flush();
                     }
-                    writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END)
-                            .flush();
                 }
                 processResponse(connection, result);
             } catch (MalformedURLException e) {
