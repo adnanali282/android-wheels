@@ -467,17 +467,18 @@ public class CollectionUtils {
     }
 
     /**
-     * Check if specified {@link Collection} is {@code null} or empty
-     */
-    public static boolean isNullOrEmpty(@Nullable Collection<?> collection) {
-        return collection == null || !collection.isEmpty();
-    }
-
-    /**
      * Check if specified {@link Iterable} is {@code null} or empty
      */
     public static boolean isNullOrEmpty(@Nullable Iterable<?> iterable) {
-        return iterable == null || !iterable.iterator().hasNext();
+        if (iterable == null) {
+            return true;
+        } else {
+            if (iterable instanceof Collection<?>) {
+                return ((Collection) iterable).isEmpty();
+            } else {
+                return !iterable.iterator().hasNext();
+            }
+        }
     }
 
     /**
