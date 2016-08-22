@@ -401,7 +401,7 @@ public class CollectionUtils {
      * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
      */
     public static <T> int search(@NonNull List<T> list, @Nullable T item, int position) {
-        int step = Math.round(list.size() * 0.1F);
+        int step = Math.round(list.size() * 0.05F);
         if (step < 4) {
             step = 4;
         } else if (step > 16) {

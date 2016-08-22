@@ -79,4 +79,9 @@ public final class SizeCompat {
     public int hashCode() {
         return mWidth ^ mHeight;
     }
+
+    @Override
+    public String toString() {
+        return mWidth + "x" + mHeight;
+    }
 }

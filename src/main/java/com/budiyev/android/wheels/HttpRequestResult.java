@@ -32,6 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Request result of {@link HttpRequest}
@@ -49,44 +53,46 @@ public final class HttpRequestResult {
     /**
      * Type of this result
      * <br>
-     * {@link HttpRequestResult#NONE} - No result
+     * {@link #NONE} - No result
      * <br>
-     * {@link HttpRequestResult#SUCCESS} - Success (response code is {@link HttpURLConnection#HTTP_OK})
+     * {@link #SUCCESS} - Success, see {@link #getHttpCode()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_HTTP} - Response code isn't {@link HttpURLConnection#HTTP_OK},
-     * see {@link HttpRequestResult#getHttpCode()} for details
+     * {@link #ERROR_HTTP} - HTTP error, see {@link #getHttpCode()}
+     * and {@link #getException()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_MALFORMED_URL} - Malformed URL,
-     * see {@link HttpRequestResult#getException()} for details
+     * {@link #ERROR_MALFORMED_URL} - Malformed URL,
+     * see {@link #getException()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_UNSUPPORTED_ENCODING} - Unsupported text encoding,
-     * see {@link HttpRequestResult#getException()} for details
+     * {@link #ERROR_UNSUPPORTED_ENCODING} - Unsupported text encoding,
+     * see {@link #getException()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_PROTOCOL} - Protocol error,
-     * see {@link HttpRequestResult#getException()} for details
+     * {@link #ERROR_PROTOCOL} - Protocol error,
+     * see {@link #getException()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_IO} - IO error,
-     * see {@link HttpRequestResult#getException()} for details
+     * {@link #ERROR_IO} - IO error,
+     * see {@link #getException()} for details
      * <br>
-     * {@link HttpRequestResult#ERROR_UNEXPECTED} - Unexpected error,
-     * see {@link HttpRequestResult#getException()} for details
+     * {@link #ERROR_UNEXPECTED} - Unexpected error,
+     * see {@link #getException()} for details
      */
     @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
             ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED})
     public @interface ResultType {
     }
 
-    public static final int STRING = 1;
-    public static final int STREAM = 2;
+    public static final int STREAM = 1;
+    public static final int STRING = 2;
 
     /**
      * Result data type
      * <br>
-     * {@link HttpRequestResult#NONE} - Don't receive any data / no data received
+     * {@link #NONE} - No data received
      * <br>
-     * {@link HttpRequestResult#STRING} - {@link String} via {@link HttpRequestResult#getDataString()}
+     * {@link #STREAM} - {@link InputStream}
+     * via {@link #getDataStream()}
      * <br>
-     * {@link HttpRequestResult#STREAM} - {@link InputStream} via {@link HttpRequestResult#getDataStream()}
+     * {@link #STRING} - {@link String}
+     * via {@link #getDataString()}
      */
     @IntDef({NONE, STRING, STREAM})
     public @interface DataType {
@@ -94,13 +100,15 @@ public final class HttpRequestResult {
 
     private static final int BUFFER_SIZE = 8192;
 
+    private final Lock mDataLock = new ReentrantLock();
+    private volatile String mDataString;
+    private InputStream mDataStream;
+    private Map<String, List<String>> mHeaderFields;
+    private Exception mException;
+    private HttpURLConnection mConnection;
     private int mResultType = NONE;
     private int mDataType = NONE;
     private int mHttpCode = NONE;
-    private String mDataString;
-    private InputStream mDataStream;
-    private Exception mException;
-    private HttpURLConnection mConnection;
 
     HttpRequestResult() {
     }
@@ -118,11 +126,16 @@ public final class HttpRequestResult {
      */
     @DataType
     public int getDataType() {
-        return mDataType;
+        mDataLock.lock();
+        try {
+            return mDataType;
+        } finally {
+            mDataLock.unlock();
+        }
     }
 
     /**
-     * HTTP response code, can be {@link HttpRequestResult#NONE}
+     * HTTP response code, can be {@link #NONE}
      */
     public int getHttpCode() {
         return mHttpCode;
@@ -131,12 +144,12 @@ public final class HttpRequestResult {
     /**
      * Result data of the request as {@link String}
      * <br>
-     * Available if {@link HttpRequestResult#getDataType()} is {@link HttpRequestResult#STRING}
-     * or {@link HttpRequestResult#STREAM}.
+     * Available if {@link #getDataType()} is {@link #STRING}
+     * or {@link #STREAM}.
      * <br>
-     * If {@link HttpRequestResult#getDataType()} is {@link HttpRequestResult#STREAM}, it can be
-     * changed to {@link HttpRequestResult#STRING} or {@link HttpRequestResult#NONE} after call
-     * of this method. The response stream will be read and closed.
+     * If {@link #getDataType()} is {@link #STREAM}, it can be
+     * changed to {@link #STRING} or {@link #NONE} after call
+     * of this method. Response stream will be read and closed.
      *
      * @return Result string
      */
@@ -148,11 +161,10 @@ public final class HttpRequestResult {
     /**
      * Result data of the request as {@link String}
      * <br>
-     * Available if {@link HttpRequestResult#getDataType()} is {@link HttpRequestResult#STRING}
-     * or {@link HttpRequestResult#STREAM}.
+     * Available if {@link #getDataType()} is {@link #STRING} or {@link #STREAM}.
      * <br>
-     * If {@link HttpRequestResult#getDataType()} is {@link HttpRequestResult#STREAM}, it can be
-     * changed to {@link HttpRequestResult#STRING} or {@link HttpRequestResult#NONE} after call
+     * If {@link #getDataType()} is {@link #STREAM}, it can be
+     * changed to {@link #STRING} or {@link #NONE} after call
      * of this method. The response stream will be read and closed.
      *
      * @param charset Response stream charset name
@@ -160,75 +172,76 @@ public final class HttpRequestResult {
      */
     @Nullable
     public String getDataString(@NonNull String charset) {
-        if (mDataType == STREAM) {
-            InputStream stream = mDataStream;
-            if (stream == null) {
-                return null;
-            }
-            try (BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(stream, charset))) {
-                StringBuilder responseBuilder = new StringBuilder();
-                char[] buffer = new char[BUFFER_SIZE];
-                for (; ; ) {
-                    int read = bufferedReader.read(buffer);
-                    if (read > -1) {
-                        responseBuilder.append(buffer, 0, read);
-                    } else {
-                        break;
-                    }
+        mDataLock.lock();
+        try {
+            if (mDataType == STREAM) {
+                InputStream stream = mDataStream;
+                if (stream == null) {
+                    return null;
                 }
-                String response = responseBuilder.toString();
-                mDataString = response;
-                mDataType = STRING;
-                return response;
-            } catch (IOException e) {
-                mDataType = NONE;
-                mDataString = null;
-                mDataStream = null;
+                try (BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(stream, charset))) {
+                    StringBuilder responseBuilder = new StringBuilder();
+                    char[] buffer = new char[BUFFER_SIZE];
+                    for (; ; ) {
+                        int read = bufferedReader.read(buffer);
+                        if (read > -1) {
+                            responseBuilder.append(buffer, 0, read);
+                        } else {
+                            break;
+                        }
+                    }
+                    String response = responseBuilder.toString();
+                    mDataString = response;
+                    mDataType = STRING;
+                    return response;
+                } catch (IOException e) {
+                    mDataType = NONE;
+                    mDataString = null;
+                    return null;
+                }
+            } else if (mDataType == STRING) {
+                return mDataString;
+            } else {
                 return null;
             }
-        } else if (mDataType == STRING) {
-            return mDataString;
-        } else {
-            return null;
+        } finally {
+            mDataLock.unlock();
         }
     }
 
     /**
      * Result data of the request as {@link InputStream}
      * <br>
-     * Available if {@link HttpRequestResult#getDataType()} is {@link HttpRequestResult#STREAM} and
-     * {@link HttpRequestResult#getResultType()} is {@link HttpRequestResult#SUCCESS}
+     * Available if {@link #getDataType()} is {@link #STREAM}
      *
      * @return Result data stream
      */
     @Nullable
     public InputStream getDataStream() {
-        return mDataStream;
-    }
-
-    /**
-     * Returns an input stream from the server in the case of an error such as
-     * the requested file has not been found on the remote server. This stream
-     * can be used to read the data the server will send back.
-     *
-     * @return The error input stream returned by the server
-     */
-    @Nullable
-    public InputStream getErrorStream() {
-        HttpURLConnection connection = mConnection;
-        if (connection == null) {
-            return null;
-        } else {
-            return connection.getErrorStream();
+        mDataLock.lock();
+        try {
+            return mDataStream;
+        } finally {
+            mDataLock.unlock();
         }
     }
 
     /**
-     * Exception, if {@link HttpRequestResult#getResultType()} is one of
-     * {@link HttpRequestResult#ERROR_MALFORMED_URL}, {@link HttpRequestResult#ERROR_UNSUPPORTED_ENCODING},
-     * {@link HttpRequestResult#ERROR_PROTOCOL}, {@link HttpRequestResult#ERROR_IO},
-     * {@link HttpRequestResult#ERROR_UNEXPECTED}
+     * Unmodifiable map of response header fields and values
+     * <br>
+     * Available if {@link #getResultType()} is {@link #SUCCESS} of {@link #ERROR_HTTP}
+     */
+    @Nullable
+    public Map<String, List<String>> getHeaderFields() {
+        return mHeaderFields;
+    }
+
+    /**
+     * Exception, if {@link #getResultType()} is one of
+     * {@link #ERROR_MALFORMED_URL}, {@link #ERROR_UNSUPPORTED_ENCODING},
+     * {@link #ERROR_PROTOCOL}, {@link #ERROR_IO},
+     * {@link #ERROR_UNEXPECTED}
      */
     @Nullable
     public Exception getException() {
@@ -254,12 +267,21 @@ public final class HttpRequestResult {
     }
 
     void setDataStream(@Nullable InputStream dataStream) {
-        mDataStream = dataStream;
-        if (dataStream == null) {
-            mDataType = NONE;
-        } else {
-            mDataType = STREAM;
+        mDataLock.lock();
+        try {
+            mDataStream = dataStream;
+            if (dataStream == null) {
+                mDataType = NONE;
+            } else {
+                mDataType = STREAM;
+            }
+        } finally {
+            mDataLock.unlock();
         }
+    }
+
+    void setHeaderFields(@Nullable Map<String, List<String>> headerFields) {
+        mHeaderFields = headerFields;
     }
 
     void setException(@Nullable Exception exception) {

@@ -150,17 +150,19 @@ final class PostHttpRequest extends HttpRequest {
                     writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END)
                             .flush();
                 }
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream dataStream;
+                try {
+                    dataStream = connection.getInputStream();
                     result.setResultType(HttpRequestResult.SUCCESS);
-                    result.setConnection(connection);
-                    result.setHttpCode(responseCode);
-                    result.setDataStream(connection.getInputStream());
-                } else {
+                } catch (IOException e) {
+                    dataStream = connection.getErrorStream();
                     result.setResultType(HttpRequestResult.ERROR_HTTP);
-                    result.setConnection(connection);
-                    result.setHttpCode(responseCode);
+                    result.setException(e);
                 }
+                result.setHeaderFields(connection.getHeaderFields());
+                result.setHttpCode(connection.getResponseCode());
+                result.setDataStream(dataStream);
+                result.setConnection(connection);
             } catch (MalformedURLException e) {
                 result.setResultType(HttpRequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);

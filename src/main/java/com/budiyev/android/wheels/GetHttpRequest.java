@@ -27,6 +27,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -46,7 +47,7 @@ final class GetHttpRequest extends HttpRequest {
 
     private final Callable<HttpRequestResult> mRequestAction = new Callable<HttpRequestResult>() {
         @Override
-        public HttpRequestResult call() throws Exception {
+        public HttpRequestResult call() {
             HttpURLConnection connection = null;
             HttpRequestResult result = new HttpRequestResult();
             try {
@@ -65,17 +66,19 @@ final class GetHttpRequest extends HttpRequest {
                     }
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream dataStream;
+                try {
+                    dataStream = connection.getInputStream();
                     result.setResultType(HttpRequestResult.SUCCESS);
-                    result.setConnection(connection);
-                    result.setHttpCode(responseCode);
-                    result.setDataStream(connection.getInputStream());
-                } else {
+                } catch (IOException e) {
+                    dataStream = connection.getErrorStream();
                     result.setResultType(HttpRequestResult.ERROR_HTTP);
-                    result.setConnection(connection);
-                    result.setHttpCode(responseCode);
+                    result.setException(e);
                 }
+                result.setHeaderFields(connection.getHeaderFields());
+                result.setHttpCode(connection.getResponseCode());
+                result.setDataStream(dataStream);
+                result.setConnection(connection);
             } catch (MalformedURLException e) {
                 result.setResultType(HttpRequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);

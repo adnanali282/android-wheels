@@ -57,6 +57,15 @@ import java.util.Objects;
  * is usable without bitmapLoader (loading new bitmaps is not available in this case).
  */
 public class ImageLoader<T> {
+    private static final float DEFAULT_MEMORY_FRACTION = 0.25F;
+    private static final double DEFAULT_STORAGE_FRACTION = 0.1D;
+    private static final int DEFAULT_COMPRESS_QUALITY = 85;
+    private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
+    private static final String DEFAULT_STORAGE_CACHE_DIRECTORY = "image_loader_cache";
+    private static final String ERROR_MESSAGE_MEMORY_FRACTION_RANGE =
+            "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)";
+    private static final String ERROR_MESSAGE_STORAGE_FRACTION_RANGE =
+            "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)";
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private volatile boolean mImageFadeIn = true;
@@ -286,8 +295,8 @@ public class ImageLoader<T> {
     /**
      * Whether to use fade effect to display images
      *
-     * @see ImageLoader#getImageFadeInTime()
-     * @see ImageLoader#setImageFadeInTime(int)
+     * @see #getImageFadeInTime()
+     * @see #setImageFadeInTime(int)
      */
     public boolean isImageFadeIn() {
         return mImageFadeIn;
@@ -296,8 +305,8 @@ public class ImageLoader<T> {
     /**
      * Whether to use fade effect to display images
      *
-     * @see ImageLoader#getImageFadeInTime()
-     * @see ImageLoader#setImageFadeInTime(int)
+     * @see #getImageFadeInTime()
+     * @see #setImageFadeInTime(int)
      */
     public void setImageFadeIn(boolean imageFadeIn) {
         mImageFadeIn = imageFadeIn;
@@ -323,8 +332,8 @@ public class ImageLoader<T> {
     /**
      * Fade effect duration if that effect is enabled
      *
-     * @see ImageLoader#isImageFadeIn()
-     * @see ImageLoader#setImageFadeIn(boolean)
+     * @see #isImageFadeIn()
+     * @see #setImageFadeIn(boolean)
      */
     public int getImageFadeInTime() {
         return mImageFadeInTime;
@@ -333,8 +342,8 @@ public class ImageLoader<T> {
     /**
      * Fade effect duration if that effect is enabled
      *
-     * @see ImageLoader#isImageFadeIn()
-     * @see ImageLoader#setImageFadeIn(boolean)
+     * @see #isImageFadeIn()
+     * @see #setImageFadeIn(boolean)
      */
     public void setImageFadeInTime(int imageFadeInTime) {
         mImageFadeInTime = imageFadeInTime;
@@ -343,10 +352,10 @@ public class ImageLoader<T> {
     /**
      * Clear all caches
      *
-     * @see ImageLoader#getMemoryImageCache()
-     * @see ImageLoader#setMemoryImageCache(MemoryImageCache)
-     * @see ImageLoader#getStorageImageCache()
-     * @see ImageLoader#setStorageImageCache(StorageImageCache)
+     * @see #getMemoryImageCache()
+     * @see #setMemoryImageCache(MemoryImageCache)
+     * @see #getStorageImageCache()
+     * @see #setStorageImageCache(StorageImageCache)
      */
     public void clearCache() {
         MemoryImageCache memoryImageCache = getMemoryImageCache();
@@ -398,8 +407,7 @@ public class ImageLoader<T> {
      */
     public static int getMaxMemoryFraction(float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
-            throw new IllegalArgumentException(
-                    ImageLoaderConstants.MemoryImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+            throw new IllegalArgumentException(ERROR_MESSAGE_MEMORY_FRACTION_RANGE);
         }
         return Math.round(fraction * Runtime.getRuntime().maxMemory());
     }
@@ -413,8 +421,7 @@ public class ImageLoader<T> {
      */
     public static long getAvailableStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(
-                    ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+            throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
         }
         return Math.round(CommonUtils.getAvailableBytes(path) * fraction);
     }
@@ -428,8 +435,7 @@ public class ImageLoader<T> {
      */
     public static long getTotalStorageFraction(@NonNull File path, double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(
-                    ImageLoaderConstants.StorageImageCache.FRACTION_RANGE_ERROR_MESSAGE);
+            throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
         }
         return Math.round(CommonUtils.getTotalBytes(path) * fraction);
     }
@@ -856,8 +862,7 @@ public class ImageLoader<T> {
      */
     @NonNull
     public static MemoryImageCache newMemoryImageCache() {
-        return newMemoryImageCache(
-                getMaxMemoryFraction(ImageLoaderConstants.MemoryImageCache.DEFAULT_FRACTION));
+        return newMemoryImageCache(getMaxMemoryFraction(DEFAULT_MEMORY_FRACTION));
     }
 
     /**
@@ -893,10 +898,9 @@ public class ImageLoader<T> {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        return newStorageImageCache(directory, getTotalStorageFraction(directory,
-                ImageLoaderConstants.StorageImageCache.DEFAULT_FRACTION),
-                ImageLoaderConstants.StorageImageCache.DEFAULT_FORMAT,
-                ImageLoaderConstants.StorageImageCache.DEFAULT_QUALITY);
+        return newStorageImageCache(directory,
+                getTotalStorageFraction(directory, DEFAULT_STORAGE_FRACTION),
+                DEFAULT_COMPRESS_FORMAT, DEFAULT_COMPRESS_QUALITY);
     }
 
     /**
@@ -923,6 +927,6 @@ public class ImageLoader<T> {
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
-        return new File(cacheDir, ImageLoaderConstants.StorageImageCache.DEFAULT_DIRECTORY);
+        return new File(cacheDir, DEFAULT_STORAGE_CACHE_DIRECTORY);
     }
 }

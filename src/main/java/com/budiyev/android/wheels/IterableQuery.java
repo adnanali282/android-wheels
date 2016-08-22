@@ -37,16 +37,16 @@ import java.util.List;
 /**
  * Object query API
  *
- * @see IterableQuery#from(Iterable)
- * @see IterableQuery#from(Object[])
- * @see IterableQuery#from(boolean[])
- * @see IterableQuery#from(byte[])
- * @see IterableQuery#from(short[])
- * @see IterableQuery#from(int[])
- * @see IterableQuery#from(long[])
- * @see IterableQuery#from(float[])
- * @see IterableQuery#from(double[])
- * @see IterableQuery#from(char[])
+ * @see #from(Iterable)
+ * @see #from(Object[])
+ * @see #from(boolean[])
+ * @see #from(byte[])
+ * @see #from(short[])
+ * @see #from(int[])
+ * @see #from(long[])
+ * @see #from(float[])
+ * @see #from(double[])
+ * @see #from(char[])
  */
 public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     private IterableQuery() {

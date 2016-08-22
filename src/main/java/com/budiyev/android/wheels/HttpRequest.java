@@ -75,7 +75,8 @@ public abstract class HttpRequest {
     }
 
     @NonNull
-    protected HttpURLConnection openHttpUrlConnection(@NonNull String query) throws IOException {
+    protected static HttpURLConnection openHttpUrlConnection(@NonNull String query) throws
+            IOException {
         URLConnection connection = new URL(query).openConnection();
         if (connection instanceof HttpURLConnection) {
             return (HttpURLConnection) connection;
@@ -86,7 +87,7 @@ public abstract class HttpRequest {
 
     /**
      * Maximum number of requests that can be executed simultaneously
-     * by calling {@link HttpRequest#submit()}
+     * by calling {@link #submit()}
      */
     public static int getParallelRequestsLimit() {
         return InternalExecutors.getHttpRequestExecutor().getPoolSize();
@@ -94,7 +95,7 @@ public abstract class HttpRequest {
 
     /**
      * Maximum number of requests that can be executed simultaneously
-     * by calling {@link HttpRequest#submit()}
+     * by calling {@link #submit()}
      */
     public static void setParallelRequestsLimit(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
