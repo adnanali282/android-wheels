@@ -474,7 +474,7 @@ public class CollectionUtils {
             return true;
         } else {
             if (iterable instanceof Collection<?>) {
-                return ((Collection) iterable).isEmpty();
+                return ((Collection<?>) iterable).isEmpty();
             } else {
                 return !iterable.iterator().hasNext();
             }
