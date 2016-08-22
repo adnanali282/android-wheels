@@ -102,12 +102,12 @@ public final class HttpRequestResult {
 
     private final Lock mDataLock = new ReentrantLock();
     private volatile String mDataString;
+    private volatile int mDataType = NONE;
     private InputStream mDataStream;
     private Map<String, List<String>> mHeaderFields;
     private Exception mException;
     private HttpURLConnection mConnection;
     private int mResultType = NONE;
-    private int mDataType = NONE;
     private int mHttpCode = NONE;
 
     HttpRequestResult() {
