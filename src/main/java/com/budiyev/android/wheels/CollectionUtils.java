@@ -313,7 +313,7 @@ public class CollectionUtils {
     /**
      * Copy all elements of the specified iterable to the new list
      *
-     * @param iterable Source collection
+     * @param iterable Source {@link Iterable}
      * @return New {@link List}, containing all elements of {@code iterable}
      */
     @NonNull
