@@ -184,7 +184,6 @@ public class StringRow implements Iterable<String> {
                 stringBuilder.append(", ");
             }
         }
-        stringBuilder.append(']');
-        return stringBuilder.toString();
+        return stringBuilder.append(']').toString();
     }
 }
