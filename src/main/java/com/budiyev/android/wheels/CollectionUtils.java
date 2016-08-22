@@ -467,6 +467,13 @@ public class CollectionUtils {
     }
 
     /**
+     * Check if specified {@link Collection} is {@code null} or empty
+     */
+    public static boolean isNullOrEmpty(@Nullable Collection<?> collection) {
+        return collection == null || !collection.isEmpty();
+    }
+
+    /**
      * Check if specified {@link Iterable} is {@code null} or empty
      */
     public static boolean isNullOrEmpty(@Nullable Iterable<?> iterable) {

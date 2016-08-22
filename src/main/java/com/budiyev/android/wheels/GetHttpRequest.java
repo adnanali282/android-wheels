@@ -58,27 +58,11 @@ final class GetHttpRequest extends HttpRequest {
                 connection = openHttpUrlConnection(query);
                 connection.setRequestMethod(REQUEST_METHOD_GET);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
-                if (mHeaderParameters != null) {
-                    for (HttpHeaderParameter parameter : mHeaderParameters) {
-                        if (parameter.key != null && parameter.value != null) {
-                            connection.setRequestProperty(parameter.key, parameter.value);
-                        }
-                    }
+                if (!CollectionUtils.isNullOrEmpty(mHeaderParameters)) {
+                    addHeaderParameters(connection, mHeaderParameters);
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
-                InputStream dataStream;
-                try {
-                    dataStream = connection.getInputStream();
-                    result.setResultType(HttpRequestResult.SUCCESS);
-                } catch (IOException e) {
-                    dataStream = connection.getErrorStream();
-                    result.setResultType(HttpRequestResult.ERROR_HTTP);
-                    result.setException(e);
-                }
-                result.setHeaderFields(connection.getHeaderFields());
-                result.setHttpCode(connection.getResponseCode());
-                result.setDataStream(dataStream);
-                result.setConnection(connection);
+                processResponse(connection, result);
             } catch (MalformedURLException e) {
                 result.setResultType(HttpRequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);

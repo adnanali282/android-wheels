@@ -77,19 +77,14 @@ final class PostHttpRequest extends HttpRequest {
                     query += "?" + buildParamsUrlString(mQueryParameters, CHARSET_UTF_8);
                 }
                 connection = openHttpUrlConnection(query);
-                connection.setUseCaches(false);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
                 connection.setRequestMethod(REQUEST_METHOD_POST);
                 connection.setRequestProperty(KEY_ACCEPT_CHARSET, CHARSET_UTF_8);
                 connection.setRequestProperty(KEY_CONTENT_TYPE, MULTIPART_FORM_DATA + boundary);
                 connection.setRequestProperty(KEY_CONNECTION, KEEP_ALIVE);
-                if (mHeaderParameters != null) {
-                    for (HttpHeaderParameter parameter : mHeaderParameters) {
-                        if (parameter.key != null && parameter.value != null) {
-                            connection.setRequestProperty(parameter.key, parameter.value);
-                        }
-                    }
+                if (!CollectionUtils.isNullOrEmpty(mHeaderParameters)) {
+                    addHeaderParameters(connection, mHeaderParameters);
                 }
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 OutputStream outputStream = connection.getOutputStream();
@@ -150,19 +145,7 @@ final class PostHttpRequest extends HttpRequest {
                     writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END)
                             .flush();
                 }
-                InputStream dataStream;
-                try {
-                    dataStream = connection.getInputStream();
-                    result.setResultType(HttpRequestResult.SUCCESS);
-                } catch (IOException e) {
-                    dataStream = connection.getErrorStream();
-                    result.setResultType(HttpRequestResult.ERROR_HTTP);
-                    result.setException(e);
-                }
-                result.setHeaderFields(connection.getHeaderFields());
-                result.setHttpCode(connection.getResponseCode());
-                result.setDataStream(dataStream);
-                result.setConnection(connection);
+                processResponse(connection, result);
             } catch (MalformedURLException e) {
                 result.setResultType(HttpRequestResult.ERROR_MALFORMED_URL);
                 result.setConnection(connection);

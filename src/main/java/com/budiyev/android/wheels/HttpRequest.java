@@ -85,6 +85,30 @@ public abstract class HttpRequest {
         }
     }
 
+    protected static void addHeaderParameters(@NonNull HttpURLConnection connection,
+            @NonNull Iterable<HttpHeaderParameter> parameters) {
+        for (HttpHeaderParameter parameter : parameters) {
+            connection.addRequestProperty(parameter.key, parameter.value);
+        }
+    }
+
+    protected static void processResponse(@NonNull HttpURLConnection connection,
+            @NonNull HttpRequestResult result) throws IOException {
+        InputStream dataStream;
+        try {
+            dataStream = connection.getInputStream();
+            result.setResultType(HttpRequestResult.SUCCESS);
+        } catch (IOException e) {
+            dataStream = connection.getErrorStream();
+            result.setResultType(HttpRequestResult.ERROR_HTTP);
+            result.setException(e);
+        }
+        result.setDataStream(dataStream);
+        result.setConnection(connection);
+        result.setHeaderFields(connection.getHeaderFields());
+        result.setHttpCode(connection.getResponseCode());
+    }
+
     /**
      * Maximum number of requests that can be executed simultaneously
      * by calling {@link #submit()}
