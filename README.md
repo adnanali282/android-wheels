@@ -20,3 +20,5 @@ dependencies {
     compile 'com.budiyev.android:android-wheels:3.6.0'
 }
 ```
+
+[ ![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)](https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
