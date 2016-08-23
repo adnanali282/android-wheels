@@ -275,28 +275,43 @@ public class CircularProgressBar extends View {
         invalidate();
     }
 
+    private void setProgressAnimated(float progress) {
+        ValueAnimator progressAnimator = mProgressAnimator;
+        if (progressAnimator == null) {
+            setProgressInternal(progress);
+        } else {
+            progressAnimator.setFloatValues(mProgress, progress);
+            progressAnimator.start();
+        }
+    }
+
     private void stopProgressAnimation() {
-        if (mProgressAnimator.isRunning()) {
-            mProgressAnimator.cancel();
+        ValueAnimator progressAnimator = mProgressAnimator;
+        if (progressAnimator != null && progressAnimator.isRunning()) {
+            progressAnimator.cancel();
         }
     }
 
     private void stopIndeterminateAnimations() {
-        if (mIndeterminateGrowAnimator.isRunning()) {
-            mIndeterminateGrowAnimator.cancel();
+        ValueAnimator growAnimator = mIndeterminateGrowAnimator;
+        if (growAnimator != null && growAnimator.isRunning()) {
+            growAnimator.cancel();
         }
-        if (mIndeterminateSweepAnimator.isRunning()) {
-            mIndeterminateSweepAnimator.cancel();
+        ValueAnimator sweepAnimator = mIndeterminateSweepAnimator;
+        if (sweepAnimator != null && sweepAnimator.isRunning()) {
+            sweepAnimator.cancel();
         }
     }
 
     private void startIndeterminateAnimations() {
         if (isLaidOutCompat()) {
-            if (!mIndeterminateGrowAnimator.isRunning()) {
-                mIndeterminateGrowAnimator.start();
+            ValueAnimator growAnimator = mIndeterminateGrowAnimator;
+            if (growAnimator != null && !growAnimator.isRunning()) {
+                growAnimator.start();
             }
-            if (!mIndeterminateSweepAnimator.isRunning()) {
-                mIndeterminateSweepAnimator.start();
+            ValueAnimator sweepAnimator = mIndeterminateSweepAnimator;
+            if (sweepAnimator != null && !sweepAnimator.isRunning()) {
+                sweepAnimator.start();
             }
         }
     }
@@ -412,8 +427,7 @@ public class CircularProgressBar extends View {
             mProgress = progress;
         } else {
             if (mAnimateProgress && isLaidOutCompat()) {
-                mProgressAnimator.setFloatValues(mProgress, progress);
-                mProgressAnimator.start();
+                setProgressAnimated(progress);
             } else {
                 setProgressInternal(progress);
             }
