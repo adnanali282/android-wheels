@@ -527,7 +527,7 @@ public class CircularProgressBar extends View {
     /**
      * Progress change animation duration
      *
-     * @see CircularProgressBar#setProgressAnimationDuration(long)
+     * @see #setProgressAnimationDuration(long)
      * @deprecated
      */
     @Deprecated
