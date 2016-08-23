@@ -164,10 +164,10 @@ public class CircularProgressBar extends View {
                                 DEFAULT_BACKGROUND_STROKE_COLOR));
                 mForegroundStrokePaint.setStrokeWidth(attributes
                         .getDimension(R.styleable.CircularProgressBar_foregroundStrokeWidth,
-                                DEFAULT_FOREGROUND_STROKE_WIDTH_DP) * displayMetrics.density);
+                                DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density));
                 mBackgroundStrokePaint.setStrokeWidth(attributes
                         .getDimension(R.styleable.CircularProgressBar_backgroundStrokeWidth,
-                                DEFAULT_BACKGROUND_STROKE_WIDTH_DP) * displayMetrics.density);
+                                DEFAULT_BACKGROUND_STROKE_WIDTH_DP * displayMetrics.density));
                 mAnimateProgress = attributes
                         .getBoolean(R.styleable.CircularProgressBar_animateProgress,
                                 DEFAULT_ANIMATE_PROGRESS);
