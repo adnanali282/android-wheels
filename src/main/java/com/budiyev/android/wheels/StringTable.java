@@ -190,6 +190,30 @@ public class StringTable implements Iterable<StringRow> {
         return mRows.size();
     }
 
+    /**
+     * Clear table
+     */
+    public void clear() {
+        clearCells();
+        clearRows();
+    }
+
+    /**
+     * Delete all cells from table
+     */
+    public void clearCells() {
+        for (StringRow row : mRows) {
+            row.clear();
+        }
+    }
+
+    /**
+     * Delete all rows from table
+     */
+    public void clearRows() {
+        mRows.clear();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {

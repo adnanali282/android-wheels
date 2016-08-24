@@ -143,6 +143,13 @@ public class StringRow implements Iterable<String> {
         return mCells.size();
     }
 
+    /**
+     * Clear row
+     */
+    public void clear() {
+        mCells.clear();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {
