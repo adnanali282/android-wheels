@@ -191,7 +191,7 @@ public class StringTable implements Iterable<StringRow> {
     }
 
     /**
-     * Clear table
+     * Clear table completely
      */
     public void clear() {
         clearCells();
@@ -199,7 +199,7 @@ public class StringTable implements Iterable<StringRow> {
     }
 
     /**
-     * Delete all cells from table
+     * Delete all cells from table (leave all rows empty)
      */
     public void clearCells() {
         for (StringRow row : mRows) {
@@ -208,7 +208,7 @@ public class StringTable implements Iterable<StringRow> {
     }
 
     /**
-     * Delete all rows from table
+     * Delete all rows from table (don't touch cells)
      */
     public void clearRows() {
         mRows.clear();
