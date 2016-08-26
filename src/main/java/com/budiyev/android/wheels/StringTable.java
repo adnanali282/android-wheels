@@ -182,7 +182,7 @@ public class StringTable implements Iterable<StringRow> {
     /**
      * Set or add row to specified position
      * <br>
-     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * If {@code position} is greater than or equal to {@link #size()},
      * empty rows will be inserted.
      *
      * @param position Position to set row
@@ -197,7 +197,7 @@ public class StringTable implements Iterable<StringRow> {
     /**
      * Set or add row to specified position
      * <br>
-     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * If {@code position} is greater than or equal to {@link #size()},
      * empty rows will be inserted.
      *
      * @param position Position to set row
@@ -212,7 +212,7 @@ public class StringTable implements Iterable<StringRow> {
     /**
      * Set or add row to specified position
      * <br>
-     * If {@code position} is greater than or equal to {@link StringTable#size()},
+     * If {@code position} is greater than or equal to {@link #size()},
      * empty rows will be inserted.
      *
      * @param position Position to set row
