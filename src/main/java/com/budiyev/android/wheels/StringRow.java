@@ -68,7 +68,7 @@ public class StringRow implements Iterable<String> {
     }
 
     /**
-     * Column
+     * Cell
      *
      * @param index Column position in row
      * @return Column at index
@@ -79,7 +79,7 @@ public class StringRow implements Iterable<String> {
     }
 
     /**
-     * Add cell with null value to row
+     * Add empty cell
      */
     public void add() {
         mCells.add(EMPTY);
@@ -92,6 +92,20 @@ public class StringRow implements Iterable<String> {
      */
     public void add(@NonNull String cell) {
         mCells.add(Objects.requireNonNull(cell));
+    }
+
+    /**
+     * Insert empty cell to specified position (column)
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty cells will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @return Previous value or {@code null} if empty cells were inserted
+     */
+    @Nullable
+    public String insert(int position) {
+        return insert(position, EMPTY);
     }
 
     /**
