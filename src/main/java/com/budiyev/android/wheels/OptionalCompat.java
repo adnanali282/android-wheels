@@ -25,34 +25,94 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * A container object which may or may not contain a non-null value
+ */
 public class OptionalCompat<T> {
     private volatile T mValue;
 
+    /**
+     * Empty {@link OptionalCompat}
+     */
     public OptionalCompat() {
     }
 
+    /**
+     * {@link OptionalCompat} with specified {@code value}
+     */
     public OptionalCompat(@NonNull T value) {
         mValue = Objects.requireNonNull(value);
     }
 
+    /**
+     * Value of this {@link OptionalCompat}
+     *
+     * @throws EmptyOptionalException if this {@link OptionalCompat} has no value
+     */
     @NonNull
     public T getValue() {
         T value = mValue;
         if (value == null) {
-            throw new NoSuchElementException();
+            throw new EmptyOptionalException();
         } else {
             return value;
         }
     }
 
+    /**
+     * Value of this {@link OptionalCompat}
+     */
     public void setValue(@NonNull T value) {
         mValue = Objects.requireNonNull(value);
     }
 
+    /**
+     * Whether if this {@link OptionalCompat} has value
+     */
     public boolean hasValue() {
         return mValue != null;
+    }
+
+    /**
+     * Clear value of this {@link OptionalCompat}
+     *
+     * @return {@code true} if this {@link OptionalCompat} wasn't empty, {@code false} otherwise
+     */
+    public boolean clear() {
+        T value = mValue;
+        if (value == null) {
+            return false;
+        } else {
+            mValue = null;
+            return true;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof OptionalCompat<?> &&
+                Objects.equals(((OptionalCompat) o).mValue, mValue);
+    }
+
+    @Override
+    public int hashCode() {
+        T value = mValue;
+        if (value == null) {
+            return 0;
+        } else {
+            return value.hashCode();
+        }
+    }
+
+    @Override
+    public String toString() {
+        T value = mValue;
+        if (value == null) {
+            return "OptionalCompat []";
+        } else {
+            return "OptionalCompat [" + value + "]";
+        }
     }
 }
