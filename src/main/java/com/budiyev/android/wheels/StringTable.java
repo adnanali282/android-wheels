@@ -112,6 +112,74 @@ public class StringTable implements Iterable<StringRow> {
     }
 
     /**
+     * Insert empty row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @return Previous value or {@code null} if empty rows were inserted
+     */
+    @Nullable
+    public StringRow insert(int position) {
+        return insert(position, new StringRow());
+    }
+
+    /**
+     * Insert row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @param cells    Cells
+     * @return Previous value or {@code null} if empty rows were inserted
+     */
+    @Nullable
+    public StringRow insert(int position, @NonNull Object... cells) {
+        return insert(position, new StringRow(cells));
+    }
+
+    /**
+     * Insert row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @param cells    Cells
+     * @return Previous value or {@code null} if empty rows were inserted
+     */
+    @Nullable
+    public StringRow insert(int position, @NonNull Iterable<Object> cells) {
+        return insert(position, new StringRow(cells));
+    }
+
+    /**
+     * Insert row to specified position
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty rows will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @param row      Row
+     * @return Previous value or {@code null} if empty rows were inserted
+     */
+    @Nullable
+    public StringRow insert(int position, @NonNull StringRow row) {
+        if (position < 0) {
+            throw new IllegalArgumentException();
+        }
+        Objects.requireNonNull(row);
+        StringRow previousValue = null;
+        if (!insertEmptyRowsIfNeeded(position)) {
+            previousValue = mRows.get(position);
+        }
+        mRows.add(position, row);
+        return previousValue;
+    }
+
+    /**
      * Set or add row to specified position
      * <br>
      * If {@code position} is greater than or equal to {@link StringTable#size()},
@@ -157,12 +225,7 @@ public class StringTable implements Iterable<StringRow> {
             throw new IllegalArgumentException();
         }
         Objects.requireNonNull(row);
-        int size = mRows.size();
-        if (position >= size) {
-            int empty = position - size;
-            for (int i = 0; i < empty; i++) {
-                mRows.add(new StringRow());
-            }
+        if (insertEmptyRowsIfNeeded(position)) {
             mRows.add(row);
             return null;
         } else {
@@ -253,5 +316,18 @@ public class StringTable implements Iterable<StringRow> {
             stringBuilder.append(System.lineSeparator()).append(row(i));
         }
         return stringBuilder.append(']').toString();
+    }
+
+    private boolean insertEmptyRowsIfNeeded(int position) {
+        int size = mRows.size();
+        if (position > size) {
+            int empty = position - size;
+            for (int i = 0; i < empty; i++) {
+                mRows.add(new StringRow());
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }

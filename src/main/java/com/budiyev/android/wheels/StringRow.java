@@ -95,14 +95,38 @@ public class StringRow implements Iterable<String> {
     }
 
     /**
+     * Insert cell to specified position (column)
+     * <br>
+     * If {@code position} is greater than or equal to {@link #size()},
+     * empty cells will be inserted.
+     *
+     * @param position Position to insert cell value
+     * @param cell     Cell value
+     * @return Previous value or {@code null} if empty cells were inserted
+     */
+    @Nullable
+    public String insert(int position, @NonNull String cell) {
+        if (position < 0) {
+            throw new IllegalArgumentException();
+        }
+        Objects.requireNonNull(cell);
+        String previousValue = null;
+        if (!insertEmptyCellsIfNeeded(position)) {
+            previousValue = mCells.get(position);
+        }
+        mCells.add(position, cell);
+        return previousValue;
+    }
+
+    /**
      * Set or add cell to specified position (column)
      * <br>
-     * If {@code position} is greater than or equal to {@link StringRow#size()},
+     * If {@code position} is greater than or equal to {@link #size()},
      * empty cells will be inserted.
      *
      * @param position Position to set cell value
      * @param cell     Cell value
-     * @return Previous value or {@code null}
+     * @return Previous value or {@code null} if empty cells were inserted
      */
     @Nullable
     public String set(int position, @NonNull String cell) {
@@ -110,12 +134,7 @@ public class StringRow implements Iterable<String> {
             throw new IllegalArgumentException();
         }
         Objects.requireNonNull(cell);
-        int size = mCells.size();
-        if (position >= size) {
-            int empty = position - size;
-            for (int i = 0; i < empty; i++) {
-                mCells.add(EMPTY);
-            }
+        if (insertEmptyCellsIfNeeded(position)) {
             mCells.add(cell);
             return null;
         } else {
@@ -192,5 +211,18 @@ public class StringRow implements Iterable<String> {
             }
         }
         return stringBuilder.append(']').toString();
+    }
+
+    private boolean insertEmptyCellsIfNeeded(int position) {
+        int size = mCells.size();
+        if (position >= size) {
+            int empty = position - size;
+            for (int i = 0; i < empty; i++) {
+                mCells.add(EMPTY);
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }

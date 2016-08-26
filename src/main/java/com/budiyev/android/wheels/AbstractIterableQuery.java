@@ -25,8 +25,6 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
