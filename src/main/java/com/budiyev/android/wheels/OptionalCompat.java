@@ -112,7 +112,7 @@ public class OptionalCompat<T> {
         if (value == null) {
             return "OptionalCompat []";
         } else {
-            return "OptionalCompat [" + value + "]";
+            return "OptionalCompat [ " + value + " ]";
         }
     }
 }
