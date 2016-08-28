@@ -52,7 +52,7 @@ public class OptionalCompat<T> {
      * @throws EmptyOptionalException if this {@link OptionalCompat} has no value
      */
     @NonNull
-    public T getValue() {
+    public T get() {
         T value = mValue;
         if (value == null) {
             throw new EmptyOptionalException();
@@ -64,7 +64,7 @@ public class OptionalCompat<T> {
     /**
      * Value of this {@link OptionalCompat}
      */
-    public void setValue(@NonNull T value) {
+    public void set(@NonNull T value) {
         mValue = Objects.requireNonNull(value);
     }
 
@@ -81,8 +81,7 @@ public class OptionalCompat<T> {
      * @return {@code true} if this {@link OptionalCompat} wasn't empty, {@code false} otherwise
      */
     public boolean clear() {
-        T value = mValue;
-        if (value == null) {
+        if (mValue == null) {
             return false;
         } else {
             mValue = null;
