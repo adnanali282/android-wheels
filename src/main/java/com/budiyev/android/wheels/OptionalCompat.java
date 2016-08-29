@@ -31,7 +31,7 @@ import java.util.Objects;
  * A container object which may or may not contain a non-null value
  */
 public class OptionalCompat<T> {
-    private volatile T mValue;
+    private T mValue;
 
     /**
      * Empty {@link OptionalCompat}
