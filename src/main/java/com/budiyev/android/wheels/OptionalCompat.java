@@ -47,7 +47,7 @@ public class OptionalCompat<T> {
     }
 
     /**
-     * Value of this {@link OptionalCompat}
+     * Get value of this {@link OptionalCompat}
      *
      * @throws EmptyOptionalException if this {@link OptionalCompat} has no value
      */
@@ -62,7 +62,7 @@ public class OptionalCompat<T> {
     }
 
     /**
-     * Value of this {@link OptionalCompat}
+     * Set value of this {@link OptionalCompat}
      */
     public void set(@NonNull T value) {
         mValue = Objects.requireNonNull(value);
@@ -109,9 +109,9 @@ public class OptionalCompat<T> {
     public String toString() {
         T value = mValue;
         if (value == null) {
-            return "OptionalCompat []";
+            return "OptionalCompat <>";
         } else {
-            return "OptionalCompat [ " + value + " ]";
+            return "OptionalCompat [" + value + "]";
         }
     }
 }
