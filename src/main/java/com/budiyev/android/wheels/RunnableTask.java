@@ -23,17 +23,30 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 
+import java.util.Objects;
+
+/**
+ * Simple {@link Runnable} with arguments
+ */
 public abstract class RunnableTask<A> implements Runnable {
     private final A[] mArguments;
 
+    /**
+     * Task with arguments
+     *
+     * @param arguments Arguments, accessible via {@link #getArguments()}
+     */
     @SafeVarargs
-    public RunnableTask(@Nullable A... arguments) {
-        mArguments = arguments;
+    public RunnableTask(@NonNull A... arguments) {
+        mArguments = Objects.requireNonNull(arguments);
     }
 
-    @Nullable
+    /**
+     * Arguments, passed through constructor
+     */
+    @NonNull
     protected A[] getArguments() {
         return mArguments;
     }
