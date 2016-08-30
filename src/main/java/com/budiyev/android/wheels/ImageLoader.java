@@ -823,7 +823,7 @@ public class ImageLoader<T> {
     /**
      * Create new common image source that is usable in most cases
      * <br>
-     * SHA-256 hash of {@link String#valueOf(Object)} will be used as a key.
+     * SHA-256 hash of {@link String#valueOf(Object)} of {@code data} will be used as a key.
      *
      * @param data Source data
      * @return Image source
