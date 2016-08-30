@@ -31,6 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Default {@link ImageSource} implementation
+ *
+ * @see ImageLoader#newImageSource(Object)
  */
 final class ImageSourceImplementation<T> implements ImageSource<T> {
     private final Lock mKeyLock = new ReentrantLock();
