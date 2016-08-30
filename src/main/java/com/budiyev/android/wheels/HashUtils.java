@@ -65,7 +65,7 @@ public final class HashUtils {
     }
 
     /**
-     * Generate SHA-512 hash string for specified {@link String}
+     * Generate SHA-256 hash string for specified {@link String}
      *
      * @param string Source string
      * @return SHA-256 hash string
@@ -76,7 +76,7 @@ public final class HashUtils {
     }
 
     /**
-     * Generate SHA-512 hash string for specified data
+     * Generate SHA-256 hash string for specified data
      *
      * @param data Data
      * @return SHA-256 hash string
