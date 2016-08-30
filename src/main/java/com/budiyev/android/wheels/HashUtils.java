@@ -165,7 +165,7 @@ public final class HashUtils {
     }
 
     /**
-     * Create string representation of byte array as one integer number
+     * Create string representation of byte array as single integer number
      *
      * @param data  Input data
      * @param radix Base to be used for the string representation
