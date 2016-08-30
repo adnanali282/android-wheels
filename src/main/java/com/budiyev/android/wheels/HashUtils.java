@@ -133,7 +133,7 @@ public final class HashUtils {
     }
 
     /**
-     * Generate hash string for the specified data, using specified algorithm and radix
+     * Generate hash string for the specified string, using specified algorithm and radix
      *
      * @param string    Source string
      * @param algorithm Hashing algorithm
