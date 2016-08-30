@@ -37,6 +37,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -405,7 +406,7 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    public static int getMaxMemoryFraction(float fraction) {
+    public static int getMaxMemoryFraction(@FloatRange(from = 0.1, to = 0.8) float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
             throw new IllegalArgumentException(ERROR_MESSAGE_MEMORY_FRACTION_RANGE);
         }
@@ -419,7 +420,8 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    public static long getAvailableStorageFraction(@NonNull File path, double fraction) {
+    public static long getAvailableStorageFraction(@NonNull File path,
+            @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
         }
@@ -433,7 +435,8 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    public static long getTotalStorageFraction(@NonNull File path, double fraction) {
+    public static long getTotalStorageFraction(@NonNull File path,
+            @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
             throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
         }
