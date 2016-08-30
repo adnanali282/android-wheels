@@ -42,10 +42,7 @@ import android.view.inputmethod.InputMethodManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -54,8 +51,6 @@ public final class CommonUtils {
     private static final String URI_SCHEME_HTTP = "http";
     private static final String URI_SCHEME_HTTPS = "https";
     private static final String URI_SCHEME_FTP = "ftp";
-    private static final String ALGORITHM_MD5 = "MD5";
-    private static final String ALGORITHM_SHA512 = "SHA-512";
 
     private CommonUtils() {
     }
@@ -243,21 +238,13 @@ public final class CommonUtils {
      *
      * @param string Source string
      * @return MD5 hash string
+     * @see HashUtils#generateMD5(String)
+     * @deprecated
      */
     @NonNull
+    @Deprecated
     public static String generateMD5(@NonNull String string) {
-        return generateHash(string, ALGORITHM_MD5);
-    }
-
-    /**
-     * Generate MD5 hash string for specified data
-     *
-     * @param data Data
-     * @return MD5 hash string
-     */
-    @NonNull
-    public static String generateMD5(@NonNull byte[] data) {
-        return generateHash(data, ALGORITHM_MD5);
+        return HashUtils.generateMD5(string);
     }
 
     /**
@@ -265,52 +252,13 @@ public final class CommonUtils {
      *
      * @param string Source string
      * @return SHA-512 hash string
+     * @see HashUtils#generateSHA512(String)
+     * @deprecated
      */
     @NonNull
+    @Deprecated
     public static String generateSHA512(@NonNull String string) {
-        return generateHash(string, ALGORITHM_SHA512);
-    }
-
-    /**
-     * Generate SHA-512 hash string for specified data
-     *
-     * @param data Data
-     * @return SHA-512 hash string
-     */
-    @NonNull
-    public static String generateSHA512(@NonNull byte[] data) {
-        return generateHash(data, ALGORITHM_SHA512);
-    }
-
-    /**
-     * Generate hash string for the specified string, using specified algorithm
-     *
-     * @param string    Source string
-     * @param algorithm Hashing algorithm
-     * @return Hash string
-     */
-    @NonNull
-    public static String generateHash(@NonNull String string, @NonNull String algorithm) {
-        return generateHash(string.getBytes(), algorithm);
-    }
-
-    /**
-     * Generate hash string for the specified data, using specified algorithm
-     *
-     * @param data      Data
-     * @param algorithm Hashing algorithm
-     * @return Hash string
-     */
-    @NonNull
-    public static String generateHash(@NonNull byte[] data, @NonNull String algorithm) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
-            messageDigest.update(data);
-            BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
-            return bigInteger.toString(Character.MAX_RADIX);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return HashUtils.generateSHA512(string);
     }
 
     /**

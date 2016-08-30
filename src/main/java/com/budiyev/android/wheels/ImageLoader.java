@@ -822,25 +822,15 @@ public class ImageLoader<T> {
 
     /**
      * Create new common image source that is usable in most cases
+     * <br>
+     * SHA-256 hash of {@link String#valueOf(Object)} will be used as a key.
      *
      * @param data Source data
      * @return Image source
      */
     @NonNull
-    public static <T> ImageSource<T> newImageSource(@NonNull final T data) {
-        final String key = CommonUtils.generateSHA512(String.valueOf(data));
-        return new ImageSource<T>() {
-            @Override
-            public T getData() {
-                return data;
-            }
-
-            @NonNull
-            @Override
-            public String getKey() {
-                return key;
-            }
-        };
+    public static <T> ImageSource<T> newImageSource(@NonNull T data) {
+        return new ImageSourceImplementation<>(data);
     }
 
     /**
