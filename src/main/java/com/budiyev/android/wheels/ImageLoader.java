@@ -52,10 +52,10 @@ import java.io.InputStream;
 import java.util.Objects;
 
 /**
- * ImageLoader is a universal tool for loading bitmaps efficiently in Android which
- * provides automatic memory and storage caching. ImageLoader is usable without caches,
- * with one of them, or both (without caches, caching is not available). Also, ImageLoader
- * is usable without bitmapLoader (loading new bitmaps is not available in this case).
+ * {@link ImageLoader} is a universal tool for loading bitmaps efficiently in Android, which
+ * provides automatic memory and storage caching. {@link ImageLoader} is usable without caches,
+ * with one of them, or both (without caches, caching is not available). Also, {@link ImageLoader}
+ * is usable without {@link BitmapLoader} (loading new bitmaps is not available in this case).
  */
 public class ImageLoader<T> {
     private static final float DEFAULT_MEMORY_FRACTION = 0.25F;
