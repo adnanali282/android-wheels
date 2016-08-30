@@ -34,9 +34,10 @@ import java.security.NoSuchAlgorithmException;
  * Hashing tools
  */
 public final class HashUtils {
-    private static final String ALGORITHM_MD5 = "MD5";
-    private static final String ALGORITHM_SHA256 = "SHA-256";
-    private static final String ALGORITHM_SHA512 = "SHA-512";
+    public static final String ALGORITHM_MD5 = "MD5";
+    public static final String ALGORITHM_SHA256 = "SHA-256";
+    public static final String ALGORITHM_SHA512 = "SHA-512";
+    public static final int DEFAULT_RADIX = 16;
 
     private HashUtils() {
     }
@@ -128,7 +129,21 @@ public final class HashUtils {
      */
     @NonNull
     public static String generateHash(@NonNull byte[] data, @NonNull String algorithm) {
-        return convertBytesToString(generateHashBytes(data, algorithm), Character.MAX_RADIX);
+        return generateHash(data, algorithm, DEFAULT_RADIX);
+    }
+
+    /**
+     * Generate hash string for the specified data, using specified algorithm and radix
+     *
+     * @param data      Data
+     * @param algorithm Hashing algorithm
+     * @param radix     Base to be used for the string representation of hash value
+     * @return Hash string
+     */
+    @NonNull
+    public static String generateHash(@NonNull byte[] data, @NonNull String algorithm,
+            @IntRange(from = Character.MIN_RADIX, to = Character.MAX_RADIX) int radix) {
+        return convertBytesToString(generateHashBytes(data, algorithm), radix);
     }
 
     /**

@@ -8,6 +8,7 @@ Some useful tools for Android
 * IterableQuery - Object query API
 * CollectionUtils - Tools for collections
 * CommonUtils - Common useful tools
+* HadhUtils - Tools for hashing
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * CsvParser - Parser/encoder of CSV format
 * CircularProgressBar - Progress bar view, supports indeterminate mode
