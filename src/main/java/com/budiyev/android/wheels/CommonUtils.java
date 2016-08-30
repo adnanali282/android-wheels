@@ -234,34 +234,6 @@ public final class CommonUtils {
     }
 
     /**
-     * Generate MD5 hash string for specified {@link String}
-     *
-     * @param string Source string
-     * @return MD5 hash string
-     * @see HashUtils#generateMD5(String)
-     * @deprecated
-     */
-    @NonNull
-    @Deprecated
-    public static String generateMD5(@NonNull String string) {
-        return HashUtils.generateMD5(string);
-    }
-
-    /**
-     * Generate SHA-512 hash string for specified {@link String}
-     *
-     * @param string Source string
-     * @return SHA-512 hash string
-     * @see HashUtils#generateSHA512(String)
-     * @deprecated
-     */
-    @NonNull
-    @Deprecated
-    public static String generateSHA512(@NonNull String string) {
-        return HashUtils.generateSHA512(string);
-    }
-
-    /**
      * Get number of available bytes by specified path
      *
      * @param path Path
@@ -313,4 +285,38 @@ public final class CommonUtils {
         }
         return result;
     }
+
+    //region Deprecated
+
+    /**
+     * Generate MD5 hash string for specified {@link String}
+     *
+     * @param string Source string
+     * @return MD5 hash string
+     * @see HashUtils#generateMD5(String)
+     * @deprecated
+     */
+    @NonNull
+    @Deprecated
+    public static String generateMD5(@NonNull String string) {
+        return HashUtils
+                .generateHash(string.getBytes(), HashUtils.ALGORITHM_MD5, Character.MAX_RADIX);
+    }
+
+    /**
+     * Generate SHA-512 hash string for specified {@link String}
+     *
+     * @param string Source string
+     * @return SHA-512 hash string
+     * @see HashUtils#generateSHA512(String)
+     * @deprecated
+     */
+    @NonNull
+    @Deprecated
+    public static String generateSHA512(@NonNull String string) {
+        return HashUtils
+                .generateHash(string.getBytes(), HashUtils.ALGORITHM_SHA512, Character.MAX_RADIX);
+    }
+
+    //endregion
 }
