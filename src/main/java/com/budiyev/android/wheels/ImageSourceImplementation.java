@@ -58,7 +58,8 @@ final class ImageSourceImplementation<T> implements ImageSource<T> {
             try {
                 key = mKey;
                 if (key == null) {
-                    key = HashUtils.generateSHA256(String.valueOf(mData));
+                    key = HashUtils.generateHash(String.valueOf(mData), HashUtils.ALGORITHM_SHA256,
+                            Character.MAX_RADIX);
                     mKey = key;
                 }
             } finally {
