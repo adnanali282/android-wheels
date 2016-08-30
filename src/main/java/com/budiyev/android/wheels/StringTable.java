@@ -254,6 +254,13 @@ public class StringTable implements Iterable<StringRow> {
     }
 
     /**
+     * Whether if this {@link StringTable} has no rows
+     */
+    public boolean isEmpty() {
+        return mRows.isEmpty();
+    }
+
+    /**
      * Clear table completely
      */
     public void clear() {
@@ -279,30 +286,14 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof StringTable) {
-            StringTable other = ((StringTable) o);
-            int size = size();
-            if (other.size() == size) {
-                for (int i = 0; i < size; i++) {
-                    if (!Objects.equals(other.row(i), row(i))) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this ||
+                o instanceof StringTable && Objects.equals(((StringTable) o).mRows, mRows);
     }
 
     @Override
     public int hashCode() {
         int hashCode = Integer.MAX_VALUE;
-        for (StringRow row : this) {
+        for (StringRow row : mRows) {
             hashCode ^= row.hashCode();
         }
         return hashCode;
@@ -310,12 +301,16 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("StringTable [");
-        for (int i = 0, s = size(); i < s; i++) {
-            stringBuilder.append(System.lineSeparator()).append(row(i));
+        if (mRows.isEmpty()) {
+            return "StringTable []";
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("StringTable [");
+            for (int i = 0, s = mRows.size(); i < s; i++) {
+                stringBuilder.append(System.lineSeparator()).append(mRows.get(i));
+            }
+            return stringBuilder.append(']').toString();
         }
-        return stringBuilder.append(']').toString();
     }
 
     private boolean insertEmptyRowsIfNeeded(int position) {

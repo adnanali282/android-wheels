@@ -177,6 +177,13 @@ public class StringRow implements Iterable<String> {
     }
 
     /**
+     * Whether if this {@link StringRow} has no cells
+     */
+    public boolean isEmpty() {
+        return mCells.isEmpty();
+    }
+
+    /**
      * Clear row
      */
     public void clear() {
@@ -185,30 +192,14 @@ public class StringRow implements Iterable<String> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof StringRow) {
-            StringRow other = (StringRow) o;
-            int size = size();
-            if (other.size() == size) {
-                for (int i = 0; i < size; i++) {
-                    if (!Objects.equals(other.cell(i), cell(i))) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this ||
+                o instanceof StringRow && Objects.equals(((StringRow) o).mCells, mCells);
     }
 
     @Override
     public int hashCode() {
         int hashCode = Integer.MAX_VALUE;
-        for (String cell : this) {
+        for (String cell : mCells) {
             hashCode ^= cell.hashCode();
         }
         return hashCode;
@@ -216,15 +207,19 @@ public class StringRow implements Iterable<String> {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("StringRow [");
-        for (int i = 0, s = size(); i < s; i++) {
-            stringBuilder.append(cell(i));
-            if (i < s - 1) {
-                stringBuilder.append(", ");
+        if (mCells.isEmpty()) {
+            return "StringRow []";
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("StringRow [");
+            for (int i = 0, s = mCells.size(); i < s; i++) {
+                stringBuilder.append(mCells.get(i));
+                if (i < s - 1) {
+                    stringBuilder.append(", ");
+                }
             }
+            return stringBuilder.append(']').toString();
         }
-        return stringBuilder.append(']').toString();
     }
 
     private boolean insertEmptyCellsIfNeeded(int position) {
