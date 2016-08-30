@@ -135,6 +135,20 @@ public final class HashUtils {
     /**
      * Generate hash string for the specified data, using specified algorithm and radix
      *
+     * @param string    Source string
+     * @param algorithm Hashing algorithm
+     * @param radix     Base to be used for the string representation of hash value
+     * @return Hash string
+     */
+    @NonNull
+    public static String generateHash(@NonNull String string, @NonNull String algorithm,
+            @IntRange(from = Character.MIN_RADIX, to = Character.MAX_RADIX) int radix) {
+        return generateHash(string.getBytes(), algorithm, radix);
+    }
+
+    /**
+     * Generate hash string for the specified data, using specified algorithm and radix
+     *
      * @param data      Data
      * @param algorithm Hashing algorithm
      * @param radix     Base to be used for the string representation of hash value
