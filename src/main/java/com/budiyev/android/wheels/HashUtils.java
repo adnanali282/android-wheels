@@ -26,7 +26,10 @@ package com.budiyev.android.wheels;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -34,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
  * Hashing tools
  */
 public final class HashUtils {
+    private static final int BUFFER_SIZE = 8192;
     public static final String ALGORITHM_MD5 = "MD5";
     public static final String ALGORITHM_SHA256 = "SHA-256";
     public static final String ALGORITHM_SHA512 = "SHA-512";
@@ -161,6 +165,20 @@ public final class HashUtils {
     }
 
     /**
+     * Generate hash string for the specified data, using specified algorithm and radix
+     *
+     * @param inputStream Data stream
+     * @param algorithm   Hashing algorithm
+     * @param radix       Base to be used for the string representation of hash value
+     * @return Hash string
+     */
+    @NonNull
+    public static String generateHash(@NonNull InputStream inputStream, @NonNull String algorithm,
+            @IntRange(from = Character.MIN_RADIX, to = Character.MAX_RADIX) int radix) {
+        return convertBytesToString(generateHashBytes(inputStream, algorithm), radix);
+    }
+
+    /**
      * Generate hash bytes for the specified data, using specified algorithm
      *
      * @param data      Data
@@ -174,6 +192,30 @@ public final class HashUtils {
             messageDigest.update(data);
             return messageDigest.digest();
         } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Generate hash bytes for the specified data, using specified algorithm
+     *
+     * @param inputStream Data stream
+     * @param algorithm   Hashing algorithm
+     * @return Hash bytes
+     */
+    @NonNull
+    public static byte[] generateHashBytes(@NonNull InputStream inputStream,
+            @NonNull String algorithm) {
+        try (DigestInputStream digestStream = new DigestInputStream(inputStream,
+                MessageDigest.getInstance(algorithm))) {
+            byte[] buffer = new byte[BUFFER_SIZE];
+            for (; ; ) {
+                if (digestStream.read(buffer) < 0) {
+                    break;
+                }
+            }
+            return digestStream.getMessageDigest().digest();
+        } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException(e);
         }
     }
