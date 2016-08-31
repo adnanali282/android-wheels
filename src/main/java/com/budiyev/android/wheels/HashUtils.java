@@ -69,6 +69,17 @@ public final class HashUtils {
     }
 
     /**
+     * Generate MD5 hash string for specified stream
+     *
+     * @param inputStream Data stream
+     * @return MD5 hash string
+     */
+    @NonNull
+    public static String generateMD5(@NonNull InputStream inputStream) {
+        return generateHash(inputStream, ALGORITHM_MD5);
+    }
+
+    /**
      * Generate SHA-256 hash string for specified {@link String}
      *
      * @param string Source string
@@ -91,6 +102,17 @@ public final class HashUtils {
     }
 
     /**
+     * Generate SHA-256 hash string for specified stream
+     *
+     * @param inputStream Data stream
+     * @return SHA-256 hash string
+     */
+    @NonNull
+    public static String generateSHA256(@NonNull InputStream inputStream) {
+        return generateHash(inputStream, ALGORITHM_SHA256);
+    }
+
+    /**
      * Generate SHA-512 hash string for specified {@link String}
      *
      * @param string Source string
@@ -110,6 +132,17 @@ public final class HashUtils {
     @NonNull
     public static String generateSHA512(@NonNull byte[] data) {
         return generateHash(data, ALGORITHM_SHA512);
+    }
+
+    /**
+     * Generate SHA-512 hash string for specified stream
+     *
+     * @param inputStream Data stream
+     * @return SHA-512 hash string
+     */
+    @NonNull
+    public static String generateSHA512(@NonNull InputStream inputStream) {
+        return generateHash(inputStream, ALGORITHM_SHA512);
     }
 
     /**
