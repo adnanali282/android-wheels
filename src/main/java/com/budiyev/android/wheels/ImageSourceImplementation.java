@@ -26,8 +26,6 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 
 import java.util.Objects;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Default {@link ImageSource} implementation
@@ -35,12 +33,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * @see ImageLoader#newImageSource(Object)
  */
 final class ImageSourceImplementation<T> implements ImageSource<T> {
-    private final Lock mKeyLock = new ReentrantLock();
     private final T mData;
-    private volatile String mKey;
+    private final String mKey;
 
     public ImageSourceImplementation(@NonNull T data) {
         mData = Objects.requireNonNull(data);
+        mKey = HashUtils.generateHash(String.valueOf(data), HashUtils.ALGORITHM_SHA256,
+                Character.MAX_RADIX);
     }
 
     @NonNull
@@ -52,20 +51,6 @@ final class ImageSourceImplementation<T> implements ImageSource<T> {
     @NonNull
     @Override
     public String getKey() {
-        String key = mKey;
-        if (key == null) {
-            mKeyLock.lock();
-            try {
-                key = mKey;
-                if (key == null) {
-                    key = HashUtils.generateHash(String.valueOf(mData), HashUtils.ALGORITHM_SHA256,
-                            Character.MAX_RADIX);
-                    mKey = key;
-                }
-            } finally {
-                mKeyLock.unlock();
-            }
-        }
-        return key;
+        return mKey;
     }
 }
