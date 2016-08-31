@@ -137,6 +137,18 @@ public final class HashUtils {
     }
 
     /**
+     * Generate hash string for the specified stream, using specified algorithm
+     *
+     * @param inputStream Data stream
+     * @param algorithm   Hashing algorithm
+     * @return Hash string
+     */
+    @NonNull
+    public static String generateHash(@NonNull InputStream inputStream, @NonNull String algorithm) {
+        return generateHash(inputStream, algorithm, DEFAULT_RADIX);
+    }
+
+    /**
      * Generate hash string for the specified string, using specified algorithm and radix
      *
      * @param string    Source string
@@ -165,7 +177,7 @@ public final class HashUtils {
     }
 
     /**
-     * Generate hash string for the specified data, using specified algorithm and radix
+     * Generate hash string for the specified stream, using specified algorithm and radix
      *
      * @param inputStream Data stream
      * @param algorithm   Hashing algorithm
@@ -197,7 +209,7 @@ public final class HashUtils {
     }
 
     /**
-     * Generate hash bytes for the specified data, using specified algorithm
+     * Generate hash bytes for the specified stream, using specified algorithm
      *
      * @param inputStream Data stream
      * @param algorithm   Hashing algorithm
