@@ -169,8 +169,13 @@ public final class ThreadUtils {
      * @param task  Task
      * @param delay Delay
      */
-    public static void runAsync(@NonNull Callable<?> task, long delay) {
-        runAsync(wrapCallable(task), delay);
+    public static void runAsync(@NonNull final Callable<?> task, long delay) {
+        InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                runAsync(task);
+            }
+        }, delay);
     }
 
     /**
@@ -273,20 +278,6 @@ public final class ThreadUtils {
                 throw new RuntimeException(throwable);
             }
         }
-    }
-
-    @NonNull
-    private static Runnable wrapCallable(@NonNull final Callable<?> callable) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    callable.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
     }
 
     @SafeVarargs
