@@ -333,6 +333,174 @@ public class CollectionUtils {
     }
 
     /**
+     * Merge two {@link Iterable}s into single {@link List}
+     *
+     * @param a First {@link Iterable}
+     * @param b Second {@link Iterable}
+     * @return List, consisting of elements of {@code a} followed by elements of {@code b}
+     */
+    public static <T> List<T> merge(@NonNull Iterable<T> a, @NonNull Iterable<T> b) {
+        List<T> result;
+        if (a instanceof Collection<?> && b instanceof Collection<?>) {
+            Collection<T> collectionA = (Collection<T>) a;
+            Collection<T> collectionB = (Collection<T>) b;
+            result = new ArrayList<>(collectionA.size() + collectionB.size());
+            result.addAll(collectionA);
+            result.addAll(collectionB);
+        } else if (a instanceof Collection<?>) {
+            Collection<T> collectionA = (Collection<T>) a;
+            result = new ArrayList<>(collectionA.size());
+            result.addAll(collectionA);
+            for (T element : b) {
+                result.add(element);
+            }
+        } else {
+            result = new ArrayList<>();
+            for (T element : a) {
+                result.add(element);
+            }
+            if (b instanceof Collection<?>) {
+                result.addAll((Collection<T>) b);
+            } else {
+                for (T element : b) {
+                    result.add(element);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Merge two arrays
+     *
+     * @param a      First array
+     * @param b      Second array
+     * @param result Result array (length must be equal or greater than
+     *               sum of {@code a} and {@code b} lengths)
+     * @return Result array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static <T> T[] merge(@NonNull T[] a, @NonNull T[] b, @NonNull T[] result) {
+        if (result.length < a.length + b.length) {
+            throw new IllegalArgumentException();
+        }
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static boolean[] merge(@NonNull boolean[] a, @NonNull boolean[] b) {
+        boolean[] result = new boolean[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static byte[] merge(@NonNull byte[] a, @NonNull byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static short[] merge(@NonNull short[] a, @NonNull short[] b) {
+        short[] result = new short[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static int[] merge(@NonNull int[] a, @NonNull int[] b) {
+        int[] result = new int[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static long[] merge(@NonNull long[] a, @NonNull long[] b) {
+        long[] result = new long[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static float[] merge(@NonNull float[] a, @NonNull float[] b) {
+        float[] result = new float[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static double[] merge(@NonNull double[] a, @NonNull double[] b) {
+        double[] result = new double[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
+     * Merge two arrays into the new one
+     *
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
+     */
+    public static char[] merge(@NonNull char[] a, @NonNull char[] b) {
+        char[] result = new char[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    /**
      * Swap the elements of {@code list} at positions {@code a} and {@code b}
      */
     public static <T> void swap(@NonNull List<T> list, int a, int b) {
@@ -484,7 +652,7 @@ public class CollectionUtils {
     /**
      * Check if specified array is {@code null} or empty
      */
-    public static boolean isNullOrEmpty(@Nullable Object[] array) {
+    public static <T> boolean isNullOrEmpty(@Nullable T[] array) {
         return array == null || array.length == 0;
     }
 
