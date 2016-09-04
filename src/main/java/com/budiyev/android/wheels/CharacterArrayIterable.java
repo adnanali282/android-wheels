@@ -39,26 +39,10 @@ final class CharacterArrayIterable implements Iterable<Character> {
         mArray = Objects.requireNonNull(array);
     }
 
+    @NonNull
     @Override
     public Iterator<Character> iterator() {
-        return new Iterator<Character>() {
-            private int position = -1;
-
-            @Override
-            public boolean hasNext() {
-                return position + 1 < mArray.length;
-            }
-
-            @Override
-            public Character next() {
-                return mArray[++position];
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return new ArrayIterator();
     }
 
     @Override
@@ -91,5 +75,24 @@ final class CharacterArrayIterable implements Iterable<Character> {
     @Override
     public String toString() {
         return Arrays.toString(mArray);
+    }
+
+    private class ArrayIterator implements Iterator<Character> {
+        private int mPosition = -1;
+
+        @Override
+        public boolean hasNext() {
+            return mPosition + 1 < mArray.length;
+        }
+
+        @Override
+        public Character next() {
+            return mArray[++mPosition];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

@@ -39,26 +39,10 @@ final class FloatArrayIterable implements Iterable<Float> {
         mArray = Objects.requireNonNull(array);
     }
 
+    @NonNull
     @Override
     public Iterator<Float> iterator() {
-        return new Iterator<Float>() {
-            private int position = -1;
-
-            @Override
-            public boolean hasNext() {
-                return position + 1 < mArray.length;
-            }
-
-            @Override
-            public Float next() {
-                return mArray[++position];
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return new ArrayIterator();
     }
 
     @Override
@@ -91,5 +75,24 @@ final class FloatArrayIterable implements Iterable<Float> {
     @Override
     public String toString() {
         return Arrays.toString(mArray);
+    }
+
+    private class ArrayIterator implements Iterator<Float> {
+        private int mPosition = -1;
+
+        @Override
+        public boolean hasNext() {
+            return mPosition + 1 < mArray.length;
+        }
+
+        @Override
+        public Float next() {
+            return mArray[++mPosition];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

@@ -39,26 +39,10 @@ final class DoubleArrayIterable implements Iterable<Double> {
         mArray = Objects.requireNonNull(array);
     }
 
+    @NonNull
     @Override
     public Iterator<Double> iterator() {
-        return new Iterator<Double>() {
-            private int position = -1;
-
-            @Override
-            public boolean hasNext() {
-                return position + 1 < mArray.length;
-            }
-
-            @Override
-            public Double next() {
-                return mArray[++position];
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return new ArrayIterator();
     }
 
     @Override
@@ -91,5 +75,24 @@ final class DoubleArrayIterable implements Iterable<Double> {
     @Override
     public String toString() {
         return Arrays.toString(mArray);
+    }
+
+    private class ArrayIterator implements Iterator<Double> {
+        private int mPosition = -1;
+
+        @Override
+        public boolean hasNext() {
+            return mPosition + 1 < mArray.length;
+        }
+
+        @Override
+        public Double next() {
+            return mArray[++mPosition];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }
