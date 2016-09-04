@@ -29,7 +29,6 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,270 +43,72 @@ public class CollectionUtils {
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static <T> Iterable<T> asIterable(@NonNull final T[] array) {
-        return new Iterable<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return new Iterator<T>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public T next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static <T> Iterable<T> asIterable(@NonNull T[] array) {
+        return new GenericArrayIterable<>(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Boolean> asIterable(@NonNull final boolean[] array) {
-        return new Iterable<Boolean>() {
-            @Override
-            public Iterator<Boolean> iterator() {
-                return new Iterator<Boolean>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Boolean next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Boolean> asIterable(@NonNull boolean[] array) {
+        return new BooleanArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Byte> asIterable(@NonNull final byte[] array) {
-        return new Iterable<Byte>() {
-            @Override
-            public Iterator<Byte> iterator() {
-                return new Iterator<Byte>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Byte next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Byte> asIterable(@NonNull byte[] array) {
+        return new ByteArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Short> asIterable(@NonNull final short[] array) {
-        return new Iterable<Short>() {
-            @Override
-            public Iterator<Short> iterator() {
-                return new Iterator<Short>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Short next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Short> asIterable(@NonNull short[] array) {
+        return new ShortArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Integer> asIterable(@NonNull final int[] array) {
-        return new Iterable<Integer>() {
-            @Override
-            public Iterator<Integer> iterator() {
-                return new Iterator<Integer>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Integer next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Integer> asIterable(@NonNull int[] array) {
+        return new IntegerArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Long> asIterable(@NonNull final long[] array) {
-        return new Iterable<Long>() {
-            @Override
-            public Iterator<Long> iterator() {
-                return new Iterator<Long>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Long next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Long> asIterable(@NonNull long[] array) {
+        return new LongArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Float> asIterable(@NonNull final float[] array) {
-        return new Iterable<Float>() {
-            @Override
-            public Iterator<Float> iterator() {
-                return new Iterator<Float>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Float next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Float> asIterable(@NonNull float[] array) {
+        return new FloatArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Double> asIterable(@NonNull final double[] array) {
-        return new Iterable<Double>() {
-            @Override
-            public Iterator<Double> iterator() {
-                return new Iterator<Double>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Double next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Double> asIterable(@NonNull double[] array) {
+        return new DoubleArrayIterable(array);
     }
 
     /**
      * Wrap specified {@code array} into {@link Iterable}
      */
     @NonNull
-    public static Iterable<Character> asIterable(@NonNull final char[] array) {
-        return new Iterable<Character>() {
-            @Override
-            public Iterator<Character> iterator() {
-                return new Iterator<Character>() {
-                    private int position = -1;
-
-                    @Override
-                    public boolean hasNext() {
-                        return position + 1 < array.length;
-                    }
-
-                    @Override
-                    public Character next() {
-                        return array[++position];
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    public static Iterable<Character> asIterable(@NonNull char[] array) {
+        return new CharacterArrayIterable(array);
     }
 
     /**
@@ -315,7 +116,7 @@ public class CollectionUtils {
      */
     @NonNull
     public static CharSequence asCharSequence(@NonNull char[] array) {
-        return asCharSequence(array, 0, array.length);
+        return new ArrayCharSequence(array, 0, array.length);
     }
 
     /**
@@ -327,78 +128,8 @@ public class CollectionUtils {
      * @return New {@link CharSequence}
      */
     @NonNull
-    public static CharSequence asCharSequence(@NonNull final char[] array, final int start,
-            final int end) {
-        if (start > end) {
-            throw new IllegalArgumentException();
-        }
-        if (start < 0 || end > array.length) {
-            throw new IndexOutOfBoundsException();
-        }
-        final int length = end - start;
-        return new CharSequence() {
-            @Override
-            public int length() {
-                return length;
-            }
-
-            @Override
-            public char charAt(int index) {
-                if (index >= length) {
-                    throw new IndexOutOfBoundsException();
-                }
-                return array[start + index];
-            }
-
-            @Override
-            public CharSequence subSequence(int s, int e) {
-                if (s > e) {
-                    throw new IllegalArgumentException();
-                }
-                int subStart = start + s;
-                int subEnd = start + e;
-                if (s < 0 || subStart < 0 || subEnd > length) {
-                    throw new IndexOutOfBoundsException();
-                }
-                return asCharSequence(array, subStart, subEnd);
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == this) {
-                    return true;
-                } else if (o instanceof CharSequence) {
-                    CharSequence other = (CharSequence) o;
-                    if (other.length() == length) {
-                        for (int i = 0; i < length; i++) {
-                            if (other.charAt(i) != array[start + i]) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-
-            @Override
-            public int hashCode() {
-                int hashCode = 1;
-                for (int i = start; i < end; i++) {
-                    hashCode = 31 * hashCode + array[i];
-                }
-                return hashCode;
-            }
-
-            @NonNull
-            @Override
-            public String toString() {
-                return new String(array, start, length);
-            }
-        };
+    public static CharSequence asCharSequence(@NonNull char[] array, int start, int end) {
+        return new ArrayCharSequence(array, start, end);
     }
 
     /**
