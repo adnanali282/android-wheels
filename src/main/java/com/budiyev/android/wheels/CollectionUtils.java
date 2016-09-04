@@ -311,6 +311,97 @@ public class CollectionUtils {
     }
 
     /**
+     * Wrap specified {@code array} into {@link CharSequence}
+     */
+    @NonNull
+    public static CharSequence asCharSequence(@NonNull char[] array) {
+        return asCharSequence(array, 0, array.length);
+    }
+
+    /**
+     * Wrap specified {@code array} into {@link CharSequence}
+     *
+     * @param array Array
+     * @param start Start index (including)
+     * @param end   End index (excluding)
+     * @return New {@link CharSequence}
+     */
+    @NonNull
+    public static CharSequence asCharSequence(@NonNull final char[] array, final int start,
+            final int end) {
+        if (start > end) {
+            throw new IllegalArgumentException();
+        }
+        if (start < 0 || end > array.length) {
+            throw new IndexOutOfBoundsException();
+        }
+        final int length = end - start;
+        return new CharSequence() {
+            @Override
+            public int length() {
+                return length;
+            }
+
+            @Override
+            public char charAt(int index) {
+                if (index >= length) {
+                    throw new IndexOutOfBoundsException();
+                }
+                return array[start + index];
+            }
+
+            @Override
+            public CharSequence subSequence(int s, int e) {
+                if (s > e) {
+                    throw new IllegalArgumentException();
+                }
+                int subStart = start + s;
+                int subEnd = start + e;
+                if (s < 0 || subStart < 0 || subEnd > length) {
+                    throw new IndexOutOfBoundsException();
+                }
+                return asCharSequence(array, subStart, subEnd);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (o == this) {
+                    return true;
+                } else if (o instanceof CharSequence) {
+                    CharSequence other = (CharSequence) o;
+                    if (other.length() == length) {
+                        for (int i = 0; i < length; i++) {
+                            if (other.charAt(i) != array[start + i]) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+
+            @Override
+            public int hashCode() {
+                int hashCode = 1;
+                for (int i = start; i < end; i++) {
+                    hashCode = 31 * hashCode + array[i];
+                }
+                return hashCode;
+            }
+
+            @NonNull
+            @Override
+            public String toString() {
+                return new String(array, start, length);
+            }
+        };
+    }
+
+    /**
      * Copy all elements of the specified iterable to the new list
      *
      * @param iterable Source {@link Iterable}
