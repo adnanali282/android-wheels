@@ -183,8 +183,8 @@ public final class HttpRequestResult {
                         new InputStreamReader(stream, charset))) {
                     StringBuilder responseBuilder = new StringBuilder();
                     char[] buffer = new char[BUFFER_SIZE];
-                    for (; ; ) {
-                        int read = bufferedReader.read(buffer);
+                    for (int read; ; ) {
+                        read = bufferedReader.read(buffer);
                         if (read > -1) {
                             responseBuilder.append(buffer, 0, read);
                         } else {
