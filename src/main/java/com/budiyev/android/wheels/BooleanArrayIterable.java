@@ -47,23 +47,8 @@ final class BooleanArrayIterable implements Iterable<Boolean> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof BooleanArrayIterable) {
-            BooleanArrayIterable other = (BooleanArrayIterable) o;
-            if (other.mArray.length == mArray.length) {
-                for (int i = 0; i < mArray.length; i++) {
-                    if (other.mArray[i] != mArray[i]) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this || o instanceof BooleanArrayIterable &&
+                Arrays.equals(((BooleanArrayIterable) o).mArray, mArray);
     }
 
     @Override

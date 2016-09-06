@@ -47,23 +47,8 @@ final class ShortArrayIterable implements Iterable<Short> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof ShortArrayIterable) {
-            ShortArrayIterable other = (ShortArrayIterable) o;
-            if (other.mArray.length == mArray.length) {
-                for (int i = 0; i < mArray.length; i++) {
-                    if (other.mArray[i] != mArray[i]) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this || o instanceof ShortArrayIterable &&
+                Arrays.equals(((ShortArrayIterable) o).mArray, mArray);
     }
 
     @Override

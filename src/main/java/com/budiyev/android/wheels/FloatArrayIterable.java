@@ -47,23 +47,8 @@ final class FloatArrayIterable implements Iterable<Float> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof FloatArrayIterable) {
-            FloatArrayIterable other = (FloatArrayIterable) o;
-            if (other.mArray.length == mArray.length) {
-                for (int i = 0; i < mArray.length; i++) {
-                    if (other.mArray[i] != mArray[i]) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this || o instanceof FloatArrayIterable &&
+                Arrays.equals(((FloatArrayIterable) o).mArray, mArray);
     }
 
     @Override

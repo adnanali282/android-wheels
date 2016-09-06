@@ -47,23 +47,8 @@ final class GenericArrayIterable<T> implements Iterable<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof GenericArrayIterable<?>) {
-            GenericArrayIterable<?> other = (GenericArrayIterable<?>) o;
-            if (other.mArray.length == mArray.length) {
-                for (int i = 0; i < mArray.length; i++) {
-                    if (!Objects.equals(other.mArray[i], mArray[i])) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this || o instanceof GenericArrayIterable<?> &&
+                Arrays.equals(((GenericArrayIterable<?>) o).mArray, mArray);
     }
 
     @Override

@@ -47,23 +47,8 @@ final class IntegerArrayIterable implements Iterable<Integer> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof IntegerArrayIterable) {
-            IntegerArrayIterable other = (IntegerArrayIterable) o;
-            if (other.mArray.length == mArray.length) {
-                for (int i = 0; i < mArray.length; i++) {
-                    if (other.mArray[i] != mArray[i]) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return o == this || o instanceof IntegerArrayIterable &&
+                Arrays.equals(((IntegerArrayIterable) o).mArray, mArray);
     }
 
     @Override
