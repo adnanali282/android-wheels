@@ -31,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,7 @@ public final class HttpRequestResult {
      * {@link #ERROR_UNEXPECTED} - Unexpected error,
      * see {@link #getException()} for details
      */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
             ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED})
     public @interface ResultType {
@@ -94,6 +97,7 @@ public final class HttpRequestResult {
      * {@link #STRING} - {@link String}
      * via {@link #getDataString()}
      */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({NONE, STRING, STREAM})
     public @interface DataType {
     }
@@ -183,8 +187,8 @@ public final class HttpRequestResult {
                         new InputStreamReader(stream, charset))) {
                     StringBuilder responseBuilder = new StringBuilder();
                     char[] buffer = new char[BUFFER_SIZE];
-                    for (; ; ) {
-                        int read = bufferedReader.read(buffer);
+                    for (int read; ; ) {
+                        read = bufferedReader.read(buffer);
                         if (read > -1) {
                             responseBuilder.append(buffer, 0, read);
                         } else {
