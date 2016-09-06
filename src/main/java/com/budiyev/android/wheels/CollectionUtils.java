@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * Tools for collections
  */
-public class CollectionUtils {
+public final class CollectionUtils {
     private CollectionUtils() {
     }
 

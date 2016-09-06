@@ -28,6 +28,9 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Size;
 
+/**
+ * Immutable class for describing width and height dimensions in pixels
+ */
 public final class SizeCompat {
     private final int mWidth;
     private final int mHeight;
@@ -69,7 +72,7 @@ public final class SizeCompat {
             return true;
         } else if (obj instanceof SizeCompat) {
             SizeCompat size = (SizeCompat) obj;
-            return mWidth == size.getWidth() && mHeight == size.getHeight();
+            return mWidth == size.mWidth && mHeight == size.mHeight;
         } else {
             return false;
         }
@@ -77,7 +80,7 @@ public final class SizeCompat {
 
     @Override
     public int hashCode() {
-        return mWidth ^ mHeight;
+        return mHeight ^ ((mWidth << (Integer.SIZE / 2)) | (mWidth >>> (Integer.SIZE / 2)));
     }
 
     @Override
