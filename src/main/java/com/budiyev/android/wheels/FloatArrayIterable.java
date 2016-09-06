@@ -62,7 +62,7 @@ final class FloatArrayIterable implements Iterable<Float> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Float> {
+    private final class ArrayIterator implements Iterator<Float> {
         private int mPosition = -1;
 
         @Override

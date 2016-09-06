@@ -62,7 +62,7 @@ final class ByteArrayIterable implements Iterable<Byte> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Byte> {
+    private final class ArrayIterator implements Iterator<Byte> {
         private int mPosition = -1;
 
         @Override

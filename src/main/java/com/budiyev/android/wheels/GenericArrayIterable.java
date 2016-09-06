@@ -62,7 +62,7 @@ final class GenericArrayIterable<T> implements Iterable<T> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<T> {
+    private final class ArrayIterator implements Iterator<T> {
         private int mPosition = -1;
 
         @Override

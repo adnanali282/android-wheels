@@ -62,7 +62,7 @@ final class IntegerArrayIterable implements Iterable<Integer> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Integer> {
+    private final class ArrayIterator implements Iterator<Integer> {
         private int mPosition = -1;
 
         @Override

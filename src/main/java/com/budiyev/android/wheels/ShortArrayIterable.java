@@ -62,7 +62,7 @@ final class ShortArrayIterable implements Iterable<Short> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Short> {
+    private final class ArrayIterator implements Iterator<Short> {
         private int mPosition = -1;
 
         @Override

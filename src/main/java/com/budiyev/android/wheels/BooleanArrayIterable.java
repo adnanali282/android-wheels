@@ -62,7 +62,7 @@ final class BooleanArrayIterable implements Iterable<Boolean> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Boolean> {
+    private final class ArrayIterator implements Iterator<Boolean> {
         private int mPosition = -1;
 
         @Override

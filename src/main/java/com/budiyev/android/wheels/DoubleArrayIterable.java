@@ -62,7 +62,7 @@ final class DoubleArrayIterable implements Iterable<Double> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Double> {
+    private final class ArrayIterator implements Iterator<Double> {
         private int mPosition = -1;
 
         @Override

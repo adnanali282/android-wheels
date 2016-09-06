@@ -62,7 +62,7 @@ final class LongArrayIterable implements Iterable<Long> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Long> {
+    private final class ArrayIterator implements Iterator<Long> {
         private int mPosition = -1;
 
         @Override

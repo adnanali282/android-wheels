@@ -62,7 +62,7 @@ final class CharacterArrayIterable implements Iterable<Character> {
         return Arrays.toString(mArray);
     }
 
-    private class ArrayIterator implements Iterator<Character> {
+    private final class ArrayIterator implements Iterator<Character> {
         private int mPosition = -1;
 
         @Override
