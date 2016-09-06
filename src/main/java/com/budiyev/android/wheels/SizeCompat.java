@@ -71,8 +71,8 @@ public final class SizeCompat {
         if (obj == this) {
             return true;
         } else if (obj instanceof SizeCompat) {
-            SizeCompat size = (SizeCompat) obj;
-            return mWidth == size.mWidth && mHeight == size.mHeight;
+            SizeCompat other = (SizeCompat) obj;
+            return mWidth == other.mWidth && mHeight == other.mHeight;
         } else {
             return false;
         }
