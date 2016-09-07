@@ -40,7 +40,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static <T> Iterable<T> asIterable(@NonNull T[] array) {
@@ -48,7 +48,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Boolean> asIterable(@NonNull boolean[] array) {
@@ -56,7 +56,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Byte> asIterable(@NonNull byte[] array) {
@@ -64,7 +64,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Short> asIterable(@NonNull short[] array) {
@@ -72,7 +72,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Integer> asIterable(@NonNull int[] array) {
@@ -80,7 +80,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Long> asIterable(@NonNull long[] array) {
@@ -88,7 +88,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Float> asIterable(@NonNull float[] array) {
@@ -96,7 +96,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Double> asIterable(@NonNull double[] array) {
@@ -104,7 +104,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Wrap specified {@code array} into {@link Iterable}
+     * Wrap specified {@code array} into immutable {@link Iterable}
      */
     @NonNull
     public static Iterable<Character> asIterable(@NonNull char[] array) {
