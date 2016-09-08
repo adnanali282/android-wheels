@@ -62,5 +62,5 @@ public abstract class CallableTask<A, V> implements Callable<V> {
      * @throws Exception if unable to compute a result
      */
     @Nullable
-    public abstract V call(@NonNull A[] arguments) throws Exception;
+    protected abstract V call(@NonNull A[] arguments) throws Exception;
 }

@@ -57,5 +57,5 @@ public abstract class RunnableTask<A> implements Runnable {
      *
      * @param arguments task arguments, passed through constructor
      */
-    public abstract void run(@NonNull A[] arguments);
+    protected abstract void run(@NonNull A[] arguments);
 }
