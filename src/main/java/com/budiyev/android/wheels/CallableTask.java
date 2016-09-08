@@ -49,6 +49,7 @@ public abstract class CallableTask<A, V> implements Callable<V> {
      * {@inheritDoc}
      */
     @Override
+    @Nullable
     public final V call() throws Exception {
         return call(mArguments);
     }
