@@ -36,7 +36,7 @@ public abstract class RunnableTask<A> implements Runnable {
     /**
      * Task with arguments
      *
-     * @param arguments Arguments, accessible via {@link #getArguments()}
+     * @param arguments task arguments
      */
     @SafeVarargs
     public RunnableTask(@NonNull A... arguments) {
@@ -44,10 +44,18 @@ public abstract class RunnableTask<A> implements Runnable {
     }
 
     /**
-     * Arguments, passed through constructor
+     * {@inheritDoc}
      */
-    @NonNull
-    protected A[] getArguments() {
-        return mArguments;
+    @Override
+    public final void run() {
+        run(mArguments);
     }
+
+    /**
+     * The general contract of the method {@code run} is that it may
+     * take any action whatsoever.
+     *
+     * @param arguments task arguments, passed through constructor
+     */
+    public abstract void run(@NonNull A[] arguments);
 }

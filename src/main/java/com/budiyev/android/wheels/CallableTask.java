@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -37,7 +38,7 @@ public abstract class CallableTask<A, V> implements Callable<V> {
     /**
      * Task with arguments
      *
-     * @param arguments Arguments, accessible via {@link #getArguments()}
+     * @param arguments task arguments
      */
     @SafeVarargs
     public CallableTask(@NonNull A... arguments) {
@@ -45,10 +46,20 @@ public abstract class CallableTask<A, V> implements Callable<V> {
     }
 
     /**
-     * Arguments, passed through constructor
+     * {@inheritDoc}
      */
-    @NonNull
-    protected A[] getArguments() {
-        return mArguments;
+    @Override
+    public final V call() throws Exception {
+        return call(mArguments);
     }
+
+    /**
+     * Compute a result, or throw an exception if unable to do so.
+     *
+     * @param arguments task arguments, passed through constructor
+     * @return computed result
+     * @throws Exception if unable to compute a result
+     */
+    @Nullable
+    public abstract V call(@NonNull A[] arguments) throws Exception;
 }
