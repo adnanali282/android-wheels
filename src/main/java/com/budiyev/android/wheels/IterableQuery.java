@@ -97,7 +97,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Remove all elements that doesn't match specified {@code predicate}
      */
     @NonNull
-    public IterableQuery<T> filter(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> filter(@NonNull final Predicate<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
@@ -119,7 +119,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Apply specified {@code function} to all elements
      */
     @NonNull
-    public IterableQuery<T> apply(@NonNull final FunctionCompat<T> function) {
+    public IterableQuery<T> apply(@NonNull final Function<T> function) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
@@ -163,7 +163,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Retain only first sequence of elements that matches specified {@code predicate}
      */
     @NonNull
-    public IterableQuery<T> takeWhile(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> takeWhile(@NonNull final Predicate<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
@@ -212,7 +212,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Remove first sequence of elements that matches specified {@code predicate}
      */
     @NonNull
-    public IterableQuery<T> skipWhile(@NonNull final PredicateCompat<T> predicate) {
+    public IterableQuery<T> skipWhile(@NonNull final Predicate<T> predicate) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
@@ -267,7 +267,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Convert all elements using specified {@code converter}
      */
     @NonNull
-    public <H> IterableQuery<H> convert(@NonNull final ConverterCompat<T, H> converter) {
+    public <H> IterableQuery<H> convert(@NonNull final Converter<T, H> converter) {
         final IterableQuery<H> query = new IterableQuery<>();
         query.enqueueTask(new Runnable() {
             @Override
@@ -288,8 +288,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Convert all elements to many elements using specified {@code converter}
      */
     @NonNull
-    public <H> IterableQuery<H> convertToMany(
-            @NonNull final ConverterToManyCompat<T, H> converter) {
+    public <H> IterableQuery<H> convertToMany(@NonNull final ConverterToMany<T, H> converter) {
         final IterableQuery<H> query = new IterableQuery<>();
         query.enqueueTask(new Runnable() {
             @Override
@@ -320,7 +319,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @return Accumulated value
      */
     @Nullable
-    public T aggregate(@NonNull AggregatorCompat<T, T> aggregator) {
+    public T aggregate(@NonNull Aggregator<T, T> aggregator) {
         boolean first = true;
         T accumulator = null;
         for (T element : executeTasks()) {
@@ -342,7 +341,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @return Accumulated value
      */
     @Nullable
-    public <A> A aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator) {
+    public <A> A aggregate(@Nullable A seed, @NonNull Aggregator<A, T> aggregator) {
         A accumulator = seed;
         for (T element : executeTasks()) {
             accumulator = aggregator.apply(accumulator, element);
@@ -357,7 +356,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public boolean aggregate(boolean seed, @NonNull AggregatorCompat<Boolean, T> aggregator) {
+    public boolean aggregate(boolean seed, @NonNull Aggregator<Boolean, T> aggregator) {
         Boolean accumulated = aggregate(Boolean.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -369,7 +368,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public byte aggregate(byte seed, @NonNull AggregatorCompat<Byte, T> aggregator) {
+    public byte aggregate(byte seed, @NonNull Aggregator<Byte, T> aggregator) {
         Byte accumulated = aggregate(Byte.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -381,7 +380,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public short aggregate(short seed, @NonNull AggregatorCompat<Short, T> aggregator) {
+    public short aggregate(short seed, @NonNull Aggregator<Short, T> aggregator) {
         Short accumulated = aggregate(Short.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -393,7 +392,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public int aggregate(int seed, @NonNull AggregatorCompat<Integer, T> aggregator) {
+    public int aggregate(int seed, @NonNull Aggregator<Integer, T> aggregator) {
         Integer accumulated = aggregate(Integer.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -405,7 +404,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public long aggregate(long seed, @NonNull AggregatorCompat<Long, T> aggregator) {
+    public long aggregate(long seed, @NonNull Aggregator<Long, T> aggregator) {
         Long accumulated = aggregate(Long.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -417,7 +416,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public float aggregate(float seed, @NonNull AggregatorCompat<Float, T> aggregator) {
+    public float aggregate(float seed, @NonNull Aggregator<Float, T> aggregator) {
         Float accumulated = aggregate(Float.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -429,7 +428,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public double aggregate(double seed, @NonNull AggregatorCompat<Double, T> aggregator) {
+    public double aggregate(double seed, @NonNull Aggregator<Double, T> aggregator) {
         Double accumulated = aggregate(Double.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -441,7 +440,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @param aggregator Accumulator function
      * @return Accumulated value
      */
-    public char aggregate(char seed, @NonNull AggregatorCompat<Character, T> aggregator) {
+    public char aggregate(char seed, @NonNull Aggregator<Character, T> aggregator) {
         Character accumulated = aggregate(Character.valueOf(seed), aggregator);
         return accumulated == null ? seed : accumulated;
     }
@@ -455,8 +454,8 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * @return Converted accumulated value (returned by {@code converter})
      */
     @Nullable
-    public <A, H> H aggregate(@Nullable A seed, @NonNull AggregatorCompat<A, T> aggregator,
-            @NonNull ConverterCompat<A, H> converter) {
+    public <A, H> H aggregate(@Nullable A seed, @NonNull Aggregator<A, T> aggregator,
+            @NonNull Converter<A, H> converter) {
         A accumulator = seed;
         for (T element : executeTasks()) {
             accumulator = aggregator.apply(accumulator, element);
@@ -482,7 +481,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * there are no matching elements
      */
     @Nullable
-    public T first(@NonNull PredicateCompat<T> predicate) {
+    public T first(@NonNull Predicate<T> predicate) {
         for (T element : executeTasks()) {
             if (predicate.apply(element)) {
                 return element;
@@ -536,7 +535,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     /**
      * Whether all elements match specified predicate
      */
-    public boolean all(@NonNull PredicateCompat<T> predicate) {
+    public boolean all(@NonNull Predicate<T> predicate) {
         for (T element : executeTasks()) {
             if (!predicate.apply(element)) {
                 return false;
@@ -548,7 +547,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     /**
      * Whether no elements match specified predicate
      */
-    public boolean none(@NonNull PredicateCompat<T> predicate) {
+    public boolean none(@NonNull Predicate<T> predicate) {
         for (T element : executeTasks()) {
             if (predicate.apply(element)) {
                 return false;
@@ -560,7 +559,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     /**
      * Whether any elements match specified predicate
      */
-    public boolean has(@NonNull PredicateCompat<T> predicate) {
+    public boolean has(@NonNull Predicate<T> predicate) {
         for (T element : executeTasks()) {
             if (predicate.apply(element)) {
                 return true;

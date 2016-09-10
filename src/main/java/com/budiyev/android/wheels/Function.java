@@ -26,8 +26,8 @@ package com.budiyev.android.wheels;
 /**
  * Function
  *
- * @see IterableQuery#apply(FunctionCompat)
+ * @see IterableQuery#apply(Function)
  */
-public interface FunctionCompat<T> {
+public interface Function<T> {
     void apply(T value);
 }

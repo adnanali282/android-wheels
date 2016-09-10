@@ -24,11 +24,10 @@
 package com.budiyev.android.wheels;
 
 /**
- * Converter
+ * Converter to many elements
  *
- * @see IterableQuery#convert(ConverterCompat)
- * @see IterableQuery#aggregate(Object, AggregatorCompat, ConverterCompat)
+ * @see IterableQuery#convertToMany(ConverterToMany)
  */
-public interface ConverterCompat<T, H> {
-    H apply(T value);
+public interface ConverterToMany<T, H> {
+    Iterable<H> apply(T value);
 }

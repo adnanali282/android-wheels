@@ -24,27 +24,16 @@
 package com.budiyev.android.wheels;
 
 /**
- * Accumulator function
+ * Predicate
  *
- * @see IterableQuery#aggregate(AggregatorCompat)
- * @see IterableQuery#aggregate(Object, AggregatorCompat)
- * @see IterableQuery#aggregate(boolean, AggregatorCompat)
- * @see IterableQuery#aggregate(byte, AggregatorCompat)
- * @see IterableQuery#aggregate(short, AggregatorCompat)
- * @see IterableQuery#aggregate(int, AggregatorCompat)
- * @see IterableQuery#aggregate(long, AggregatorCompat)
- * @see IterableQuery#aggregate(float, AggregatorCompat)
- * @see IterableQuery#aggregate(double, AggregatorCompat)
- * @see IterableQuery#aggregate(char, AggregatorCompat)
- * @see IterableQuery#aggregate(Object, AggregatorCompat, ConverterCompat)
+ * @see IterableQuery#filter(Predicate)
+ * @see IterableQuery#takeWhile(Predicate)
+ * @see IterableQuery#skipWhile(Predicate)
+ * @see IterableQuery#first(Predicate)
+ * @see IterableQuery#all(Predicate)
+ * @see IterableQuery#none(Predicate)
+ * @see IterableQuery#has(Predicate)
  */
-public interface AggregatorCompat<A, T> {
-    /**
-     * Apply function
-     *
-     * @param accumulator Accumulated value
-     * @param value       Next value from sequence
-     * @return Accumulated value
-     */
-    A apply(A accumulator, T value);
+public interface Predicate<T> {
+    boolean apply(T value);
 }

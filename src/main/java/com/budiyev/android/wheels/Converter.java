@@ -24,16 +24,11 @@
 package com.budiyev.android.wheels;
 
 /**
- * Predicate
+ * Converter
  *
- * @see IterableQuery#filter(PredicateCompat)
- * @see IterableQuery#takeWhile(PredicateCompat)
- * @see IterableQuery#skipWhile(PredicateCompat)
- * @see IterableQuery#first(PredicateCompat)
- * @see IterableQuery#all(PredicateCompat)
- * @see IterableQuery#none(PredicateCompat)
- * @see IterableQuery#has(PredicateCompat)
+ * @see IterableQuery#convert(Converter)
+ * @see IterableQuery#aggregate(Object, Aggregator, Converter)
  */
-public interface PredicateCompat<T> {
-    boolean apply(T value);
+public interface Converter<T, H> {
+    H apply(T value);
 }

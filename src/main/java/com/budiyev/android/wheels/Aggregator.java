@@ -24,10 +24,27 @@
 package com.budiyev.android.wheels;
 
 /**
- * Converter to many elements
+ * Accumulator function
  *
- * @see IterableQuery#convertToMany(ConverterToManyCompat)
+ * @see IterableQuery#aggregate(Aggregator)
+ * @see IterableQuery#aggregate(Object, Aggregator)
+ * @see IterableQuery#aggregate(boolean, Aggregator)
+ * @see IterableQuery#aggregate(byte, Aggregator)
+ * @see IterableQuery#aggregate(short, Aggregator)
+ * @see IterableQuery#aggregate(int, Aggregator)
+ * @see IterableQuery#aggregate(long, Aggregator)
+ * @see IterableQuery#aggregate(float, Aggregator)
+ * @see IterableQuery#aggregate(double, Aggregator)
+ * @see IterableQuery#aggregate(char, Aggregator)
+ * @see IterableQuery#aggregate(Object, Aggregator, Converter)
  */
-public interface ConverterToManyCompat<T, H> {
-    Iterable<H> apply(T value);
+public interface Aggregator<A, T> {
+    /**
+     * Apply function
+     *
+     * @param accumulator Accumulated value
+     * @param value       Next value from sequence
+     * @return Accumulated value
+     */
+    A apply(A accumulator, T value);
 }
