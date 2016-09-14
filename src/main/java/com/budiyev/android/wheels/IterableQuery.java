@@ -575,7 +575,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     public int size() {
         Iterable<T> iterable = executeTasks();
         if (iterable instanceof Collection<?>) {
-            return ((Collection<?>) iterable).size();
+            return ((Collection<T>) iterable).size();
         } else {
             int count = 0;
             for (T element : iterable) {
