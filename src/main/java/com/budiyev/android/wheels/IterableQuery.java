@@ -590,17 +590,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      */
     @NonNull
     public List<T> asList() {
-        Iterable<T> iterable = executeTasks();
-        if (iterable instanceof List<?>) {
-            return (List<T>) iterable;
-        } else {
-            List<T> list = new ArrayList<>();
-            for (T element : iterable) {
-                list.add(element);
-            }
-            setMutableIterable(list);
-            return list;
-        }
+        return convertToList();
     }
 
     /**

@@ -64,15 +64,15 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
         if (mIterableMutable) {
             return (List<T>) iterable;
         } else {
-            List<T> mutableList = CollectionUtils.copy(iterable);
-            mIterable = mutableList;
+            List<T> mutableIterable = CollectionUtils.copy(iterable);
+            mIterable = mutableIterable;
             mIterableMutable = true;
-            return mutableList;
+            return mutableIterable;
         }
     }
 
-    protected final void setMutableIterable(@NonNull List<T> mutableList) {
-        mIterable = mutableList;
+    protected final void setMutableIterable(@NonNull List<T> mutableIterable) {
+        mIterable = mutableIterable;
         mIterableMutable = true;
     }
 
@@ -92,5 +92,11 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
             task.run();
         }
         return mIterable;
+    }
+
+    @NonNull
+    protected final List<T> convertToList() {
+        executeTasks();
+        return getMutableIterable();
     }
 }
