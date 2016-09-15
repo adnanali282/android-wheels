@@ -74,17 +74,11 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> operand;
-                if (iterable instanceof IterableQuery<?>) {
-                    operand = ((IterableQuery<T>) iterable).executeTasks();
-                } else {
-                    operand = iterable;
-                }
                 List<T> list = getMutableIterable();
-                if (operand instanceof Collection<?>) {
-                    list.addAll((Collection<T>) operand);
+                if (iterable instanceof Collection<?>) {
+                    list.addAll((Collection<T>) iterable);
                 } else {
-                    for (T element : operand) {
+                    for (T element : iterable) {
                         list.add(element);
                     }
                 }
@@ -295,9 +289,6 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
                 List<H> converted = new ArrayList<>();
                 for (T element : executeTasks()) {
                     Iterable<H> convertResult = converter.apply(element);
-                    if (convertResult instanceof IterableQuery<?>) {
-                        convertResult = ((IterableQuery<H>) convertResult).executeTasks();
-                    }
                     if (convertResult instanceof Collection<?>) {
                         converted.addAll((Collection<H>) convertResult);
                     } else {
