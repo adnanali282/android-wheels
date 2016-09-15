@@ -45,7 +45,7 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
      */
     @Override
     public final Iterator<T> iterator() {
-        return executeTasks().iterator();
+        return convertToList().iterator();
     }
 
     @NonNull
@@ -92,5 +92,11 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
             task.run();
         }
         return mIterable;
+    }
+
+    @NonNull
+    protected final List<T> convertToList() {
+        executeTasks();
+        return getMutableIterable();
     }
 }

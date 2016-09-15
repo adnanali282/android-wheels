@@ -528,12 +528,14 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Whether all elements match specified predicate
      */
     public boolean all(@NonNull Predicate<T> predicate) {
+        boolean hasElements = false;
         for (T element : executeTasks()) {
             if (!predicate.apply(element)) {
                 return false;
             }
+            hasElements = true;
         }
-        return true;
+        return hasElements;
     }
 
     /**
@@ -581,8 +583,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      */
     @NonNull
     public List<T> asList() {
-        executeTasks();
-        return getMutableIterable();
+        return convertToList();
     }
 
     /**
