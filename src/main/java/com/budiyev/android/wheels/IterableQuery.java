@@ -579,14 +579,6 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     }
 
     /**
-     * Convert to {@link List}
-     */
-    @NonNull
-    public List<T> asList() {
-        return convertToList();
-    }
-
-    /**
      * Query from specified {@code iterable}
      */
     @NonNull
