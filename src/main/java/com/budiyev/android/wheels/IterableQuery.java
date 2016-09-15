@@ -590,7 +590,8 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      */
     @NonNull
     public List<T> asList() {
-        return convertToList();
+        executeTasks();
+        return getMutableIterable();
     }
 
     /**

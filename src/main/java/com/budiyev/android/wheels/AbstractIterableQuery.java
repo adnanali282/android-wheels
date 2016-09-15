@@ -93,10 +93,4 @@ abstract class AbstractIterableQuery<T> implements Iterable<T> {
         }
         return mIterable;
     }
-
-    @NonNull
-    protected final List<T> convertToList() {
-        executeTasks();
-        return getMutableIterable();
-    }
 }
