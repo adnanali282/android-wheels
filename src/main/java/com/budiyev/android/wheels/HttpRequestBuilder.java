@@ -29,6 +29,9 @@ import java.util.concurrent.Future;
 
 /**
  * Common interface for {@link HttpRequest} builders
+ *
+ * @see HttpRequest#newGetBuilder(String)
+ * @see HttpRequest#newPostBuilder(String)
  */
 public interface HttpRequestBuilder {
     /**
