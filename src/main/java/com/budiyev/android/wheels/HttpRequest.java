@@ -40,7 +40,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * HTTP request
+ * HTTP request API, based on {@link HttpURLConnection}
  */
 public abstract class HttpRequest {
     protected static final String CHARSET_UTF_8 = "UTF-8";
@@ -260,7 +260,7 @@ public abstract class HttpRequest {
     public abstract Future<HttpRequestResult> submit();
 
     /**
-     * Execute request immediately
+     * Execute request immediately on current thread
      *
      * @return Request result
      */

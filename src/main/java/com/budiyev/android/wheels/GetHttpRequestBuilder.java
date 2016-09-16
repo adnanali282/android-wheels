@@ -29,11 +29,12 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 
 /**
  * Builder for GET HTTP requests
  */
-public final class GetHttpRequestBuilder {
+public final class GetHttpRequestBuilder implements HttpRequestBuilder {
     private final String mUrl;
     private List<HttpHeaderParameter> mHeaderParameters;
     private List<HttpQueryParameter> mQueryParameters;
@@ -77,10 +78,29 @@ public final class GetHttpRequestBuilder {
     }
 
     /**
-     * Build request
+     * {@inheritDoc}
      */
     @NonNull
+    @Override
     public HttpRequest build() {
         return new GetHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mCallbacks);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    public Future<HttpRequestResult> submit() {
+        return build().submit();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    public HttpRequestResult execute() {
+        return build().execute();
     }
 }

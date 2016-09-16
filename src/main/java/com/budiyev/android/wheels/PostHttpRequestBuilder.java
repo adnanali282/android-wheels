@@ -31,11 +31,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 
 /**
  * Builder for POST HTTP requests
  */
-public final class PostHttpRequestBuilder {
+public final class PostHttpRequestBuilder implements HttpRequestBuilder {
     private final String mUrl;
     private List<HttpHeaderParameter> mHeaderParameters;
     private List<HttpQueryParameter> mQueryParameters;
@@ -117,11 +118,30 @@ public final class PostHttpRequestBuilder {
     }
 
     /**
-     * Build request
+     * {@inheritDoc}
      */
     @NonNull
+    @Override
     public HttpRequest build() {
         return new PostHttpRequest(mUrl, mHeaderParameters, mQueryParameters, mBodyParameters,
                 mCallbacks);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    public Future<HttpRequestResult> submit() {
+        return build().submit();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    public HttpRequestResult execute() {
+        return build().execute();
     }
 }
