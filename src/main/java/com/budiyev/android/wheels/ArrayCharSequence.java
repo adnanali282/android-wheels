@@ -56,7 +56,7 @@ final class ArrayCharSequence implements CharSequence {
 
     @Override
     public char charAt(int index) {
-        if (index >= mLength) {
+        if (index < 0 || index >= mLength) {
             throw new IndexOutOfBoundsException();
         }
         return mArray[mStart + index];
