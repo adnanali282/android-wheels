@@ -145,6 +145,16 @@ public abstract class HttpRequest {
     }
 
     /**
+     * Create new GET HTTP request
+     *
+     * @param url URL-address
+     */
+    @NonNull
+    public static HttpRequest newGetRequest(@NonNull String url) {
+        return new GetHttpRequest(url, null, null, null);
+    }
+
+    /**
      * Create new GET HTTP request builder
      *
      * @param url URL-address
@@ -172,6 +182,16 @@ public abstract class HttpRequest {
             @Nullable Iterable<HttpRequestCallback> callbacks) {
         return new PostHttpRequest(url, headerParameters, queryParameters, bodyParameters,
                 callbacks);
+    }
+
+    /**
+     * Create new POST HTTP request
+     *
+     * @param url URL-address
+     */
+    @NonNull
+    public static HttpRequest newPostRequest(@NonNull String url) {
+        return new PostHttpRequest(url, null, null, null, null);
     }
 
     /**
