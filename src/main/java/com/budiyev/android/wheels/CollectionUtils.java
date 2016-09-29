@@ -161,6 +161,7 @@ public final class CollectionUtils {
      * @param b Second {@link Iterable}
      * @return List, consisting of elements of {@code a} followed by elements of {@code b}
      */
+    @NonNull
     public static <T> List<T> merge(@NonNull Iterable<T> a, @NonNull Iterable<T> b) {
         List<T> result;
         if (a instanceof Collection<?> && b instanceof Collection<?>) {
@@ -201,6 +202,7 @@ public final class CollectionUtils {
      *               sum of {@code a} and {@code b} lengths)
      * @return Result array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static <T> T[] merge(@NonNull T[] a, @NonNull T[] b, @NonNull T[] result) {
         if (result.length < a.length + b.length) {
             throw new IllegalArgumentException();
@@ -217,6 +219,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static boolean[] merge(@NonNull boolean[] a, @NonNull boolean[] b) {
         boolean[] result = new boolean[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -231,6 +234,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static byte[] merge(@NonNull byte[] a, @NonNull byte[] b) {
         byte[] result = new byte[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -245,6 +249,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static short[] merge(@NonNull short[] a, @NonNull short[] b) {
         short[] result = new short[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -259,6 +264,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static int[] merge(@NonNull int[] a, @NonNull int[] b) {
         int[] result = new int[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -273,6 +279,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static long[] merge(@NonNull long[] a, @NonNull long[] b) {
         long[] result = new long[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -287,6 +294,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static float[] merge(@NonNull float[] a, @NonNull float[] b) {
         float[] result = new float[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -301,6 +309,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static double[] merge(@NonNull double[] a, @NonNull double[] b) {
         double[] result = new double[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -315,6 +324,7 @@ public final class CollectionUtils {
      * @param b Second array
      * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
+    @NonNull
     public static char[] merge(@NonNull char[] a, @NonNull char[] b) {
         char[] result = new char[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
