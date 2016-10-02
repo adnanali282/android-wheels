@@ -132,6 +132,7 @@ bintray {
         licenses = allLicenses
         publish = true
         publicDownloadNumbers = true
+
         version {
             desc = libraryDescription
         }
