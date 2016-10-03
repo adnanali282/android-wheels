@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.app.Activity;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -34,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.LinkedList;
 
 /**
@@ -87,7 +90,7 @@ public final class SnackbarUtils {
      */
     @NonNull
     public static Snackbar makeSnackbar(@NonNull View view, @NonNull CharSequence text,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         return Snackbar.make(view, text, duration);
     }
 
@@ -101,7 +104,7 @@ public final class SnackbarUtils {
      */
     @NonNull
     public static Snackbar makeSnackbar(@NonNull View view, @StringRes int textId,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         return Snackbar.make(view, textId, duration);
     }
 
@@ -115,7 +118,7 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Window window, @NonNull CharSequence text,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         View view = window.getDecorView();
         if (view == null) {
             return null;
@@ -137,7 +140,7 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Window window, @StringRes int textId,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         View view = window.getDecorView();
         if (view == null) {
             return null;
@@ -159,7 +162,7 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Activity activity, @NonNull CharSequence text,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         Window window = activity.getWindow();
         if (window == null) {
             return null;
@@ -177,7 +180,7 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Activity activity, @StringRes int textId,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         Window window = activity.getWindow();
         if (window == null) {
             return null;
@@ -195,7 +198,7 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Fragment fragment, @NonNull CharSequence text,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return null;
@@ -213,11 +216,16 @@ public final class SnackbarUtils {
      */
     @Nullable
     public static Snackbar makeSnackbar(@NonNull Fragment fragment, @StringRes int textId,
-            @Snackbar.Duration int duration) {
+            @Duration int duration) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return null;
         }
         return makeSnackbar(activity, textId, duration);
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Snackbar.LENGTH_INDEFINITE, Snackbar.LENGTH_SHORT, Snackbar.LENGTH_LONG})
+    public @interface Duration {
     }
 }
