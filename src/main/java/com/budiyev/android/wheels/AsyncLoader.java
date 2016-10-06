@@ -128,7 +128,8 @@ public abstract class AsyncLoader<T> extends Loader<T> {
 
         @Override
         public void run() {
-            data = load(mArguments);
+            final T localData = load(mArguments);
+            data = localData;
             loaded = true;
             if (isAbandoned()) {
                 return;
@@ -139,7 +140,7 @@ public abstract class AsyncLoader<T> extends Loader<T> {
                     if (cancelled) {
                         deliverCancellation();
                     } else {
-                        deliverResult(data);
+                        deliverResult(localData);
                     }
                 }
             });
