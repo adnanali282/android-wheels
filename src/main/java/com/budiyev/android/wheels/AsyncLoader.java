@@ -30,10 +30,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AsyncLoader<T> extends Loader<T> {
+    private final Lock mLock = new ReentrantLock();
     private final Bundle mArguments;
-    private volatile Future<?> mFuture;
+    private volatile LoadTask mLoadTask;
 
     public AsyncLoader(@NonNull Context context, @Nullable Bundle arguments) {
         super(context);
@@ -45,17 +48,39 @@ public abstract class AsyncLoader<T> extends Loader<T> {
 
     @Override
     protected void onStartLoading() {
+        mLock.lock();
+        try {
+            LoadTask loadTask = mLoadTask;
+            if (loadTask != null && loadTask.loaded && !loadTask.cancelled) {
+                deliverResult(loadTask.data);
+            } else {
+                cancelCurrentLoadTask();
+                startNewLoadTask();
+            }
+        } finally {
+            mLock.unlock();
+        }
     }
 
     @Override
     protected boolean onCancelLoad() {
-        Future<?> future = mFuture;
-        return future != null && future.cancel(false);
+        mLock.lock();
+        try {
+            return cancelCurrentLoadTask();
+        } finally {
+            mLock.unlock();
+        }
     }
 
     @Override
     protected void onForceLoad() {
-        mFuture = ThreadUtils.runAsync(new LoadTask());
+        mLock.lock();
+        try {
+            cancelCurrentLoadTask();
+            startNewLoadTask();
+        } finally {
+            mLock.unlock();
+        }
     }
 
     @Override
@@ -64,20 +89,58 @@ public abstract class AsyncLoader<T> extends Loader<T> {
 
     @Override
     protected void onAbandon() {
+        mLock.lock();
+        try {
+            LoadTask loadTask = mLoadTask;
+            if (loadTask != null && loadTask.future != null) {
+                loadTask.future.cancel(false);
+            }
+        } finally {
+            mLock.unlock();
+        }
     }
 
     @Override
     protected void onReset() {
+        mLoadTask = null;
+    }
+
+    private void startNewLoadTask() {
+        LoadTask loadTask = new LoadTask();
+        loadTask.future = ThreadUtils.runAsync(loadTask);
+        mLoadTask = loadTask;
+    }
+
+    private boolean cancelCurrentLoadTask() {
+        LoadTask loadTask = mLoadTask;
+        if (loadTask == null) {
+            return false;
+        }
+        loadTask.cancelled = true;
+        return true;
     }
 
     private class LoadTask implements Runnable {
+        public volatile Future<?> future;
+        public volatile boolean cancelled;
+        public volatile boolean loaded;
+        public volatile T data;
+
         @Override
         public void run() {
-            final T data = load(mArguments);
+            data = load(mArguments);
+            loaded = true;
+            if (isAbandoned()) {
+                return;
+            }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
-                    deliverResult(data);
+                    if (cancelled) {
+                        deliverCancellation();
+                    } else {
+                        deliverResult(data);
+                    }
                 }
             });
         }
