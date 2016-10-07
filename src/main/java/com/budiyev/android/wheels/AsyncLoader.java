@@ -47,9 +47,6 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     protected void onStartLoading() {
         LoadTask loadTask = mLoadTask;
         if (loadTask != null && loadTask.loaded) {
-            loadTask.state.setAbandoned(false);
-            loadTask.state.setCancelled(false);
-            loadTask.state.setStopped(false);
             deliverResult(loadTask.data);
         } else {
             cancelCurrentLoadTask();
@@ -153,7 +150,7 @@ public abstract class AsyncLoader<T> extends Loader<T> {
         public void run() {
             final T localData = load(mArguments, state);
             data = localData;
-            loaded = !state.isCancelled();
+            loaded = !state.isAbandoned() && !state.isCancelled() && !state.isStopped();
             if (state.isAbandoned()) {
                 return;
             }
