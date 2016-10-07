@@ -150,14 +150,16 @@ public abstract class AsyncLoader<T> extends Loader<T> {
         public void run() {
             final T localData = load(mArguments, state);
             data = localData;
-            loaded = !state.isAbandoned() && !state.isCancelled() && !state.isStopped();
-            if (state.isAbandoned()) {
+            final boolean abandoned = state.isAbandoned();
+            final boolean cancelled = state.isCancelled();
+            loaded = !abandoned && !cancelled && !state.isStopped();
+            if (abandoned) {
                 return;
             }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (state.isCancelled()) {
+                    if (cancelled) {
                         deliverCancellation();
                     } else {
                         deliverResult(localData);
