@@ -153,7 +153,7 @@ public abstract class AsyncLoader<T> extends Loader<T> {
         public void run() {
             final T localData = load(mArguments, state);
             data = localData;
-            loaded = true;
+            loaded = !state.isCancelled();
             if (state.isAbandoned()) {
                 return;
             }
