@@ -31,17 +31,33 @@ import android.support.annotation.Nullable;
 
 import java.util.concurrent.Future;
 
+/**
+ * {@link Loader} implementation, based on {@link ThreadUtils}
+ */
 public abstract class AsyncLoader<T> extends Loader<T> {
     private final Bundle mArguments;
     private volatile LoadTask mLoadTask;
 
+    /**
+     * AsyncLoader
+     *
+     * @param context   Context
+     * @param arguments Arguments
+     */
     public AsyncLoader(@NonNull Context context, @Nullable Bundle arguments) {
         super(context);
         mArguments = arguments;
     }
 
+    /**
+     * Load data asynchronously
+     *
+     * @param arguments arguments
+     * @param state     current loading state
+     * @return loaded data
+     */
     @Nullable
-    protected abstract T load(@Nullable Bundle arguments, @NonNull TaskState state);
+    protected abstract T load(@Nullable Bundle arguments, @NonNull LoadState state);
 
     @Override
     protected void onStartLoading() {
@@ -110,26 +126,44 @@ public abstract class AsyncLoader<T> extends Loader<T> {
         return true;
     }
 
-    protected static final class TaskState {
+    /**
+     * Loading state
+     */
+    protected static final class LoadState {
         private volatile boolean abandoned;
         private volatile boolean cancelled;
         private volatile boolean stopped;
 
+        /**
+         * Whether if loading was abandoned
+         * <br>
+         * Bound with {@link Loader#abandon()}
+         */
         public boolean isAbandoned() {
             return abandoned;
         }
 
+        /**
+         * Whether if loading was cancelled
+         * <br>
+         * Bound with {@link Loader#cancelLoad()}
+         */
         public boolean isCancelled() {
             return cancelled;
         }
 
+        /**
+         * Whether if loading was stopped
+         * <br>
+         * Bound with {@link Loader#stopLoading()}
+         */
         public boolean isStopped() {
             return stopped;
         }
     }
 
     private class LoadTask implements Runnable {
-        private final TaskState state = new TaskState();
+        private final LoadState state = new LoadState();
         private volatile Future<?> future;
         private volatile T data;
         private volatile boolean loaded;
