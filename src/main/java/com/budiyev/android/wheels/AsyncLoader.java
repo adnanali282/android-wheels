@@ -30,11 +30,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AsyncLoader<T> extends Loader<T> {
-    private final Lock mLock = new ReentrantLock();
     private final Bundle mArguments;
     private volatile LoadTask mLoadTask;
 
@@ -44,59 +41,52 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     }
 
     @Nullable
-    protected abstract T load(@Nullable Bundle arguments);
+    protected abstract T load(@Nullable Bundle arguments, @NonNull TaskState state);
 
     @Override
     protected void onStartLoading() {
-        mLock.lock();
-        try {
-            LoadTask loadTask = mLoadTask;
-            if (loadTask != null && loadTask.loaded && !loadTask.cancelled) {
-                deliverResult(loadTask.data);
-            } else {
-                cancelCurrentLoadTask();
-                startNewLoadTask();
-            }
-        } finally {
-            mLock.unlock();
+        LoadTask loadTask = mLoadTask;
+        if (loadTask != null && loadTask.loaded) {
+            loadTask.state.setAbandoned(false);
+            loadTask.state.setCancelled(false);
+            loadTask.state.setStopped(false);
+            deliverResult(loadTask.data);
+        } else {
+            cancelCurrentLoadTask();
+            startNewLoadTask();
         }
     }
 
     @Override
     protected boolean onCancelLoad() {
-        mLock.lock();
-        try {
-            return cancelCurrentLoadTask();
-        } finally {
-            mLock.unlock();
-        }
+        return cancelCurrentLoadTask();
     }
 
     @Override
     protected void onForceLoad() {
-        mLock.lock();
-        try {
-            cancelCurrentLoadTask();
-            startNewLoadTask();
-        } finally {
-            mLock.unlock();
-        }
+        cancelCurrentLoadTask();
+        startNewLoadTask();
     }
 
     @Override
     protected void onStopLoading() {
+        LoadTask loadTask = mLoadTask;
+        if (loadTask != null) {
+            if (loadTask.future != null) {
+                loadTask.future.cancel(false);
+            }
+            loadTask.state.setStopped(true);
+        }
     }
 
     @Override
     protected void onAbandon() {
-        mLock.lock();
-        try {
-            LoadTask loadTask = mLoadTask;
-            if (loadTask != null && loadTask.future != null) {
+        LoadTask loadTask = mLoadTask;
+        if (loadTask != null) {
+            if (loadTask.future != null) {
                 loadTask.future.cancel(false);
             }
-        } finally {
-            mLock.unlock();
+            loadTask.state.setAbandoned(true);
         }
     }
 
@@ -113,31 +103,64 @@ public abstract class AsyncLoader<T> extends Loader<T> {
 
     private boolean cancelCurrentLoadTask() {
         LoadTask loadTask = mLoadTask;
-        if (loadTask == null) {
+        if (loadTask == null || loadTask.state.isCancelled()) {
             return false;
         }
-        loadTask.cancelled = true;
+        if (loadTask.future != null) {
+            loadTask.future.cancel(false);
+        }
+        loadTask.state.setCancelled(true);
         return true;
     }
 
+    protected static final class TaskState {
+        private volatile boolean mAbandoned;
+        private volatile boolean mCancelled;
+        private volatile boolean mStopped;
+
+        public boolean isAbandoned() {
+            return mAbandoned;
+        }
+
+        public boolean isCancelled() {
+            return mCancelled;
+        }
+
+        public boolean isStopped() {
+            return mStopped;
+        }
+
+        private void setAbandoned(boolean abandoned) {
+            mAbandoned = abandoned;
+        }
+
+        private void setCancelled(boolean cancelled) {
+            mCancelled = cancelled;
+        }
+
+        private void setStopped(boolean stopped) {
+            mStopped = stopped;
+        }
+    }
+
     private class LoadTask implements Runnable {
+        public final TaskState state = new TaskState();
         public volatile Future<?> future;
-        public volatile boolean cancelled;
-        public volatile boolean loaded;
         public volatile T data;
+        public volatile boolean loaded;
 
         @Override
         public void run() {
-            final T localData = load(mArguments);
+            final T localData = load(mArguments, state);
             data = localData;
             loaded = true;
-            if (isAbandoned()) {
+            if (state.isAbandoned()) {
                 return;
             }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (cancelled) {
+                    if (state.isCancelled()) {
                         deliverCancellation();
                     } else {
                         deliverResult(localData);
