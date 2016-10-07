@@ -85,9 +85,7 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     protected void onStopLoading() {
         LoadTask loadTask = mLoadTask;
         if (loadTask != null) {
-            if (loadTask.future != null) {
-                loadTask.future.cancel(false);
-            }
+            cancelFuture(loadTask);
             loadTask.state.stopped = true;
         }
     }
@@ -96,9 +94,7 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     protected void onAbandon() {
         LoadTask loadTask = mLoadTask;
         if (loadTask != null) {
-            if (loadTask.future != null) {
-                loadTask.future.cancel(false);
-            }
+            cancelFuture(loadTask);
             loadTask.state.abandoned = true;
         }
     }
@@ -119,11 +115,15 @@ public abstract class AsyncLoader<T> extends Loader<T> {
         if (loadTask == null || loadTask.state.cancelled) {
             return false;
         }
+        cancelFuture(loadTask);
+        loadTask.state.cancelled = true;
+        return true;
+    }
+
+    private void cancelFuture(@NonNull LoadTask loadTask) {
         if (loadTask.future != null) {
             loadTask.future.cancel(false);
         }
-        loadTask.state.cancelled = true;
-        return true;
     }
 
     /**
