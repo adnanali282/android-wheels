@@ -86,22 +86,30 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     @Override
     protected void onStartLoading() {
         LoadTask loadTask = mLoadTask;
-        if (loadTask != null && loadTask.loaded) {
-            deliverResult(loadTask.data);
-        } else {
-            cancelCurrentLoadTask();
+        if (loadTask == null) {
             startNewLoadTask();
+        } else if (loadTask.loaded) {
+            deliverResult(loadTask.data);
         }
     }
 
     @Override
     protected boolean onCancelLoad() {
-        return cancelCurrentLoadTask();
+        LoadTask loadTask = mLoadTask;
+        if (loadTask == null || loadTask.state.cancelled) {
+            return false;
+        }
+        loadTask.state.cancelled = true;
+        return true;
     }
 
     @Override
     protected void onForceLoad() {
-        cancelCurrentLoadTask();
+        LoadTask loadTask = mLoadTask;
+        if (loadTask != null) {
+            loadTask.state.forcedStop = true;
+            cancelFuture(loadTask);
+        }
         startNewLoadTask();
     }
 
@@ -109,8 +117,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     protected void onStopLoading() {
         LoadTask loadTask = mLoadTask;
         if (loadTask != null) {
-            cancelFuture(loadTask);
             loadTask.state.stopped = true;
+            cancelFuture(loadTask);
         }
     }
 
@@ -118,8 +126,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     protected void onAbandon() {
         LoadTask loadTask = mLoadTask;
         if (loadTask != null) {
-            cancelFuture(loadTask);
             loadTask.state.abandoned = true;
+            cancelFuture(loadTask);
         }
     }
 
@@ -132,16 +140,6 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         LoadTask loadTask = new LoadTask();
         loadTask.future = ThreadUtils.runAsync(loadTask);
         mLoadTask = loadTask;
-    }
-
-    private boolean cancelCurrentLoadTask() {
-        LoadTask loadTask = mLoadTask;
-        if (loadTask == null || loadTask.state.cancelled) {
-            return false;
-        }
-        cancelFuture(loadTask);
-        loadTask.state.cancelled = true;
-        return true;
     }
 
     private void cancelFuture(@NonNull LoadTask loadTask) {
@@ -157,6 +155,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         private volatile boolean abandoned;
         private volatile boolean cancelled;
         private volatile boolean stopped;
+        private volatile boolean forcedStop;
 
         private LoadState() {
         }
@@ -187,6 +186,24 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         public boolean isStopped() {
             return stopped;
         }
+
+        /**
+         * Whether if current loading cancelled by calling {@link AsyncLoader#forceLoad}
+         */
+        public boolean isForcedStop() {
+            return forcedStop;
+        }
+
+        /**
+         * Convenience method to check if loading process should be sopped
+         *
+         * @return {@code true} if one of {@link #isAbandoned}, {@link #isCancelled},
+         * {@link #isStopped} or {@link #isForcedStop()} returns {@code true},
+         * {@code false} otherwise.
+         */
+        public boolean shouldStopLoading() {
+            return abandoned || cancelled || stopped || forcedStop;
+        }
     }
 
     private class LoadTask implements Runnable {
@@ -198,10 +215,12 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         @Override
         public void run() {
             final D localData = load(mArguments, state);
-            data = localData;
-            loaded = !state.abandoned && !state.cancelled && !state.stopped;
-            if (state.abandoned || state.stopped) {
+            if (state.forcedStop || state.abandoned || state.stopped) {
                 return;
+            }
+            loaded = !state.abandoned && !state.cancelled && !state.stopped;
+            if (loaded) {
+                data = localData;
             }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
