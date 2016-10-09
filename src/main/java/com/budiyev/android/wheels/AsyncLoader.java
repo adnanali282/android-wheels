@@ -90,7 +90,6 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         if (loadTask == null) {
             startNewLoadTask();
         } else if (loadTask.loaded) {
-            commitContentChanged();
             deliverResult(loadTask.data);
         }
     }
@@ -243,10 +242,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
                 @Override
                 public void run() {
                     if (state.cancelled) {
-                        rollbackContentChanged();
                         deliverCancellation();
                     } else {
-                        commitContentChanged();
                         deliverResult(localData);
                     }
                 }
