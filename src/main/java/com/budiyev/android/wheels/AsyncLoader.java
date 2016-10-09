@@ -77,12 +77,12 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * {@link LoadState#shouldStopLoading}.
      *
      * @param arguments arguments, transferred through constructor
-     * @param state     current loading state
+     * @param loadState current loading state
      * @return loaded data
      */
     @Nullable
     @WorkerThread
-    protected abstract D load(@Nullable A arguments, @NonNull LoadState state);
+    protected abstract D load(@Nullable A arguments, @NonNull LoadState loadState);
 
     @Override
     protected void onStartLoading() {
