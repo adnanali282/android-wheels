@@ -63,8 +63,9 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * Load data asynchronously
      *
      * Implementations should not deliver the result directly, but should return it
-     * from this method, which will eventually end up calling {@link #deliverResult)} on
-     * the main thread.  If implementations need to process the results on the main thread
+     * from this method, which will eventually end up calling {@link #deliverResult)} or,
+     * if loading was cancelled, {@link #deliverCancellation) on the main thread.
+     * If implementations need to process the results on the main thread
      * they may override {@link #deliverResult} and do so there.
      *
      * To support cancellation, this method should periodically check {@code state}
