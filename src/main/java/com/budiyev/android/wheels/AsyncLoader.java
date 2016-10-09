@@ -155,6 +155,9 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         private volatile boolean cancelled;
         private volatile boolean stopped;
 
+        private LoadState() {
+        }
+
         /**
          * Whether if loading was abandoned
          * <br>
