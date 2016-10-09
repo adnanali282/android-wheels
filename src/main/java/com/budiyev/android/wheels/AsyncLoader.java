@@ -71,7 +71,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * If implementations need to process the results on the main thread
      * they may override {@link #deliverResult} and do so there.
      * <br>
-     * To support cancellation, this method should periodically check {@code state}
+     * To support cancellation, this method should periodically check {@code loadState}
      * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled},
      * {@link LoadState#isStopped}, {@link LoadState#isForcedStop} or
      * {@link LoadState#shouldStopLoading}.
