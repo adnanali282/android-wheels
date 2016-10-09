@@ -57,11 +57,16 @@ public final class CommonUtils {
 
     /**
      * Remove parent of specified {@link View}
+     *
+     * @return {@code true} if parent was removed, {@code false} otherwise
      */
-    public static void removeViewParent(@NonNull View view) {
+    public static boolean removeViewParent(@NonNull View view) {
         ViewParent parent = view.getParent();
         if (parent instanceof ViewManager) {
             ((ViewManager) parent).removeView(view);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -88,19 +93,28 @@ public final class CommonUtils {
     }
 
     /**
-     * Get {@link Bitmap} representation of specified {@link View}
+     * Draw specified {@link View} on a {@link Bitmap}
      *
      * @param view View
      * @return Bitmap
      */
     @NonNull
-    private Bitmap getViewBitmap(@NonNull View view) {
-        int width = view.getWidth();
-        int height = view.getHeight();
-        if (width == 0 || height == 0) {
-            SizeCompat viewSize = getViewSize(view);
-            width = viewSize.getWidth();
-            height = viewSize.getHeight();
+    public Bitmap drawViewOnBitmap(@NonNull View view) {
+        SizeCompat size = getViewSize(view);
+        return drawViewOnBitmap(view, size.getWidth(), size.getHeight());
+    }
+
+    /**
+     * Draw specified {@link View} on a {@link Bitmap}
+     *
+     * @param view   View
+     * @param width  Bitmap width
+     * @param height Bitmap height
+     * @return Bitmap
+     */
+    @NonNull
+    public Bitmap drawViewOnBitmap(@NonNull View view, int width, int height) {
+        if (view.getWidth() != width || view.getHeight() != height) {
             view.layout(0, 0, width, height);
         }
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
