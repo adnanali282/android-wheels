@@ -220,7 +220,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
             if (state.forcedStop || state.abandoned || state.stopped) {
                 return;
             }
-            loaded = !state.abandoned && !state.cancelled && !state.stopped;
+            loaded = !state.cancelled;
             if (loaded) {
                 data = localData;
             }
