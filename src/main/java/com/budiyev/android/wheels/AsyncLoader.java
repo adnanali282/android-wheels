@@ -79,7 +79,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     /**
-     * Set arguments that will be transferred to the {@link #load} method
+     * Set the arguments that will be transferred to the {@link #load} method
      */
     public void setArguments(@Nullable A arguments) {
         mArguments = arguments;
