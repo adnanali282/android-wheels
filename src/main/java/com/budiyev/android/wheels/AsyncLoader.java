@@ -47,7 +47,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     /**
      * AsyncLoader
      * <br>
-     * Stores away the application context associated with context.
+     * Stores away the application context associated with {@code context}.
      * Since Loaders can be used across multiple activities it's dangerous to
      * store the context directly; always use {@link #getContext} to retrieve
      * the Loader's Context, don't use the constructor argument directly.
