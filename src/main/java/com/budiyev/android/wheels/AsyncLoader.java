@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Loader;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import java.util.concurrent.Future;
 
@@ -45,14 +46,13 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * <br>
      * Stores away the application context associated with context.
      * Since Loaders can be used across multiple activities it's dangerous to
-     * store the context directly; always use {@link #getContext()} to retrieve
+     * store the context directly; always use {@link #getContext} to retrieve
      * the Loader's Context, don't use the constructor argument directly.
      * The Context returned by {@link #getContext} is safe to use across
      * Activity instances.
      *
      * @param context   context
-     * @param arguments arguments that will be transferred to {@link #load(Object, LoadState)}
-     *                  method
+     * @param arguments arguments that will be transferred to {@link #load} method
      */
     public AsyncLoader(@NonNull Context context, @Nullable A arguments) {
         super(context);
@@ -62,11 +62,21 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     /**
      * Load data asynchronously
      *
+     * Implementations should not deliver the result directly, but should return it
+     * from this method, which will eventually end up calling {@link #deliverResult)} on
+     * the main thread.  If implementations need to process the results on the main thread
+     * they may override {@link #deliverResult} and do so there.
+     *
+     * To support cancellation, this method should periodically check {@code state}
+     * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled}
+     * and {@link LoadState#isStopped}.
+     *
      * @param arguments arguments, transferred through constructor
      * @param state     current loading state
      * @return loaded data
      */
     @Nullable
+    @WorkerThread
     protected abstract D load(@Nullable A arguments, @NonNull LoadState state);
 
     @Override
@@ -147,7 +157,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was abandoned
          * <br>
-         * Bound with {@link Loader#abandon()}
+         * Bound with {@link AsyncLoader#abandon}
          */
         public boolean isAbandoned() {
             return abandoned;
@@ -156,7 +166,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was cancelled
          * <br>
-         * Bound with {@link Loader#cancelLoad()}
+         * Bound with {@link AsyncLoader#cancelLoad}
          */
         public boolean isCancelled() {
             return cancelled;
@@ -165,7 +175,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was stopped
          * <br>
-         * Bound with {@link Loader#stopLoading()}
+         * Bound with {@link AsyncLoader#stopLoading}
          */
         public boolean isStopped() {
             return stopped;
