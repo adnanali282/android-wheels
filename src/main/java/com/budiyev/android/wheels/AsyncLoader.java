@@ -212,10 +212,10 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
 
         /**
          * Tell the loader that despite abandoning, cancelling or stopping,
-         * the data is loaded normally and ready to be used
+         * the data is loaded normally and ready to be delivered immediately
          * on next {@link AsyncLoader#startLoading} call.
          *
-         * @param force whether to force or not
+         * @param force whether to force or not, {@code false} by default
          */
         public void setForceLoaded(boolean force) {
             forceLoaded = force;
