@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.support.annotation.NonNull;
@@ -32,7 +33,9 @@ import android.support.annotation.WorkerThread;
 import java.util.concurrent.Future;
 
 /**
- * {@link Loader} implementation, based on {@link ThreadUtils}
+ * Abstract Loader based on {@link ThreadUtils}
+ * <br>
+ * See {@link Loader} and {@link LoaderManager} for more details.
  *
  * @param <A> Arguments type
  * @param <D> Data type
@@ -61,13 +64,13 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
 
     /**
      * Load data asynchronously
-     *
+     * <br>
      * Implementations should not deliver the result directly, but should return it
-     * from this method, which will eventually end up calling {@link #deliverResult)} or,
-     * if loading was cancelled, {@link #deliverCancellation) on the main thread.
+     * from this method, which will eventually end up calling {@link #deliverResult} or,
+     * if loading was cancelled, {@link #deliverCancellation} on the main thread.
      * If implementations need to process the results on the main thread
      * they may override {@link #deliverResult} and do so there.
-     *
+     * <br>
      * To support cancellation, this method should periodically check {@code state}
      * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled}
      * and {@link LoadState#isStopped}.
