@@ -90,6 +90,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         if (loadTask == null) {
             startNewLoadTask();
         } else if (loadTask.loaded) {
+            commitContentChanged();
             deliverResult(loadTask.data);
         }
     }
@@ -157,6 +158,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         private volatile boolean cancelled;
         private volatile boolean stopped;
         private volatile boolean forcedStop;
+        private volatile boolean forceLoaded;
 
         private LoadState() {
         }
@@ -206,6 +208,17 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         public boolean shouldStopLoading() {
             return abandoned || cancelled || stopped || forcedStop;
         }
+
+        /**
+         * Tell the loader that despite abandoning, cancelling or stopping,
+         * the data is loaded normally and ready to be used
+         * on next {@link AsyncLoader#startLoading} call.
+         *
+         * @param force whether to force or not
+         */
+        public void setForceLoaded(boolean force) {
+            forceLoaded = force;
+        }
     }
 
     private class LoadTask implements Runnable {
@@ -217,19 +230,22 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         @Override
         public void run() {
             final D localData = load(mArguments, state);
-            if (state.forcedStop || state.abandoned || state.stopped) {
-                return;
-            }
-            loaded = !state.cancelled;
+            boolean loadInterrupted = state.abandoned || state.stopped || state.forcedStop;
+            loaded = !state.cancelled && !loadInterrupted || state.forceLoaded;
             if (loaded) {
                 data = localData;
+            }
+            if (loadInterrupted) {
+                return;
             }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     if (state.cancelled) {
+                        rollbackContentChanged();
                         deliverCancellation();
                     } else {
+                        commitContentChanged();
                         deliverResult(localData);
                     }
                 }
