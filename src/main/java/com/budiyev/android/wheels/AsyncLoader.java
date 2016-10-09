@@ -25,7 +25,6 @@ package com.budiyev.android.wheels;
 
 import android.content.Context;
 import android.content.Loader;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -33,18 +32,29 @@ import java.util.concurrent.Future;
 
 /**
  * {@link Loader} implementation, based on {@link ThreadUtils}
+ *
+ * @param <A> Arguments type
+ * @param <D> Data type
  */
-public abstract class AsyncLoader<T> extends Loader<T> {
-    private final Bundle mArguments;
+public abstract class AsyncLoader<A, D> extends Loader<D> {
+    private final A mArguments;
     private volatile LoadTask mLoadTask;
 
     /**
      * AsyncLoader
+     * <br>
+     * Stores away the application context associated with context.
+     * Since Loaders can be used across multiple activities it's dangerous to
+     * store the context directly; always use {@link #getContext()} to retrieve
+     * the Loader's Context, don't use the constructor argument directly.
+     * The Context returned by {@link #getContext} is safe to use across
+     * Activity instances.
      *
-     * @param context   Context
-     * @param arguments Arguments
+     * @param context   context
+     * @param arguments arguments that will be transferred to {@link #load(Object, LoadState)}
+     *                  method
      */
-    public AsyncLoader(@NonNull Context context, @Nullable Bundle arguments) {
+    public AsyncLoader(@NonNull Context context, @Nullable A arguments) {
         super(context);
         mArguments = arguments;
     }
@@ -52,12 +62,12 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     /**
      * Load data asynchronously
      *
-     * @param arguments arguments
+     * @param arguments arguments, transferred through constructor
      * @param state     current loading state
      * @return loaded data
      */
     @Nullable
-    protected abstract T load(@Nullable Bundle arguments, @NonNull LoadState state);
+    protected abstract D load(@Nullable A arguments, @NonNull LoadState state);
 
     @Override
     protected void onStartLoading() {
@@ -165,12 +175,12 @@ public abstract class AsyncLoader<T> extends Loader<T> {
     private class LoadTask implements Runnable {
         private final LoadState state = new LoadState();
         private volatile Future<?> future;
-        private volatile T data;
+        private volatile D data;
         private volatile boolean loaded;
 
         @Override
         public void run() {
-            final T localData = load(mArguments, state);
+            final D localData = load(mArguments, state);
             data = localData;
             loaded = !state.abandoned && !state.cancelled && !state.stopped;
             if (state.abandoned) {
