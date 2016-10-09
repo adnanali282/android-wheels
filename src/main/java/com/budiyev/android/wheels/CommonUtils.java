@@ -164,7 +164,7 @@ public final class CommonUtils {
      *
      * @param context      Context
      * @param resourceName Name of resource identifier
-     * @return Text
+     * @return Text or {@code null} if specified resource wasn't found
      */
     @Nullable
     public static CharSequence getTextByResourceName(@NonNull Context context,
