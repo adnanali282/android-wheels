@@ -41,8 +41,24 @@ import java.util.concurrent.Future;
  * @param <D> Data type
  */
 public abstract class AsyncLoader<A, D> extends Loader<D> {
-    private final A mArguments;
     private volatile LoadTask mLoadTask;
+    private volatile A mArguments;
+
+    /**
+     * AsyncLoader
+     * <br>
+     * Stores away the application context associated with {@code context}.
+     * Since Loaders can be used across multiple activities it's dangerous to
+     * store the context directly; always use {@link #getContext} to retrieve
+     * the Loader's context, don't use the constructor argument directly.
+     * The context returned by {@link #getContext} is safe to use across
+     * Activity instances.
+     *
+     * @param context context
+     */
+    public AsyncLoader(@NonNull Context context) {
+        super(context);
+    }
 
     /**
      * AsyncLoader
@@ -55,10 +71,17 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * Activity instances.
      *
      * @param context   context
-     * @param arguments arguments that will be transferred to {@link #load} method
+     * @param arguments arguments that will be transferred to the {@link #load} method
      */
     public AsyncLoader(@NonNull Context context, @Nullable A arguments) {
         super(context);
+        mArguments = arguments;
+    }
+
+    /**
+     * Set arguments that will be transferred to the {@link #load} method
+     */
+    public void setArguments(@Nullable A arguments) {
         mArguments = arguments;
     }
 
