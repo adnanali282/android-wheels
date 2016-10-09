@@ -255,7 +255,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         public void run() {
             final D localData = load(mArguments, state);
             boolean loadInterrupted = state.abandoned || state.stopped || state.forcedStop;
-            loaded = !state.cancelled && !loadInterrupted || state.forceLoaded;
+            loaded = !state.cancelled && !loadInterrupted || state.forceLoaded && !state.forcedStop;
             if (loaded) {
                 data = localData;
             }
