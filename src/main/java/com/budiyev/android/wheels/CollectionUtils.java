@@ -342,7 +342,7 @@ public final class CollectionUtils {
     /**
      * Sorts the {@code list} in ascending natural order
      * <br>
-     * Sorting algorithm is unstable (Heapsort)
+     * Sorting algorithm is <b>unstable</b> (Heapsort)
      */
     public static <T extends Comparable<T>> void sort(@NonNull List<T> list) {
         sort(list, new Comparator<T>() {
