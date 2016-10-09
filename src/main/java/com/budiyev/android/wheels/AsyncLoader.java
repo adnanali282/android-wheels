@@ -145,8 +145,9 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     private void cancelFuture(@NonNull LoadTask loadTask) {
-        if (loadTask.future != null) {
-            loadTask.future.cancel(false);
+        Future<?> future = loadTask.future;
+        if (future != null) {
+            future.cancel(false);
         }
     }
 
