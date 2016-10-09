@@ -72,8 +72,9 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * they may override {@link #deliverResult} and do so there.
      * <br>
      * To support cancellation, this method should periodically check {@code state}
-     * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled}
-     * and {@link LoadState#isStopped}.
+     * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled},
+     * {@link LoadState#isStopped}, {@link LoadState#isForcedStop} or
+     * {@link LoadState#shouldStopLoading}.
      *
      * @param arguments arguments, transferred through constructor
      * @param state     current loading state
@@ -188,7 +189,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         }
 
         /**
-         * Whether if current loading cancelled by calling {@link AsyncLoader#forceLoad}
+         * Whether if current loading process was cancelled by
+         * calling {@link AsyncLoader#forceLoad}
          */
         public boolean isForcedStop() {
             return forcedStop;
@@ -198,7 +200,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
          * Convenience method to check if loading process should be sopped
          *
          * @return {@code true} if one of {@link #isAbandoned}, {@link #isCancelled},
-         * {@link #isStopped} or {@link #isForcedStop()} returns {@code true},
+         * {@link #isStopped} or {@link #isForcedStop} returns {@code true},
          * {@code false} otherwise.
          */
         public boolean shouldStopLoading() {
