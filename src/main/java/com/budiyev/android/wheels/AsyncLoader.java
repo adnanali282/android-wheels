@@ -200,7 +200,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
             final D localData = load(mArguments, state);
             data = localData;
             loaded = !state.abandoned && !state.cancelled && !state.stopped;
-            if (state.abandoned) {
+            if (state.abandoned || state.stopped) {
                 return;
             }
             ThreadUtils.runOnMainThread(new Runnable() {
