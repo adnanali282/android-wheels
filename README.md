@@ -5,6 +5,7 @@ Some useful tools for Android
 * ThreadUtils - Tools for asynchronous tasks in Android
 * ImageLoader - Universal image loading tool
 * HttpRequest - API for HTTP requests based on HttpURLConnection
+* AsyncLoader - Abstract Loader based on ThreadUtils
 * IterableQuery - Object query API
 * CollectionUtils - Tools for collections
 * CommonUtils - Common useful tools
