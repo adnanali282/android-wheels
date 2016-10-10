@@ -93,7 +93,11 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * <br>
      * Implementations should not deliver the result directly, but should return it
      * from this method, which will eventually end up calling {@link #deliverResult(Object)} or,
-     * if loading was cancelled, {@link #deliverCancellation()} on the main thread.
+     * if {@link #cancelLoad()} was called, {@link #deliverCancellation()} on the main thread.
+     * If {@link #abandon()} or {@link #stopLoading()} was called, no callbacks will be delivered.
+     * If {@link #forceLoad()} called after the task was started, no callbacks will be delivered
+     * for current task and loaded data can't be forced to be delivered on next
+     * {@link #startLoading()} call.
      * If implementations need to process the results on the main thread
      * they may override {@link #deliverResult(Object)} and do so there.
      * <br>
@@ -178,6 +182,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
 
     /**
      * Loading state
+     * <br>
+     * Represents loading state for concrete {@link AsyncLoader#load(Object, LoadState)} call
      */
     protected static final class LoadState {
         private volatile boolean abandoned;
@@ -239,6 +245,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
          * Tell the loader that despite abandoning, cancelling or stopping,
          * the data is loaded normally and ready to be delivered immediately
          * on next {@link AsyncLoader#startLoading()} call.
+         * <br>
+         * This flag will be ignored if {@link #isForcedStop()} return {@code true}.
          *
          * @param force whether to force or not, {@code false} by default
          */
