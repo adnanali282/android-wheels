@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
@@ -37,7 +38,7 @@ import java.util.concurrent.Future;
  * <br>
  * See {@link Loader} and {@link LoaderManager} for more details.
  *
- * @param <A> Arguments type
+ * @param <A> Arguments type, {@link Bundle} in most cases
  * @param <D> Data type
  */
 public abstract class AsyncLoader<A, D> extends Loader<D> {
