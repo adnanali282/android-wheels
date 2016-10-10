@@ -38,6 +38,7 @@ import java.util.Objects;
  * @see CsvParser#parse(String, char)
  */
 public class StringRow implements Iterable<String> {
+    private static final String EMPTY = "";
     private final ArrayList<String> mCells = new ArrayList<>();
 
     public StringRow() {
@@ -81,7 +82,7 @@ public class StringRow implements Iterable<String> {
      * Add empty cell
      */
     public void add() {
-        mCells.add(CommonUtils.EMPTY_STRING);
+        mCells.add(EMPTY);
     }
 
     /**
@@ -104,7 +105,7 @@ public class StringRow implements Iterable<String> {
      */
     @Nullable
     public String insert(int position) {
-        return insert(position, CommonUtils.EMPTY_STRING);
+        return insert(position, EMPTY);
     }
 
     /**
@@ -226,7 +227,7 @@ public class StringRow implements Iterable<String> {
         if (position >= size) {
             int empty = position - size;
             for (int i = 0; i < empty; i++) {
-                mCells.add(CommonUtils.EMPTY_STRING);
+                mCells.add(EMPTY);
             }
             return true;
         } else {

@@ -48,7 +48,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public final class CommonUtils {
-    public static final String EMPTY_STRING = "";
     private static final String URI_SCHEME_HTTP = "http";
     private static final String URI_SCHEME_HTTPS = "https";
     private static final String URI_SCHEME_FTP = "ftp";
