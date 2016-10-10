@@ -49,9 +49,9 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * <br>
      * Stores away the application context associated with {@code context}.
      * Since Loaders can be used across multiple activities it's dangerous to
-     * store the context directly; always use {@link #getContext} to retrieve
+     * store the context directly; always use {@link #getContext()} to retrieve
      * the Loader's context, don't use the constructor argument directly.
-     * The context returned by {@link #getContext} is safe to use across
+     * The context returned by {@link #getContext()} is safe to use across
      * Activity instances.
      *
      * @param context context
@@ -66,13 +66,14 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * <br>
      * Stores away the application context associated with {@code context}.
      * Since Loaders can be used across multiple activities it's dangerous to
-     * store the context directly; always use {@link #getContext} to retrieve
+     * store the context directly; always use {@link #getContext()} to retrieve
      * the Loader's context, don't use the constructor argument directly.
-     * The context returned by {@link #getContext} is safe to use across
+     * The context returned by {@link #getContext()} is safe to use across
      * Activity instances.
      *
      * @param context   context
-     * @param arguments arguments that will be transferred to the {@link #load} method
+     * @param arguments arguments that will be transferred to the
+     *                  {@link #load(Object, LoadState)} method
      */
     public AsyncLoader(@NonNull Context context, @Nullable A arguments) {
         super(context);
@@ -80,7 +81,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     /**
-     * Set arguments that will be transferred to the {@link #load} method
+     * Set arguments that will be transferred to the {@link #load(Object, LoadState)} method
      */
     public void setArguments(@Nullable A arguments) {
         mArguments = arguments;
@@ -90,15 +91,15 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * Load data asynchronously
      * <br>
      * Implementations should not deliver the result directly, but should return it
-     * from this method, which will eventually end up calling {@link #deliverResult} or,
-     * if loading was cancelled, {@link #deliverCancellation} on the main thread.
+     * from this method, which will eventually end up calling {@link #deliverResult(Object)} or,
+     * if loading was cancelled, {@link #deliverCancellation()} on the main thread.
      * If implementations need to process the results on the main thread
-     * they may override {@link #deliverResult} and do so there.
+     * they may override {@link #deliverResult(Object)} and do so there.
      * <br>
      * To support cancellation, this method should periodically check {@code loadState}
-     * parameter's values: {@link LoadState#isAbandoned}, {@link LoadState#isCancelled},
-     * {@link LoadState#isStopped}, {@link LoadState#isForcedStop} or
-     * {@link LoadState#shouldStopLoading}.
+     * parameter's values: {@link LoadState#isAbandoned()}, {@link LoadState#isCancelled()},
+     * {@link LoadState#isStopped()}, {@link LoadState#isForcedStop()} or
+     * {@link LoadState#shouldStopLoading()}.
      *
      * @param arguments arguments, transferred through constructor
      * @param loadState current loading state
@@ -190,7 +191,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was abandoned
          * <br>
-         * Bound with {@link AsyncLoader#abandon}
+         * Bound with {@link AsyncLoader#abandon()}
          */
         public boolean isAbandoned() {
             return abandoned;
@@ -199,7 +200,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was cancelled
          * <br>
-         * Bound with {@link AsyncLoader#cancelLoad}
+         * Bound with {@link AsyncLoader#cancelLoad()}
          */
         public boolean isCancelled() {
             return cancelled;
@@ -208,7 +209,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Whether if loading was stopped
          * <br>
-         * Bound with {@link AsyncLoader#stopLoading}
+         * Bound with {@link AsyncLoader#stopLoading()}
          */
         public boolean isStopped() {
             return stopped;
@@ -216,7 +217,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
 
         /**
          * Whether if current loading process was cancelled by
-         * calling {@link AsyncLoader#forceLoad}
+         * calling {@link AsyncLoader#forceLoad()}
          */
         public boolean isForcedStop() {
             return forcedStop;
@@ -225,8 +226,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Convenience method to check if loading process should be sopped
          *
-         * @return {@code true} if one of {@link #isAbandoned}, {@link #isCancelled},
-         * {@link #isStopped} or {@link #isForcedStop} returns {@code true},
+         * @return {@code true} if one of {@link #isAbandoned()}, {@link #isCancelled()},
+         * {@link #isStopped()} or {@link #isForcedStop()} returns {@code true},
          * {@code false} otherwise.
          */
         public boolean shouldStopLoading() {
@@ -236,7 +237,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         /**
          * Tell the loader that despite abandoning, cancelling or stopping,
          * the data is loaded normally and ready to be delivered immediately
-         * on next {@link AsyncLoader#startLoading} call.
+         * on next {@link AsyncLoader#startLoading()} call.
          *
          * @param force whether to force or not, {@code false} by default
          */
