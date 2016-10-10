@@ -90,6 +90,11 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
 
     /**
      * Loaded data
+     * <br>
+     * Note that returned {@code null} doesn't guarantees that loading hasn't
+     * started or is still in progress; {@code null} can also be returned by
+     * {@link #load(Object, LoadState)} method. So, this method can't be used to
+     * check loading state, {@link LoadState} should be used for this.
      *
      * @return data, if it has already been loaded or {@code null} otherwise
      */
