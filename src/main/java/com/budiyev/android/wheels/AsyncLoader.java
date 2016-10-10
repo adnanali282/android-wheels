@@ -183,7 +183,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     /**
      * Loading state
      * <br>
-     * Represents loading state for concrete {@link AsyncLoader#load(Object, LoadState)} call
+     * Represents loading state for concrete {@link AsyncLoader#load(Object, LoadState)}
+     * method call
      */
     protected static final class LoadState {
         private volatile boolean abandoned;
