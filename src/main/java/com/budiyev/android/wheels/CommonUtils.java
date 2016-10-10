@@ -100,7 +100,7 @@ public final class CommonUtils {
      * @return Bitmap
      */
     @NonNull
-    public Bitmap drawViewOnBitmap(@NonNull View view) {
+    public static Bitmap drawViewOnBitmap(@NonNull View view) {
         SizeCompat size = getViewSize(view);
         return drawViewOnBitmap(view, size.getWidth(), size.getHeight());
     }
@@ -114,7 +114,7 @@ public final class CommonUtils {
      * @return Bitmap
      */
     @NonNull
-    public Bitmap drawViewOnBitmap(@NonNull View view, int width, int height) {
+    public static Bitmap drawViewOnBitmap(@NonNull View view, int width, int height) {
         if (view.getWidth() != width || view.getHeight() != height) {
             view.layout(0, 0, width, height);
         }
