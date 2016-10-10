@@ -89,6 +89,21 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     /**
+     * Loaded data
+     *
+     * @return data, if it has already been loaded or {@code null} otherwise
+     */
+    @Nullable
+    public D getLoadedData() {
+        LoadTask loadTask = mLoadTask;
+        if (loadTask != null && loadTask.loaded) {
+            return loadTask.data;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Load data asynchronously
      * <br>
      * Implementations should not deliver the result directly, but should return it
