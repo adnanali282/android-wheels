@@ -589,7 +589,7 @@ public class ImageLoader<T> {
     public static Bitmap loadSampledBitmapFromUri(@NonNull Context context, @NonNull Uri uri,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = null;
-        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+        if (requiredWidth < Integer.MAX_VALUE || requiredHeight < Integer.MAX_VALUE) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             try (InputStream inputStream = CommonUtils.getDataStreamFromUri(context, uri)) {
@@ -623,7 +623,7 @@ public class ImageLoader<T> {
     public static Bitmap loadSampledBitmapFromFile(@NonNull File file, int requiredWidth,
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = null;
-        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+        if (requiredWidth < Integer.MAX_VALUE || requiredHeight < Integer.MAX_VALUE) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             try (InputStream inputStream = new FileInputStream(file)) {
@@ -657,7 +657,7 @@ public class ImageLoader<T> {
     public static Bitmap loadSampledBitmapFromFileDescriptor(@NonNull FileDescriptor fileDescriptor,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = null;
-        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+        if (requiredWidth < Integer.MAX_VALUE || requiredHeight < Integer.MAX_VALUE) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             try (InputStream inputStream = new FileInputStream(fileDescriptor)) {
@@ -706,7 +706,7 @@ public class ImageLoader<T> {
             return null;
         }
         options.inJustDecodeBounds = false;
-        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+        if (requiredWidth < Integer.MAX_VALUE || requiredHeight < Integer.MAX_VALUE) {
             options.inSampleSize =
                     calculateSampleSize(options.outWidth, options.outHeight, requiredWidth,
                             requiredHeight, ignoreTotalNumberOfPixels);
@@ -732,7 +732,7 @@ public class ImageLoader<T> {
     public static Bitmap loadSampledBitmapFromByteArray(@NonNull byte[] byteArray,
             int requiredWidth, int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         BitmapFactory.Options options = null;
-        if (requiredWidth < Integer.MAX_VALUE && requiredHeight < Integer.MAX_VALUE) {
+        if (requiredWidth < Integer.MAX_VALUE || requiredHeight < Integer.MAX_VALUE) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
