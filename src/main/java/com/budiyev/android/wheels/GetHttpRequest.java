@@ -119,4 +119,42 @@ final class GetHttpRequest extends HttpRequest {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public int hashCode() {
+        int hash = mUrl.hashCode();
+        if (mHeaderParameters != null) {
+            hash ^= mHeaderParameters.hashCode();
+        }
+        if (mQueryParameters != null) {
+            hash ^= mQueryParameters.hashCode();
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof GetHttpRequest) {
+            GetHttpRequest other = (GetHttpRequest) obj;
+            return Objects.equals(mUrl, other.mUrl) &&
+                    Objects.equals(mHeaderParameters, other.mHeaderParameters) &&
+                    Objects.equals(mQueryParameters, other.mQueryParameters);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("HttpRequest GET [url: ").append(mUrl);
+        if (mHeaderParameters != null) {
+            stringBuilder.append(", header parameters: ").append(mHeaderParameters);
+        }
+        if (mQueryParameters != null) {
+            stringBuilder.append(", query parameters: ").append(mQueryParameters);
+        }
+        return stringBuilder.append(']').toString();
+    }
 }

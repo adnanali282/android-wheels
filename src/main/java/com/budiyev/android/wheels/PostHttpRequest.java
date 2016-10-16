@@ -200,4 +200,49 @@ final class PostHttpRequest extends HttpRequest {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public int hashCode() {
+        int hash = mUrl.hashCode();
+        if (mHeaderParameters != null) {
+            hash ^= mHeaderParameters.hashCode();
+        }
+        if (mQueryParameters != null) {
+            hash ^= mQueryParameters.hashCode();
+        }
+        if (mBodyParameters != null) {
+            hash ^= mBodyParameters.hashCode();
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof PostHttpRequest) {
+            PostHttpRequest other = (PostHttpRequest) obj;
+            return Objects.equals(mUrl, other.mUrl) &&
+                    Objects.equals(mHeaderParameters, other.mHeaderParameters) &&
+                    Objects.equals(mQueryParameters, other.mQueryParameters) &&
+                    Objects.equals(mBodyParameters, other.mBodyParameters);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("HttpRequest POST [url: ").append(mUrl);
+        if (mHeaderParameters != null) {
+            stringBuilder.append("; header parameters: ").append(mHeaderParameters);
+        }
+        if (mQueryParameters != null) {
+            stringBuilder.append("; query parameters: ").append(mQueryParameters);
+        }
+        if (mBodyParameters != null) {
+            stringBuilder.append("; body parameters: ").append(mBodyParameters);
+        }
+        return stringBuilder.append(']').toString();
+    }
 }
