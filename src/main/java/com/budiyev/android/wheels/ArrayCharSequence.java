@@ -33,7 +33,6 @@ import java.util.Objects;
 final class ArrayCharSequence implements CharSequence {
     private final char[] mArray;
     private final int mStart;
-    private final int mEnd;
     private final int mLength;
 
     public ArrayCharSequence(@NonNull char[] array, int start, int end) {
@@ -45,7 +44,6 @@ final class ArrayCharSequence implements CharSequence {
         }
         mArray = Objects.requireNonNull(array);
         mStart = start;
-        mEnd = end;
         mLength = end - start;
     }
 
@@ -99,7 +97,8 @@ final class ArrayCharSequence implements CharSequence {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        for (int i = mStart; i < mEnd; i++) {
+        int end = mStart + mLength;
+        for (int i = mStart; i < end; i++) {
             hashCode = 31 * hashCode + mArray[i];
         }
         return hashCode;
