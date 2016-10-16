@@ -150,10 +150,10 @@ final class GetHttpRequest extends HttpRequest {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("HttpRequest GET [url: ").append(mUrl);
         if (mHeaderParameters != null) {
-            stringBuilder.append(", header parameters: ").append(mHeaderParameters);
+            stringBuilder.append("; header parameters: ").append(mHeaderParameters);
         }
         if (mQueryParameters != null) {
-            stringBuilder.append(", query parameters: ").append(mQueryParameters);
+            stringBuilder.append("; query parameters: ").append(mQueryParameters);
         }
         return stringBuilder.append(']').toString();
     }
