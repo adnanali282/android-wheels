@@ -27,8 +27,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,10 +38,12 @@ import java.util.Objects;
  *
  * @see CsvParser#parse(InputStream, char, String)
  * @see CsvParser#parse(String, char)
+ * @see CsvParser#encode(StringTable, OutputStream, char, String)
+ * @see CsvParser#encode(StringTable, char)
  */
 public class StringRow implements Iterable<String> {
     private static final String EMPTY = "";
-    private final ArrayList<String> mCells = new ArrayList<>();
+    private final List<String> mCells = new ArrayList<>();
 
     public StringRow() {
     }
