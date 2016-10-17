@@ -24,10 +24,10 @@
 package com.budiyev.android.wheels;
 
 /**
- * Function
+ * Action
  *
- * @see IterableQuery#apply(Function)
+ * @see IterableQuery#apply(Action)
  */
-public interface Function<T> {
+public interface Action<T> {
     void apply(T value);
 }

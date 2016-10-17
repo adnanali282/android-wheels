@@ -110,16 +110,16 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     }
 
     /**
-     * Apply specified {@code function} to all elements
+     * Apply specified {@code action} to all elements
      */
     @NonNull
-    public IterableQuery<T> apply(@NonNull final Function<T> function) {
+    public IterableQuery<T> apply(@NonNull final Action<T> action) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
                 Iterable<T> list = getIterable();
                 for (T element : list) {
-                    function.apply(element);
+                    action.apply(element);
                 }
             }
         });
