@@ -143,6 +143,8 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
             startNewLoadTask();
         } else if (loadTask.loaded) {
             deliverResult(loadTask.data);
+        } else {
+            forceLoad();
         }
     }
 
@@ -291,8 +293,6 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
             loaded = !state.cancelled && !loadInterrupted || state.forceLoaded && !state.forcedStop;
             if (loaded) {
                 data = localData;
-            } else if (!state.forcedStop) {
-                mLoadTask = null;
             }
             if (loadInterrupted) {
                 return;
