@@ -358,7 +358,8 @@ public final class CollectionUtils {
      * <br>
      * Sorting algorithm is <b>unstable</b> (Heapsort)
      */
-    public static <T> void sort(@NonNull List<T> list, @NonNull Comparator<T> comparator) {
+    public static <T> void sort(@NonNull List<? extends T> list,
+            @NonNull Comparator<? super T> comparator) {
         int size = list.size();
         for (int i = size / 2 - 1; i >= 0; i--) {
             shift(list, comparator, i, size);
@@ -369,8 +370,8 @@ public final class CollectionUtils {
         }
     }
 
-    private static <T> void shift(@NonNull List<T> list, @NonNull Comparator<T> comparator, int i,
-            int j) {
+    private static <T> void shift(@NonNull List<? extends T> list,
+            @NonNull Comparator<? super T> comparator, int i, int j) {
         int max;
         int di = i * 2;
         while (di + 1 < j) {
