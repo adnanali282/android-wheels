@@ -22,5 +22,92 @@ dependencies {
 }
 ```
 
+### Examples
+* ImageLoader
+```
+/**
+ * Simple singleton {@link Uri} {@link ImageLoader} example
+ */
+public final class UriImageLoader extends ImageLoader<Uri> {
+    private UriImageLoader(@NonNull Context context) {
+        super(context);
+        setBitmapLoader(newUriBitmapLoader());
+        setMemoryImageCache(newMemoryImageCache());
+        setStorageImageCache(newStorageImageCache(context));
+    }
+
+    public void loadImage(@NonNull Uri uri, @NonNull ImageView imageView) {
+        loadImage(newImageSource(uri), imageView);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private static volatile Context sContext;
+
+    /**
+     * Initialize context for this loader
+     * <br>
+     * Use <b>application context</b> to avoid memory leaks.
+     *
+     * @param context context
+     * @see Context#getApplicationContext()
+     */
+    public static void initialize(@NonNull Context context) {
+        sContext = Objects.requireNonNull(context);
+    }
+
+    /**
+     * Obtain an instance of this loader
+     */
+    @NonNull
+    public static UriImageLoader getInstance() {
+        return InstanceHolder.INSTANCE;
+    }
+
+    private static final class InstanceHolder {
+        @SuppressLint("StaticFieldLeak")
+        public static final UriImageLoader INSTANCE = new UriImageLoader(sContext);
+    }
+}
+```
+
+* HttpRequest
+```
+InputStream dataStream =
+        HttpRequest.newGetRequest("http://www.google.ru/").execute().getDataStream();
+
+String dataStringUtf16 = HttpRequest.newGetRequest("http://www.google.ru/").execute()
+        .getDataString("UTF-16");
+
+String dataStringDefault = // UTF-8
+        HttpRequest.newGetRequest("http://www.google.ru/").execute().getDataString();
+```
+
+* AsyncLoader
+```
+/**
+ * Simple URL picture loader
+ */
+public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
+    public static final String EXTRA_PICTURE_URL = "extra_picture_url";
+
+    public PictureLoader(@NonNull Context context, @Nullable Bundle arguments) {
+        super(context, arguments);
+    }
+
+    @Nullable
+    @Override
+    protected Bitmap load(@Nullable Bundle arguments, @NonNull LoadState loadState) {
+        if (arguments == null || !arguments.containsKey(EXTRA_PICTURE_URL)) {
+            return null;
+        }
+        Bitmap bitmap = ImageLoader.loadSampledBitmapFromUri(getContext(),
+                Uri.parse(arguments.getString(EXTRA_PICTURE_URL)), Integer.MAX_VALUE,
+                Integer.MAX_VALUE, true);
+        loadState.setForceLoaded(true);
+        return bitmap;
+    }
+}
+```
+
 [![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)]
 (https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
