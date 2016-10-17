@@ -24,7 +24,7 @@
 package com.budiyev.android.wheels;
 
 /**
- * This interface will be removed soon, use {@link Action} instead
+ * This interface will be removed in next version, use {@link Action} instead
  *
  * @see Action
  * @deprecated
