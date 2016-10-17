@@ -34,8 +34,10 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -106,13 +108,17 @@ public final class HttpRequestResult {
 
     private final Lock mDataLock = new ReentrantLock();
     private volatile String mDataString;
-    private volatile int mDataType = NONE;
     private InputStream mDataStream;
     private Map<String, List<String>> mHeaderFields;
     private Exception mException;
     private HttpURLConnection mConnection;
-    private int mResultType = NONE;
     private int mHttpCode = NONE;
+
+    @DataType
+    private volatile int mDataType = NONE;
+
+    @ResultType
+    private int mResultType = NONE;
 
     HttpRequestResult() {
     }
@@ -126,6 +132,42 @@ public final class HttpRequestResult {
     }
 
     /**
+     * {@link String} representation of {@link #getResultType()}
+     */
+    @NonNull
+    public String getResultTypeString() {
+        switch (getResultType()) {
+            case ERROR_HTTP: {
+                return "ERROR_HTTP";
+            }
+            case ERROR_IO: {
+                return "ERROR_IO";
+            }
+            case ERROR_MALFORMED_URL: {
+                return "ERROR_MALFORMED_URL";
+            }
+            case ERROR_PROTOCOL: {
+                return "ERROR_PROTOCOL";
+            }
+            case ERROR_UNEXPECTED: {
+                return "ERROR_UNEXPECTED";
+            }
+            case ERROR_UNSUPPORTED_ENCODING: {
+                return "ERROR_UNSUPPORTED_ENCODING";
+            }
+            case NONE: {
+                return "NONE";
+            }
+            case SUCCESS: {
+                return "SUCCESS";
+            }
+            default: {
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
+    /**
      * Result data type
      */
     @DataType
@@ -135,6 +177,27 @@ public final class HttpRequestResult {
             return mDataType;
         } finally {
             mDataLock.unlock();
+        }
+    }
+
+    /**
+     * {@link String} representation of {@link #getDataType()}
+     */
+    @NonNull
+    public String getDataTypeString() {
+        switch (getDataType()) {
+            case NONE: {
+                return "NONE";
+            }
+            case STREAM: {
+                return "STREAM";
+            }
+            case STRING: {
+                return "STRING";
+            }
+            default: {
+                throw new IllegalArgumentException();
+            }
         }
     }
 
@@ -294,5 +357,35 @@ public final class HttpRequestResult {
 
     void setConnection(@Nullable HttpURLConnection connection) {
         mConnection = connection;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(
+                new Object[]{mDataString, mDataType, mDataStream, mHeaderFields, mResultType,
+                        mHttpCode});
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof HttpRequestResult) {
+            HttpRequestResult other = (HttpRequestResult) obj;
+            return mDataType == other.mDataType && mResultType == other.mResultType &&
+                    mHttpCode == other.mHttpCode &&
+                    Objects.equals(mDataString, other.mDataString) &&
+                    Objects.equals(mDataStream, other.mDataStream) &&
+                    Objects.equals(mHeaderFields, other.mHeaderFields);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestResult [result type: " + getResultTypeString() + "; data type: " +
+                getDataTypeString() + "; response code : " +
+                (mHttpCode == -1 ? "NONE" : mHttpCode) + "]";
     }
 }
