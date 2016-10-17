@@ -108,17 +108,17 @@ public final class HttpRequestResult {
 
     private final Lock mDataLock = new ReentrantLock();
     private volatile String mDataString;
-    private InputStream mDataStream;
-    private Map<String, List<String>> mHeaderFields;
-    private Exception mException;
-    private HttpURLConnection mConnection;
-    private int mHttpCode = NONE;
+    private volatile InputStream mDataStream;
+    private volatile Map<String, List<String>> mHeaderFields;
+    private volatile Exception mException;
+    private volatile HttpURLConnection mConnection;
+    private volatile int mHttpCode = NONE;
 
     @DataType
     private volatile int mDataType = NONE;
 
     @ResultType
-    private int mResultType = NONE;
+    private volatile int mResultType = NONE;
 
     HttpRequestResult() {
     }
