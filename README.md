@@ -103,6 +103,8 @@ public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
         Bitmap bitmap = ImageLoader.loadSampledBitmapFromUri(getContext(),
                 Uri.parse(arguments.getString(EXTRA_PICTURE_URL)), Integer.MAX_VALUE,
                 Integer.MAX_VALUE, true);
+        // To avoid reloading, if activity was stopped or smth;
+        // Read documentation for details
         loadState.setForceLoaded(true);
         return bitmap;
     }
