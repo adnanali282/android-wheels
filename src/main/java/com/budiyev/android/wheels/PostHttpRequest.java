@@ -203,7 +203,7 @@ final class PostHttpRequest extends HttpRequest {
 
     @Override
     public int hashCode() {
-        int hash = mUrl.hashCode();
+        int hash = 31 + mUrl.hashCode();
         if (mHeaderParameters != null) {
             hash = 31 * hash + mHeaderParameters.hashCode();
         }
