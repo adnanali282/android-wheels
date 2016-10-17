@@ -29,5 +29,8 @@ package com.budiyev.android.wheels;
  * @see IterableQuery#apply(Action)
  */
 public interface Action<T> {
+    /**
+     * General contract of this method is that it should do something related to the {@code value}
+     */
     void apply(T value);
 }
