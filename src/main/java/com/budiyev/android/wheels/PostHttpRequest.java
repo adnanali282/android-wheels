@@ -205,13 +205,13 @@ final class PostHttpRequest extends HttpRequest {
     public int hashCode() {
         int hash = mUrl.hashCode();
         if (mHeaderParameters != null) {
-            hash ^= mHeaderParameters.hashCode();
+            hash = 31 * hash + mHeaderParameters.hashCode();
         }
         if (mQueryParameters != null) {
-            hash ^= mQueryParameters.hashCode();
+            hash = 31 * hash + mQueryParameters.hashCode();
         }
         if (mBodyParameters != null) {
-            hash ^= mBodyParameters.hashCode();
+            hash = 31 * hash + mBodyParameters.hashCode();
         }
         return hash;
     }

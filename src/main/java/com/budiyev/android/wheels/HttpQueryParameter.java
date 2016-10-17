@@ -39,4 +39,26 @@ public final class HttpQueryParameter {
         this.key = Objects.requireNonNull(key);
         this.value = value;
     }
+
+    @Override
+    public int hashCode() {
+        return 31 * key.hashCode() + value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof HttpQueryParameter) {
+            HttpQueryParameter other = (HttpQueryParameter) obj;
+            return Objects.equals(key, other.key) && Objects.equals(value, other.value);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "HttpQueryParameter [key: " + key + "; value: " + value + "]";
+    }
 }

@@ -27,6 +27,7 @@ import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -66,5 +67,46 @@ public final class HttpBodyParameter {
         this.stream = Objects.requireNonNull(stream);
         this.fileName = Objects.requireNonNull(fileName);
         this.contentType = Objects.requireNonNull(contentType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[]{key, value, file, stream, fileName, contentType});
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof HttpBodyParameter) {
+            HttpBodyParameter other = (HttpBodyParameter) obj;
+            return Objects.equals(key, other.key) && Objects.equals(value, other.value) &&
+                    Objects.equals(file, other.file) && Objects.equals(stream, other.stream) &&
+                    Objects.equals(fileName, other.fileName) &&
+                    Objects.equals(contentType, other.contentType);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("HttpBodyParameter [key: ").append(key);
+        if (value != null) {
+            stringBuilder.append("; value: ").append(value);
+        }
+        if (file != null) {
+            stringBuilder.append("; file: ").append(file);
+        }
+        if (stream != null) {
+            stringBuilder.append("; stream: ").append(stream);
+        }
+        if (fileName != null) {
+            stringBuilder.append("; file name: ").append(fileName);
+        }
+        if (contentType != null) {
+            stringBuilder.append("; content type: ").append(contentType);
+        }
+        return stringBuilder.append(']').toString();
     }
 }

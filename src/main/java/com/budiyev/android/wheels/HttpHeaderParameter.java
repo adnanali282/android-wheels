@@ -38,4 +38,26 @@ public final class HttpHeaderParameter {
         this.key = Objects.requireNonNull(key);
         this.value = Objects.requireNonNull(value);
     }
+
+    @Override
+    public int hashCode() {
+        return 31 * key.hashCode() + value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof HttpHeaderParameter) {
+            HttpHeaderParameter other = (HttpHeaderParameter) obj;
+            return Objects.equals(key, other.key) && Objects.equals(value, other.value);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "HttpHeaderParameter [key: " + key + "; value: " + value + "]";
+    }
 }
