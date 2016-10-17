@@ -109,5 +109,6 @@ public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
 }
 ```
 
+### Download
 [![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)]
 (https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
