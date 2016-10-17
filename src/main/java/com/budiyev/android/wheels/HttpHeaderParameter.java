@@ -41,7 +41,7 @@ public final class HttpHeaderParameter {
 
     @Override
     public int hashCode() {
-        return 31 * key.hashCode() + value.hashCode();
+        return 31 * (31 * key.hashCode() + 1) + value.hashCode();
     }
 
     @Override
