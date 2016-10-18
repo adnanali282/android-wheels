@@ -112,6 +112,14 @@ public final class CollectionUtils {
     }
 
     /**
+     * Wrap specified {@link CharSequence} into immutable {@link Iterable}
+     */
+    @NonNull
+    public static Iterable<Character> asIterable(@NonNull CharSequence charSequence) {
+        return new CharSequenceIterable(charSequence);
+    }
+
+    /**
      * Wrap specified {@code array} into {@link CharSequence}
      */
     @NonNull

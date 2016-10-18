@@ -678,4 +678,14 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
         query.setImmutableIterable(CollectionUtils.asIterable(array));
         return query;
     }
+
+    /**
+     * Query from specified {@link CharSequence}
+     */
+    @NonNull
+    public static IterableQuery<Character> from(@NonNull CharSequence charSequence) {
+        IterableQuery<Character> query = new IterableQuery<>();
+        query.setImmutableIterable(CollectionUtils.asIterable(charSequence));
+        return query;
+    }
 }
