@@ -82,6 +82,46 @@ String dataStringUtf16 = HttpRequest.newGetRequest("http://www.google.ru/").exec
 
 String dataStringDefault = // UTF-8
         HttpRequest.newGetRequest("http://www.google.ru/").execute().getDataString();
+
+HttpRequestResult requestResult =
+        HttpRequest.newGetRequest("http://www.google.ru/").execute();
+
+Future<HttpRequestResult> submit =
+        HttpRequest.newGetRequest("http://www.google.ru/").submit();
+
+// More complex case
+
+HttpRequest.newGetBuilder("http://www.google.ru/").addCallback(new HttpRequestCallback() {
+    @Override
+    public void onResult(@NonNull HttpRequestResult requestResult) {
+    switch (requestResult.getResultType()) {
+        case HttpRequestResult.ERROR_HTTP:
+            // Do something
+            break;
+        case HttpRequestResult.ERROR_IO:
+            // Do something
+            break;
+        case HttpRequestResult.ERROR_MALFORMED_URL:
+            // Do something
+            break;
+        case HttpRequestResult.ERROR_PROTOCOL:
+            // Do something
+            break;
+        case HttpRequestResult.ERROR_UNEXPECTED:
+            // Do something
+            break;
+        case HttpRequestResult.ERROR_UNSUPPORTED_ENCODING:
+            // Do something
+            break;
+        case HttpRequestResult.NONE:
+            // Do something
+            break;
+        case HttpRequestResult.SUCCESS:
+             // Do something
+             break;
+        }
+    }
+}).submit();
 ```
 
 * AsyncLoader
