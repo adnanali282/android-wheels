@@ -153,6 +153,20 @@ public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
 }
 ```
 
+* IterableQuery
+```
+// Reverse string
+String reversed =
+        IterableQuery.from("The quick brown fox jumps over the lazy dog".split(" "))
+                .aggregate(new Aggregator<String, String>() {
+                    @Override
+                        public String apply(String accumulator, String value) {
+                            return value + " " + accumulator;
+                        }
+                });
+// reversed = "dog lazy the over jumps fox brown quick The"
+```
+
 ### Download
 [![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)]
 (https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
