@@ -86,7 +86,7 @@ String dataStringDefault = // UTF-8
 HttpRequestResult requestResult =
         HttpRequest.newGetRequest("http://www.google.ru/").execute();
 
-Future<HttpRequestResult> submit =
+Future<HttpRequestResult> futureResult =
         HttpRequest.newGetRequest("http://www.google.ru/").submit();
 
 // More complex case
