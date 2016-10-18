@@ -35,6 +35,7 @@ import java.util.Objects;
 /**
  * Tools for collections
  */
+//TODO: Fix all Iterable's (hasNext shouldn't cause iteration)
 public final class CollectionUtils {
     private CollectionUtils() {
     }
