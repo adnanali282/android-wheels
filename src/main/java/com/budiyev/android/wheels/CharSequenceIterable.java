@@ -66,12 +66,12 @@ final class CharSequenceIterable implements Iterable<Character> {
 
         @Override
         public boolean hasNext() {
-            return ++mPosition < mCharSequence.length();
+            return mPosition + 1 < mCharSequence.length();
         }
 
         @Override
         public Character next() {
-            return mCharSequence.charAt(mPosition);
+            return mCharSequence.charAt(++mPosition);
         }
 
         @Override
