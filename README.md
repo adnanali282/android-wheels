@@ -156,6 +156,7 @@ public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
 * IterableQuery
 ```
 // Reverse string
+
 String reversed =
         IterableQuery.from("The quick brown fox jumps over the lazy dog".split(" "))
                 .aggregate(new Aggregator<String, String>() {
@@ -164,7 +165,60 @@ String reversed =
                             return value + " " + accumulator;
                         }
                 });
+
 // reversed = "dog lazy the over jumps fox brown quick The"
+
+//Get sum of 10 maximum salaries of employees
+
+public double getTopTenSalary() {
+    // Fill test data
+    int personCount = 1000;
+    Random random = new Random();
+    List<Employee> employees = new ArrayList<>(personCount);
+    for (int i = 0; i < personCount; i++) {
+        employees.add(new Employee("Person " + (i + 1), random.nextDouble() * 10000));
+    }
+    // Get salary
+    return IterableQuery.from(employees).sort(new Comparator<Employee>() {
+        @Override
+        public int compare(Employee o1, Employee o2) {
+            double salary1 = o1.getSalary();
+            double salary2 = o2.getSalary();
+            return salary1 > salary2 ? -1 : salary1 == salary2 ? 0 : 1;
+        }
+    }).take(10).aggregate(0D, new Aggregator<Double, Employee>() {
+        @Override
+        public Double apply(Double accumulator, Employee value) {
+            return accumulator + value.getSalary();
+        }
+    });
+}
+
+public class Employee {
+    private String mName;
+    private double mSalary;
+
+    public Employee(String name, double salary) {
+        mName = name;
+        mSalary = salary;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public double getSalary() {
+        return mSalary;
+    }
+
+    public void setSalary(double salary) {
+        mSalary = salary;
+    }
+}
 ```
 
 ### Download
