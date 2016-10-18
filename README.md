@@ -72,6 +72,8 @@ public final class UriImageLoader extends ImageLoader<Uri> {
 
 * HttpRequest
 ```
+// Common simple cases
+
 InputStream dataStream =
         HttpRequest.newGetRequest("http://www.google.ru/").execute().getDataStream();
 
