@@ -33,9 +33,23 @@ import java.util.Objects;
  */
 final class CharSequenceIterable implements Iterable<Character> {
     private final CharSequence mCharSequence;
+    private final int mStart;
+    private final int mEnd;
 
     public CharSequenceIterable(@NonNull CharSequence charSequence) {
         mCharSequence = Objects.requireNonNull(charSequence);
+        mStart = 0;
+        mEnd = charSequence.length();
+    }
+
+    public CharSequenceIterable(@NonNull CharSequence charSequence, int start, int length) {
+        mCharSequence = Objects.requireNonNull(charSequence);
+        int end = start + length;
+        if (start < 0 || length < 0 || end > charSequence.length()) {
+            throw new IllegalArgumentException();
+        }
+        mStart = start;
+        mEnd = end;
     }
 
     @NonNull
@@ -62,11 +76,11 @@ final class CharSequenceIterable implements Iterable<Character> {
     }
 
     private class CharSequenceIterator implements Iterator<Character> {
-        private int mPosition = -1;
+        private int mPosition = mStart - 1;
 
         @Override
         public boolean hasNext() {
-            return mPosition + 1 < mCharSequence.length();
+            return mPosition + 1 < mEnd;
         }
 
         @Override
