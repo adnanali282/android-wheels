@@ -30,5 +30,11 @@ package com.budiyev.android.wheels;
  * @see IterableQuery#aggregate(Object, Aggregator, Converter)
  */
 public interface Converter<T, H> {
+    /**
+     * Convert {@code value}
+     *
+     * @param value source value
+     * @return result of conversion
+     */
     H apply(T value);
 }

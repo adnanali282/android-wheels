@@ -33,7 +33,7 @@ public interface ConverterToMany<T, H> {
      * Convert {@value} to none, one or many elements.
      *
      * @param value source value
-     * @return result of conversion or {@code null}
+     * @return result of conversion or {@code null} if you want ignore this {@code value}
      */
     Iterable<H> apply(T value);
 }

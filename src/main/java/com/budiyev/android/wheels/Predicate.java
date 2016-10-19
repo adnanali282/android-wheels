@@ -35,5 +35,11 @@ package com.budiyev.android.wheels;
  * @see IterableQuery#has(Predicate)
  */
 public interface Predicate<T> {
+    /**
+     * Predicate
+     *
+     * @param value source value
+     * @return {@code true} if {@code value} satisfies some condition, {@code false} otherwise
+     */
     boolean apply(T value);
 }
