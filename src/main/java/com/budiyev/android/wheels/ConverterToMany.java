@@ -29,5 +29,11 @@ package com.budiyev.android.wheels;
  * @see IterableQuery#convertToMany(ConverterToMany)
  */
 public interface ConverterToMany<T, H> {
+    /**
+     * Convert {@value} to none, one or many elements.
+     *
+     * @param value source value
+     * @return result of conversion or {@code null}
+     */
     Iterable<H> apply(T value);
 }
