@@ -42,10 +42,9 @@ final class CharSequenceIterable implements Iterable<Character> {
         mEnd = charSequence.length();
     }
 
-    public CharSequenceIterable(@NonNull CharSequence charSequence, int start, int length) {
+    public CharSequenceIterable(@NonNull CharSequence charSequence, int start, int end) {
         mCharSequence = Objects.requireNonNull(charSequence);
-        int end = start + length;
-        if (start < 0 || length < 0 || end > charSequence.length()) {
+        if (start < 0 || end < start || end > charSequence.length()) {
             throw new IllegalArgumentException();
         }
         mStart = start;
