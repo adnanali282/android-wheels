@@ -120,6 +120,20 @@ public final class CollectionUtils {
     }
 
     /**
+     * Wrap specified {@link CharSequence} into immutable {@link Iterable}
+     *
+     * @param charSequence source char sequence
+     * @param start        start position
+     * @param length       count of characters, starting from {@code start}
+     * @return immutable {@link Iterable}
+     */
+    @NonNull
+    public static Iterable<Character> asIterable(@NonNull CharSequence charSequence, int start,
+            int length) {
+        return new CharSequenceIterable(charSequence, start, length);
+    }
+
+    /**
      * Wrap specified {@code array} into {@link CharSequence}
      */
     @NonNull
