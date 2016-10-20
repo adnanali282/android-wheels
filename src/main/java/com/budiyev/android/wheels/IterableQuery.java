@@ -458,7 +458,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     }
 
     /**
-     * First element, or {@code null} if there are no elements
+     * First element, or {@code null} if there are no elements or if first element is {@code null}
      */
     @Nullable
     public T first() {
@@ -472,7 +472,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
 
     /**
      * First element that matches specified {@code predicate}, or {@code null} if
-     * there are no matching elements
+     * there are no matching elements or if matched element is {@code null}
      */
     @Nullable
     public T first(@NonNull Predicate<? super T> predicate) {
@@ -486,7 +486,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
 
     /**
      * Minimum element according to specified {@code comparator}, or {@code null}
-     * if there are no elements
+     * if there are no elements or minimal element is {@code null}
      */
     @Nullable
     public T min(@NonNull Comparator<? super T> comparator) {
@@ -507,7 +507,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
 
     /**
      * Maximum element according to specified {@code comparator}, or {@code null}
-     * if there are no elements
+     * if there are no elements or maximal element is {@code null}
      */
     @Nullable
     public T max(@NonNull Comparator<? super T> comparator) {
