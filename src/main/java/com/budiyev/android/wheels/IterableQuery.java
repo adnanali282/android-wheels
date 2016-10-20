@@ -47,6 +47,7 @@ import java.util.List;
  * @see #from(float[])
  * @see #from(double[])
  * @see #from(char[])
+ * @see #from(CharSequence)
  */
 public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     private IterableQuery() {
