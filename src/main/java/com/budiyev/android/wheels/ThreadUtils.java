@@ -25,6 +25,7 @@ package com.budiyev.android.wheels;
 
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.annotation.AnyThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -55,6 +56,7 @@ public final class ThreadUtils {
      * @return Thread name prefix
      */
     @NonNull
+    @AnyThread
     public static String getBackgroundThreadNamePrefix() {
         return AsyncThreadFactory.getThreadNamePrefix();
     }
@@ -77,6 +79,7 @@ public final class ThreadUtils {
      *
      * @param prefix Thread name prefix
      */
+    @AnyThread
     public static void setBackgroundThreadNamePrefix(@NonNull String prefix) {
         AsyncThreadFactory.setThreadNamePrefix(prefix);
     }
@@ -92,6 +95,7 @@ public final class ThreadUtils {
      * <li>{@link HttpRequest}</li>
      * </ul>
      */
+    @AnyThread
     public static boolean isThrowExecutionExceptions() {
         return sThrowExecutionExceptions;
     }
@@ -107,6 +111,7 @@ public final class ThreadUtils {
      * <li>{@link HttpRequest}</li>
      * </ul>
      */
+    @AnyThread
     public static void setThrowExecutionExceptions(boolean throwExecutionExceptions) {
         sThrowExecutionExceptions = throwExecutionExceptions;
     }
@@ -118,6 +123,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static Future<?> runAsync(@NonNull Runnable task) {
         return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
@@ -129,6 +135,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
         return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
@@ -141,6 +148,7 @@ public final class ThreadUtils {
      * @return Task
      */
     @NonNull
+    @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
@@ -154,6 +162,7 @@ public final class ThreadUtils {
      * @param task  Task
      * @param delay Delay
      */
+    @AnyThread
     public static void runAsync(@NonNull final Runnable task, long delay) {
         InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
@@ -169,6 +178,7 @@ public final class ThreadUtils {
      * @param task  Task
      * @param delay Delay
      */
+    @AnyThread
     public static void runAsync(@NonNull final Callable<?> task, long delay) {
         InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
@@ -187,6 +197,7 @@ public final class ThreadUtils {
      * @return Task
      */
     @NonNull
+    @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
@@ -202,6 +213,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static Future<?> runOnMainThread(@NonNull Runnable task) {
         return InternalExecutors.getMainThreadExecutor().submit(task);
     }
@@ -213,6 +225,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task) {
         return InternalExecutors.getMainThreadExecutor().submit(task);
     }
@@ -225,6 +238,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static Future<?> runOnMainThread(@NonNull Runnable task, long delay) {
         return InternalExecutors.getMainThreadExecutor().submit(task, delay);
     }
@@ -237,6 +251,7 @@ public final class ThreadUtils {
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
+    @AnyThread
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
         return InternalExecutors.getMainThreadExecutor().submit(task, delay);
     }
@@ -247,6 +262,7 @@ public final class ThreadUtils {
      *
      * @param message Message
      */
+    @AnyThread
     public static void requireMainThread(@Nullable String message) {
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new NotMainThreadException(message);
@@ -256,6 +272,7 @@ public final class ThreadUtils {
     /**
      * Throws {@link NotMainThreadException} if current thread is not the main (UI) thread
      */
+    @AnyThread
     public static void requireMainThread() {
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new NotMainThreadException();
