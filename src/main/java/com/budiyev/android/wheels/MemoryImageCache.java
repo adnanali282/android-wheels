@@ -45,10 +45,11 @@ public interface MemoryImageCache {
     void put(@NonNull String key, @NonNull BitmapDrawable value);
 
     /**
-     * Get {@link BitmapDrawable} for the specified key
+     * Get {@link BitmapDrawable} for the specified {@code key}
      *
-     * @param key Key
-     * @return Image drawable or null, id there are no entry for the specified key
+     * @param key Unique key
+     * @return Image {@link BitmapDrawable} or {@code null}, if there are no entry
+     * for the specified {@code key}
      */
     @Nullable
     BitmapDrawable get(@NonNull String key);

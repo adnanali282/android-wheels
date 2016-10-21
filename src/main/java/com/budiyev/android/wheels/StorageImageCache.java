@@ -49,10 +49,11 @@ public interface StorageImageCache {
     void put(@NonNull String key, @NonNull Bitmap value);
 
     /**
-     * Get {@link Bitmap} for the specified key
+     * Get {@link Bitmap} for the specified {@code key}
      *
      * @param key Unique key
-     * @return Image bitmap or null, id there are no entry for the specified key
+     * @return Image {@link Bitmap} or {@code null}, if there are no entry
+     * for the specified {@code key}
      */
     @Nullable
     Bitmap get(@NonNull String key);
