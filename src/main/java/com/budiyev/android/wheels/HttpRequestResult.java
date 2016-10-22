@@ -295,7 +295,7 @@ public final class HttpRequestResult {
     /**
      * Unmodifiable map of response header fields and values
      * <br>
-     * Available if {@link #getResultType()} is {@link #SUCCESS} of {@link #ERROR_HTTP}
+     * Available if {@link #getResultType()} is {@link #SUCCESS} or {@link #ERROR_HTTP}
      */
     @Nullable
     public Map<String, List<String>> getHeaderFields() {
