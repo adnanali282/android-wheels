@@ -26,7 +26,6 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,13 +52,13 @@ public final class CsvParser {
      * @param table        Table
      * @param outputStream Stream to save result
      * @param separator    Column separator
-     * @param encoding     Text encoding
+     * @param charset      Charset name
      * @return true if success, false otherwise
      */
     public static boolean encode(@NonNull StringTable table, @NonNull OutputStream outputStream,
-            char separator, @NonNull String encoding) {
+            char separator, @NonNull String charset) {
         try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, encoding))) {
+                new OutputStreamWriter(outputStream, charset))) {
             for (StringRow row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
@@ -108,14 +107,13 @@ public final class CsvParser {
      *
      * @param inputStream Source data stream
      * @param separator   Column separator
-     * @param encoding    Text encoding
+     * @param charset     Charset name
      * @return Table
      */
     @Nullable
     public static StringTable parse(@NonNull InputStream inputStream, char separator,
-            @NonNull String encoding) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, encoding))) {
+            @NonNull String charset) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
             StringTable table = new StringTable();
             StringBuilder row = new StringBuilder();
             boolean inQuotes = false;

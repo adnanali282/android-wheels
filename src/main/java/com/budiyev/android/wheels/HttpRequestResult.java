@@ -27,7 +27,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -246,12 +245,11 @@ public final class HttpRequestResult {
                 if (stream == null) {
                     return null;
                 }
-                try (BufferedReader bufferedReader = new BufferedReader(
-                        new InputStreamReader(stream, charset))) {
+                try (InputStreamReader streamReader = new InputStreamReader(stream, charset)) {
                     StringBuilder responseBuilder = new StringBuilder();
                     char[] buffer = new char[BUFFER_SIZE];
                     for (int read; ; ) {
-                        read = bufferedReader.read(buffer);
+                        read = streamReader.read(buffer);
                         if (read > -1) {
                             responseBuilder.append(buffer, 0, read);
                         } else {
