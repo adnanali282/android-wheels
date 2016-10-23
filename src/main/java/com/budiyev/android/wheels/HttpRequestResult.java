@@ -250,7 +250,7 @@ public final class HttpRequestResult {
                     char[] buffer = new char[BUFFER_SIZE];
                     for (int read; ; ) {
                         read = streamReader.read(buffer);
-                        if (read > -1) {
+                        if (read != -1) {
                             responseBuilder.append(buffer, 0, read);
                         } else {
                             break;
