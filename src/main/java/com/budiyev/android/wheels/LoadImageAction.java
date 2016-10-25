@@ -28,6 +28,7 @@ import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
@@ -59,7 +60,69 @@ final class LoadImageAction<T> {
         mImageLoadCallback = imageLoadCallback;
     }
 
-    public void loadImage() {
+    @AnyThread
+    public boolean execute() {
+        if (!isCancelled() && !isFinished() && mSubmitted.compareAndSet(false, true)) {
+            mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
+                @Override
+                public void run() {
+                    loadImage();
+                    mFinished.set(true);
+                    mSubmitted.set(false);
+                }
+            }));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @NonNull
+    public ImageSource<T> getImageSource() {
+        return mImageSource;
+    }
+
+    @Nullable
+    @MainThread
+    public ImageView getAttachedImageView() {
+        ImageView imageView = mImageViewReference.get();
+        LoadImageAction<?> loadImageAction = ImageLoader.getLoadImageAction(imageView);
+        if (this == loadImageAction) {
+            return imageView;
+        }
+        return null;
+    }
+
+    public void cancel() {
+        mCancelled.set(true);
+        Future<?> future = mFuture.get();
+        if (future != null) {
+            future.cancel(false);
+        }
+    }
+
+    public boolean reset() {
+        if (isFinished() || isCancelled()) {
+            mFuture.set(null);
+            mFinished.set(false);
+            mCancelled.set(false);
+            mSubmitted.set(false);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isFinished() {
+        return mFinished.get();
+    }
+
+    public boolean isCancelled() {
+        return mCancelled.get();
+    }
+
+    @WorkerThread
+    private void loadImage() {
         synchronized (mPauseWorkLock) {
             while (mImageLoader.isPauseWork() && !mImageLoader.isExitTasksEarly() &&
                     !isCancelled()) {
@@ -142,65 +205,5 @@ final class LoadImageAction<T> {
                 }
             });
         }
-    }
-
-    @NonNull
-    public ImageSource<T> getImageSource() {
-        return mImageSource;
-    }
-
-    @Nullable
-    @MainThread
-    public ImageView getAttachedImageView() {
-        ImageView imageView = mImageViewReference.get();
-        LoadImageAction<?> loadImageAction = ImageLoader.getLoadImageAction(imageView);
-        if (this == loadImageAction) {
-            return imageView;
-        }
-        return null;
-    }
-
-    public boolean execute() {
-        if (!isCancelled() && !isFinished() && mSubmitted.compareAndSet(false, true)) {
-            mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    loadImage();
-                    mFinished.set(true);
-                    mSubmitted.set(false);
-                }
-            }));
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void cancel() {
-        mCancelled.set(true);
-        Future<?> future = mFuture.get();
-        if (future != null) {
-            future.cancel(false);
-        }
-    }
-
-    public boolean reset() {
-        if (isFinished() || isCancelled()) {
-            mFuture.set(null);
-            mFinished.set(false);
-            mCancelled.set(false);
-            mSubmitted.set(false);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isFinished() {
-        return mFinished.get();
-    }
-
-    public boolean isCancelled() {
-        return mCancelled.get();
     }
 }
