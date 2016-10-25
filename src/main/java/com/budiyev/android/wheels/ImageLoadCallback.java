@@ -60,7 +60,7 @@ public interface ImageLoadCallback<T> {
      * Called when {@link BitmapLoader} was unable to load {@link Bitmap}
      *
      * @param data      Source data
-     * @param exception Exception that was thrown by
+     * @param exception Exception that has been thrown by
      *                  {@link BitmapLoader#load(Context, Object)} method
      */
     @MainThread
