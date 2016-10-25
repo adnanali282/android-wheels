@@ -83,7 +83,17 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     /**
-     * Set {@code arguments} that will be transferred to the {@link #load(Object, LoadState)} method
+     * Get {@code arguments}, that will be transferred to the
+     * {@link #load(Object, LoadState)} method
+     */
+    @Nullable
+    public A getArguments() {
+        return mArguments;
+    }
+
+    /**
+     * Set {@code arguments} that will be transferred to the
+     * {@link #load(Object, LoadState)} method
      */
     public void setArguments(@Nullable A arguments) {
         mArguments = arguments;
@@ -95,6 +105,14 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      */
     public void setForceReload(boolean forceReload) {
         mForceReload = forceReload;
+    }
+
+    /**
+     * Check whether to force data reload on each {@link #startLoading()} call,
+     * {@code false} by default
+     */
+    public boolean isForceReload() {
+        return mForceReload;
     }
 
     /**
