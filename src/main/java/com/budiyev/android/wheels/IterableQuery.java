@@ -113,7 +113,7 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
      * Make intersection of this {@link IterableQuery} and specified {@link Iterable}
      */
     @NonNull
-    public IterableQuery<T> intersect(@NonNull final Iterable<T> iterable) {
+    public IterableQuery<T> intersection(@NonNull final Iterable<T> iterable) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
