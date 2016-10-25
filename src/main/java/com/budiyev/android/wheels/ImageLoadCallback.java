@@ -39,22 +39,25 @@ public interface ImageLoadCallback<T> {
      * Called when image is loaded and ready to be displayed
      *
      * @param data             Source data
-     * @param image            Image
-     * @param fromMemoryCache  Image loaded from memory cache
-     * @param fromStorageCache Image loaded from storage cache
+     * @param image            Image, loaded from {@code data}
+     * @param fromMemoryCache  Whether if image is loaded from memory cache
+     * @param fromStorageCache Whether if image is loaded from storage cache
      */
     @MainThread
-    void onImageLoaded(@NonNull T data, @NonNull Bitmap image, boolean fromMemoryCache,
+    void onLoaded(@NonNull T data, @NonNull Bitmap image, boolean fromMemoryCache,
             boolean fromStorageCache);
 
     /**
      * Called when image displayed; if fade effect is enabled, this method will be called
      * when fade will done
      *
-     * @param imageView Image view
+     * @param data      Source data
+     * @param image     Loaded image
+     * @param imageView {@link ImageView}, on which {@code image} loaded form {@code data}
+     *                  is displayed
      */
     @MainThread
-    void onImageDisplayed(@NonNull ImageView imageView);
+    void onDisplayed(@NonNull T data, @NonNull Bitmap image, @NonNull ImageView imageView);
 
     /**
      * Called when {@link BitmapLoader} was unable to load {@link Bitmap}

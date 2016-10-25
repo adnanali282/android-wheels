@@ -23,9 +23,11 @@
  */
 package com.budiyev.android.wheels;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -33,15 +35,15 @@ import android.widget.ImageView;
 /**
  * Set image action for {@link ImageLoader}
  */
-final class SetImageAction implements Runnable {
+final class SetImageAction<T> implements Runnable {
     private final BitmapDrawable mBitmapDrawable;
-    private final ImageLoader<?> mImageLoader;
-    private final LoadImageAction<?> mLoadImageAction;
-    private final ImageLoadCallback mImageLoadCallback;
+    private final ImageLoader<T> mImageLoader;
+    private final LoadImageAction<T> mLoadImageAction;
+    private final ImageLoadCallback<T> mImageLoadCallback;
 
     public SetImageAction(@Nullable BitmapDrawable bitmapDrawable,
-            @NonNull ImageLoader<?> imageLoader, @Nullable ImageLoadCallback imageLoadCallback,
-            @NonNull LoadImageAction<?> loadImageAction) {
+            @NonNull ImageLoader<T> imageLoader, @Nullable ImageLoadCallback<T> imageLoadCallback,
+            @NonNull LoadImageAction<T> loadImageAction) {
         mBitmapDrawable = bitmapDrawable;
         mImageLoader = imageLoader;
         mImageLoadCallback = imageLoadCallback;
@@ -52,7 +54,9 @@ final class SetImageAction implements Runnable {
     public void run() {
         if (!mLoadImageAction.isCancelled() && !mImageLoader.isExitTasksEarly()) {
             final ImageView imageView = mLoadImageAction.getAttachedImageView();
-            if (mBitmapDrawable == null || imageView == null) {
+            final Bitmap image;
+            if (mBitmapDrawable == null || imageView == null ||
+                    (image = mBitmapDrawable.getBitmap()) == null) {
                 return;
             }
             if (mImageLoader.isImageFadeIn()) {
@@ -68,18 +72,22 @@ final class SetImageAction implements Runnable {
 
                     @Override
                     public void onEnd(@NonNull FadeDrawable drawable) {
-                        if (mImageLoadCallback != null) {
-                            mImageLoadCallback.onImageDisplayed(imageView);
-                        }
+                        reportDisplayed(image, imageView);
                     }
                 });
                 fadeDrawable.startFade(mImageLoader.getImageFadeInTime());
             } else {
                 imageView.setImageDrawable(mBitmapDrawable);
-                if (mImageLoadCallback != null) {
-                    mImageLoadCallback.onImageDisplayed(imageView);
-                }
+                reportDisplayed(image, imageView);
             }
+        }
+    }
+
+    @MainThread
+    private void reportDisplayed(@NonNull Bitmap image, @NonNull ImageView imageView) {
+        if (mImageLoadCallback != null) {
+            mImageLoadCallback
+                    .onDisplayed(mLoadImageAction.getImageSource().getData(), image, imageView);
         }
     }
 }

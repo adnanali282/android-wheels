@@ -82,18 +82,24 @@ public class ImageLoader<T> {
 
     /**
      * ImageLoader without any cache or bitmap loader
+     * <br>
+     * Use <b>application context</b> to avoid memory leaks.
      *
      * @param context Context
+     * @see Context#getApplicationContext()
      */
     public ImageLoader(@NonNull Context context) {
         this(context, null, null, null);
     }
 
     /**
-     * ImageLoader with default memory and storage caches.
+     * ImageLoader with default memory and storage caches
+     * <br>
+     * Use <b>application context</b> to avoid memory leaks.
      *
      * @param context      Context
      * @param bitmapLoader Bitmap loader
+     * @see Context#getApplicationContext()
      */
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader) {
         this(context, bitmapLoader, newMemoryImageCache(), newStorageImageCache(context));
@@ -101,11 +107,14 @@ public class ImageLoader<T> {
 
     /**
      * ImageLoader with specified bitmap loader, memory image cache and storage image cache
+     * <br>
+     * Use <b>application context</b> to avoid memory leaks.
      *
      * @param context           Context
      * @param bitmapLoader      Bitmap loader
      * @param memoryImageCache  Memory image cache
      * @param storageImageCache Storage image cache
+     * @see Context#getApplicationContext()
      */
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader,
             @Nullable MemoryImageCache memoryImageCache,
@@ -158,16 +167,15 @@ public class ImageLoader<T> {
         if (memoryImageCache != null) {
             drawable = memoryImageCache.get(imageSource.getKey());
         }
-        if (drawable != null) {
+        Bitmap image;
+        if (drawable != null && (image = drawable.getBitmap()) != null) {
+            T data = imageSource.getData();
             if (imageLoadCallback != null) {
-                Bitmap image = drawable.getBitmap();
-                if (image != null) {
-                    imageLoadCallback.onImageLoaded(imageSource.getData(), image, true, false);
-                }
+                imageLoadCallback.onLoaded(data, image, true, false);
             }
             imageView.setImageDrawable(drawable);
             if (imageLoadCallback != null) {
-                imageLoadCallback.onImageDisplayed(imageView);
+                imageLoadCallback.onDisplayed(data, image, imageView);
             }
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =

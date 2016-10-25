@@ -178,7 +178,7 @@ final class LoadImageAction<T> {
             return;
         }
         ThreadUtils.runOnMainThread(
-                new SetImageAction(drawable, mImageLoader, mImageLoadCallback, this));
+                new SetImageAction<>(drawable, mImageLoader, mImageLoadCallback, this));
     }
 
     @AnyThread
@@ -188,8 +188,7 @@ final class LoadImageAction<T> {
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
-                    mImageLoadCallback
-                            .onImageLoaded(data, image, fromMemoryCache, fromStorageCache);
+                    mImageLoadCallback.onLoaded(data, image, fromMemoryCache, fromStorageCache);
                 }
             });
         }
