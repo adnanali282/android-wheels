@@ -52,7 +52,7 @@ public interface ImageLoadCallback<T> {
      * when fade will done
      *
      * @param data      Source data
-     * @param image     Loaded image
+     * @param image     Image, loaded from {@code data}
      * @param imageView {@link ImageView}, on which {@code image} loaded form {@code data}
      *                  is displayed
      */
