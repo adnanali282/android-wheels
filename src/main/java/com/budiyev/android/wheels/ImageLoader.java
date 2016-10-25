@@ -149,7 +149,7 @@ public class ImageLoader<T> {
      * @param imageLoadCallback Optional callback
      */
     public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @Nullable ImageLoadCallback imageLoadCallback) {
+            @Nullable ImageLoadCallback<T> imageLoadCallback) {
         BitmapDrawable drawable = null;
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
@@ -159,7 +159,7 @@ public class ImageLoader<T> {
             if (imageLoadCallback != null) {
                 Bitmap image = drawable.getBitmap();
                 if (image != null) {
-                    imageLoadCallback.onImageLoaded(image, true, false);
+                    imageLoadCallback.onImageLoaded(imageSource, image, true, false);
                 }
             }
             ThreadUtils.runOnMainThread(
@@ -752,10 +752,12 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<Uri> newUriBitmapLoader() {
         return new BitmapLoader<Uri>() {
+            @NonNull
             @Override
-            public Bitmap load(@NonNull Context context, Uri data) {
-                return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
-                        true);
+            public Bitmap load(@NonNull Context context, Uri data) throws Exception {
+                return Objects.requireNonNull(
+                        loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE,
+                                Integer.MAX_VALUE, true));
             }
         };
     }
@@ -768,9 +770,12 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<File> newFileBitmapLoader() {
         return new BitmapLoader<File>() {
+            @NonNull
             @Override
-            public Bitmap load(@NonNull Context context, File data) {
-                return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            public Bitmap load(@NonNull Context context, File data) throws Exception {
+                return Objects.requireNonNull(
+                        loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                                true));
             }
         };
     }
@@ -783,10 +788,12 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
         return new BitmapLoader<FileDescriptor>() {
+            @NonNull
             @Override
-            public Bitmap load(@NonNull Context context, FileDescriptor data) {
-                return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
-                        Integer.MAX_VALUE, true);
+            public Bitmap load(@NonNull Context context, FileDescriptor data) throws Exception {
+                return Objects.requireNonNull(
+                        loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
+                                Integer.MAX_VALUE, true));
             }
         };
     }
@@ -799,10 +806,12 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<Integer> newResourceBitmapLoader() {
         return new BitmapLoader<Integer>() {
+            @NonNull
             @Override
-            public Bitmap load(@NonNull Context context, Integer data) {
-                return loadSampledBitmapFromResource(context.getResources(), data,
-                        Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+            public Bitmap load(@NonNull Context context, Integer data) throws Exception {
+                return Objects.requireNonNull(
+                        loadSampledBitmapFromResource(context.getResources(), data,
+                                Integer.MAX_VALUE, Integer.MAX_VALUE, true));
             }
         };
     }
@@ -815,10 +824,12 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
         return new BitmapLoader<byte[]>() {
+            @NonNull
             @Override
-            public Bitmap load(@NonNull Context context, byte[] data) {
-                return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
-                        true);
+            public Bitmap load(@NonNull Context context, byte[] data) throws Exception {
+                return Objects.requireNonNull(
+                        loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                                true));
             }
         };
     }

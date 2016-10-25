@@ -23,9 +23,9 @@
  */
 package com.budiyev.android.wheels;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 /**
@@ -33,21 +33,32 @@ import android.widget.ImageView;
  *
  * @see ImageLoader#loadImage(ImageSource, ImageView, ImageLoadCallback)
  */
-public interface ImageLoadCallback {
+public interface ImageLoadCallback<T> {
     /**
      * Called when image is loaded and ready to be displayed
      *
+     * @param imageSource      Image source
      * @param image            Image
      * @param fromMemoryCache  Image loaded from memory cache
      * @param fromStorageCache Image loaded from storage cache
      */
-    void onImageLoaded(@Nullable Bitmap image, boolean fromMemoryCache, boolean fromStorageCache);
+    void onImageLoaded(@NonNull ImageSource<T> imageSource, @NonNull Bitmap image,
+            boolean fromMemoryCache, boolean fromStorageCache);
 
     /**
-     * Called when image displayed; if fade enabled, this method will be called
+     * Called when image displayed; if fade effect is enabled, this method will be called
      * when fade will done
      *
      * @param imageView Image view
      */
     void onImageDisplayed(@NonNull ImageView imageView);
+
+    /**
+     * Called when {@link BitmapLoader} was unable to load {@link Bitmap}
+     *
+     * @param imageSource Image source
+     * @param exception   Exception that was thrown by
+     *                    {@link BitmapLoader#load(Context, Object)} method
+     */
+    void onError(@NonNull ImageSource<T> imageSource, @NonNull Exception exception);
 }

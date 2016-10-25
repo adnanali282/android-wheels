@@ -41,7 +41,7 @@ final class LoadImageAction<T> {
     private final WeakReference<ImageView> mImageViewReference;
     private final ImageLoader<T> mImageLoader;
     private final Object mPauseWorkLock;
-    private final ImageLoadCallback mImageLoadCallback;
+    private final ImageLoadCallback<T> mImageLoadCallback;
     private final AtomicBoolean mSubmitted = new AtomicBoolean();
     private final AtomicBoolean mFinished = new AtomicBoolean();
     private final AtomicBoolean mCancelled = new AtomicBoolean();
@@ -49,7 +49,7 @@ final class LoadImageAction<T> {
 
     public LoadImageAction(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
             @NonNull ImageLoader<T> imageLoader, @NonNull Object pauseWorkLock,
-            @Nullable ImageLoadCallback imageLoadCallback) {
+            @Nullable ImageLoadCallback<T> imageLoadCallback) {
         mImageSource = imageSource;
         mImageViewReference = new WeakReference<>(imageView);
         mImageLoader = imageLoader;
@@ -75,17 +75,23 @@ final class LoadImageAction<T> {
         if (storageImageCache != null) {
             image = storageImageCache.get(mImageSource.getKey());
             if (image != null && mImageLoadCallback != null) {
-                mImageLoadCallback.onImageLoaded(image, false, true);
+                mImageLoadCallback.onImageLoaded(mImageSource, image, false, true);
             }
         }
         if (image == null) {
             BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
             if (bitmapLoader != null) {
-                image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
+                try {
+                    image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
+                } catch (Exception e) {
+                    if (mImageLoadCallback != null) {
+                        mImageLoadCallback.onError(mImageSource, e);
+                    }
+                }
             }
             if (image != null) {
                 if (mImageLoadCallback != null) {
-                    mImageLoadCallback.onImageLoaded(image, false, false);
+                    mImageLoadCallback.onImageLoaded(mImageSource, image, false, false);
                 }
                 if (storageImageCache != null) {
                     storageImageCache.put(mImageSource.getKey(), image);

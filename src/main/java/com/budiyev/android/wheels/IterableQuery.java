@@ -153,16 +153,31 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     }
 
     /**
-     * Apply specified {@code action} to all elements
+     * Apply specified {@code action} over a sequence
      */
     @NonNull
     public IterableQuery<T> apply(@NonNull final Action<? super T> action) {
         enqueueTask(new Runnable() {
             @Override
             public void run() {
-                Iterable<T> list = getIterable();
-                for (T element : list) {
+                for (T element : getIterable()) {
                     action.apply(element);
+                }
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Apply specified accumulator function over a sequence
+     */
+    public <A> IterableQuery<T> apply(@NonNull final Aggregator<A, T> aggregator) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                A accumulator = null;
+                for (T element : getIterable()) {
+                    accumulator = aggregator.apply(accumulator, element);
                 }
             }
         });
