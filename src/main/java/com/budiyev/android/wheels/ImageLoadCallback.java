@@ -25,6 +25,7 @@ package com.budiyev.android.wheels;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
@@ -42,6 +43,7 @@ public interface ImageLoadCallback<T> {
      * @param fromMemoryCache  Image loaded from memory cache
      * @param fromStorageCache Image loaded from storage cache
      */
+    @MainThread
     void onImageLoaded(@NonNull ImageSource<T> imageSource, @NonNull Bitmap image,
             boolean fromMemoryCache, boolean fromStorageCache);
 
@@ -51,6 +53,7 @@ public interface ImageLoadCallback<T> {
      *
      * @param imageView Image view
      */
+    @MainThread
     void onImageDisplayed(@NonNull ImageView imageView);
 
     /**
@@ -60,5 +63,6 @@ public interface ImageLoadCallback<T> {
      * @param exception   Exception that was thrown by
      *                    {@link BitmapLoader#load(Context, Object)} method
      */
+    @MainThread
     void onError(@NonNull ImageSource<T> imageSource, @NonNull Exception exception);
 }

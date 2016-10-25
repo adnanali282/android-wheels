@@ -83,9 +83,14 @@ final class LoadImageAction<T> {
             if (bitmapLoader != null) {
                 try {
                     image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
-                } catch (Exception e) {
+                } catch (final Exception exception) {
                     if (mImageLoadCallback != null) {
-                        mImageLoadCallback.onError(mImageSource, e);
+                        ThreadUtils.runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mImageLoadCallback.onError(mImageSource, exception);
+                            }
+                        });
                     }
                 }
             }
