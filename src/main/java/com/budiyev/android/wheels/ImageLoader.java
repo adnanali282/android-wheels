@@ -37,6 +37,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.AnyThread;
 import android.support.annotation.FloatRange;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -194,6 +195,7 @@ public class ImageLoader<T> {
     /**
      * Delete cached image for specified {@link ImageSource}
      */
+    @AnyThread
     public void invalidate(@NonNull ImageSource<T> imageSource) {
         String key = imageSource.getKey();
         MemoryImageCache memoryImageCache = getMemoryImageCache();
@@ -362,6 +364,7 @@ public class ImageLoader<T> {
      * @see #getStorageImageCache()
      * @see #setStorageImageCache(StorageImageCache)
      */
+    @AnyThread
     public void clearCache() {
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
@@ -374,6 +377,7 @@ public class ImageLoader<T> {
     }
 
     @Nullable
+    @MainThread
     protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
         if (imageView != null) {
             Drawable drawable = imageView.getDrawable();

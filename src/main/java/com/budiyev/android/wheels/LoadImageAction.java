@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -67,7 +68,7 @@ final class LoadImageAction<T> {
                 }
             }
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() == null) {
+        if (isCancelled() || mImageLoader.isExitTasksEarly()) {
             return;
         }
         Bitmap image = null;
@@ -126,7 +127,7 @@ final class LoadImageAction<T> {
                 memoryImageCache.put(key, drawable);
             }
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() == null) {
+        if (isCancelled() || mImageLoader.isExitTasksEarly()) {
             return;
         }
         ThreadUtils.runOnMainThread(
@@ -139,6 +140,7 @@ final class LoadImageAction<T> {
     }
 
     @Nullable
+    @MainThread
     public ImageView getAttachedImageView() {
         ImageView imageView = mImageViewReference.get();
         LoadImageAction<?> loadImageAction = ImageLoader.getLoadImageAction(imageView);
