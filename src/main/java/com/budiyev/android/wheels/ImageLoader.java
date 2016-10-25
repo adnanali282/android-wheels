@@ -762,12 +762,11 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<Uri> newUriBitmapLoader() {
         return new BitmapLoader<Uri>() {
-            @NonNull
+            @Nullable
             @Override
             public Bitmap load(@NonNull Context context, Uri data) throws Exception {
-                return Objects.requireNonNull(
-                        loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE,
-                                Integer.MAX_VALUE, true));
+                return loadSampledBitmapFromUri(context, data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                        true);
             }
         };
     }
@@ -780,12 +779,10 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<File> newFileBitmapLoader() {
         return new BitmapLoader<File>() {
-            @NonNull
+            @Nullable
             @Override
             public Bitmap load(@NonNull Context context, File data) throws Exception {
-                return Objects.requireNonNull(
-                        loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
-                                true));
+                return loadSampledBitmapFromFile(data, Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
         };
     }
@@ -798,12 +795,11 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
         return new BitmapLoader<FileDescriptor>() {
-            @NonNull
+            @Nullable
             @Override
             public Bitmap load(@NonNull Context context, FileDescriptor data) throws Exception {
-                return Objects.requireNonNull(
-                        loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
-                                Integer.MAX_VALUE, true));
+                return loadSampledBitmapFromFileDescriptor(data, Integer.MAX_VALUE,
+                        Integer.MAX_VALUE, true);
             }
         };
     }
@@ -816,12 +812,11 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<Integer> newResourceBitmapLoader() {
         return new BitmapLoader<Integer>() {
-            @NonNull
+            @Nullable
             @Override
             public Bitmap load(@NonNull Context context, Integer data) throws Exception {
-                return Objects.requireNonNull(
-                        loadSampledBitmapFromResource(context.getResources(), data,
-                                Integer.MAX_VALUE, Integer.MAX_VALUE, true));
+                return loadSampledBitmapFromResource(context.getResources(), data,
+                        Integer.MAX_VALUE, Integer.MAX_VALUE, true);
             }
         };
     }
@@ -834,12 +829,11 @@ public class ImageLoader<T> {
     @NonNull
     public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
         return new BitmapLoader<byte[]>() {
-            @NonNull
+            @Nullable
             @Override
             public Bitmap load(@NonNull Context context, byte[] data) throws Exception {
-                return Objects.requireNonNull(
-                        loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
-                                true));
+                return loadSampledBitmapFromByteArray(data, Integer.MAX_VALUE, Integer.MAX_VALUE,
+                        true);
             }
         };
     }
