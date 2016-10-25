@@ -94,6 +94,7 @@ final class LoadImageAction<T> {
                             }
                         });
                     }
+                    return;
                 }
             }
             if (image != null) {
