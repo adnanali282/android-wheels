@@ -38,6 +38,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.FloatRange;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -148,10 +149,11 @@ public class ImageLoader<T> {
      * @param imageView         Image view
      * @param imageLoadCallback Optional callback
      */
+    @MainThread
     public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
             @Nullable ImageLoadCallback<T> imageLoadCallback) {
-        BitmapDrawable drawable = null;
         MemoryImageCache memoryImageCache = getMemoryImageCache();
+        BitmapDrawable drawable = null;
         if (memoryImageCache != null) {
             drawable = memoryImageCache.get(imageSource.getKey());
         }
@@ -162,8 +164,10 @@ public class ImageLoader<T> {
                     imageLoadCallback.onImageLoaded(imageSource.getData(), image, true, false);
                 }
             }
-            ThreadUtils.runOnMainThread(
-                    new SimpleSetImageAction(imageView, drawable, imageLoadCallback));
+            imageView.setImageDrawable(drawable);
+            if (imageLoadCallback != null) {
+                imageLoadCallback.onImageDisplayed(imageView);
+            }
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
                     new LoadImageAction<>(imageSource, imageView, this, mPauseWorkLock,
@@ -171,8 +175,7 @@ public class ImageLoader<T> {
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
-            ThreadUtils.runOnMainThread(
-                    new SimpleSetImageAction(imageView, asyncBitmapDrawable, null));
+            imageView.setImageDrawable(asyncBitmapDrawable);
             loadAction.execute();
         }
     }
@@ -183,6 +186,7 @@ public class ImageLoader<T> {
      * @param imageSource Image source
      * @param imageView   Image view
      */
+    @MainThread
     public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView) {
         loadImage(imageSource, imageView, null);
     }
@@ -380,6 +384,7 @@ public class ImageLoader<T> {
         return null;
     }
 
+    @MainThread
     protected static void cancelWork(@Nullable ImageView imageView) {
         LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
         if (loadImageAction != null) {
@@ -387,6 +392,7 @@ public class ImageLoader<T> {
         }
     }
 
+    @MainThread
     protected static boolean cancelPotentialWork(@NonNull ImageSource<?> imageSource,
             @Nullable ImageView imageView) {
         LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);

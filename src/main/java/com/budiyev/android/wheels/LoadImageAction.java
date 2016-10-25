@@ -77,7 +77,13 @@ final class LoadImageAction<T> {
         if (storageImageCache != null) {
             image = storageImageCache.get(key);
             if (image != null && mImageLoadCallback != null) {
-                mImageLoadCallback.onImageLoaded(data, image, false, true);
+                final Bitmap cachedImage = image;
+                ThreadUtils.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mImageLoadCallback.onImageLoaded(data, cachedImage, false, true);
+                    }
+                });
             }
         }
         if (image == null) {
@@ -99,7 +105,13 @@ final class LoadImageAction<T> {
             }
             if (image != null) {
                 if (mImageLoadCallback != null) {
-                    mImageLoadCallback.onImageLoaded(data, image, false, false);
+                    final Bitmap loadedImage = image;
+                    ThreadUtils.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mImageLoadCallback.onImageLoaded(data, loadedImage, false, false);
+                        }
+                    });
                 }
                 if (storageImageCache != null) {
                     storageImageCache.put(key, image);
