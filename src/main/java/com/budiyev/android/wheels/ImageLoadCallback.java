@@ -61,7 +61,9 @@ public interface ImageLoadCallback<T> {
      *
      * @param data      Source data
      * @param exception Exception, that has been thrown by
-     *                  {@link BitmapLoader#load(Context, Object)} method
+     *                  {@link BitmapLoader#load(Context, Object)} method or
+     *                  {@link NullPointerException} if {@link BitmapLoader#load(Context, Object)}
+     *                  method returned null
      */
     @MainThread
     void onError(@NonNull T data, @NonNull Exception exception);
