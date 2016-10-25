@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
+import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -78,13 +79,7 @@ final class LoadImageAction<T> {
         if (storageImageCache != null) {
             image = storageImageCache.get(key);
             if (image != null && mImageLoadCallback != null) {
-                final Bitmap cachedImage = image;
-                ThreadUtils.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mImageLoadCallback.onImageLoaded(data, cachedImage, false, true);
-                    }
-                });
+                reportImageLoaded(data, image, false, true);
             }
         }
         if (image == null) {
@@ -93,27 +88,16 @@ final class LoadImageAction<T> {
                 try {
                     image = bitmapLoader.load(mImageLoader.getContext(), data);
                 } catch (final Exception exception) {
-                    if (mImageLoadCallback != null) {
-                        ThreadUtils.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mImageLoadCallback.onError(data, exception);
-                            }
-                        });
-                    }
+                    reportError(data, exception);
+                    return;
+                }
+                if (image == null) {
+                    reportError(data, new NullPointerException("BitmapLoader returned null"));
                     return;
                 }
             }
             if (image != null) {
-                if (mImageLoadCallback != null) {
-                    final Bitmap loadedImage = image;
-                    ThreadUtils.runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mImageLoadCallback.onImageLoaded(data, loadedImage, false, false);
-                        }
-                    });
-                }
+                reportImageLoaded(data, image, false, false);
                 if (storageImageCache != null) {
                     storageImageCache.put(key, image);
                 }
@@ -132,6 +116,32 @@ final class LoadImageAction<T> {
         }
         ThreadUtils.runOnMainThread(
                 new SetImageAction(drawable, mImageLoader, mImageLoadCallback, this));
+    }
+
+    @AnyThread
+    private void reportImageLoaded(final T data, final Bitmap image, final boolean fromMemoryCache,
+            final boolean fromStorageCache) {
+        if (mImageLoadCallback != null) {
+            ThreadUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mImageLoadCallback
+                            .onImageLoaded(data, image, fromMemoryCache, fromStorageCache);
+                }
+            });
+        }
+    }
+
+    @AnyThread
+    private void reportError(final T data, final Exception exception) {
+        if (mImageLoadCallback != null) {
+            ThreadUtils.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    mImageLoadCallback.onError(data, exception);
+                }
+            });
+        }
     }
 
     @NonNull
