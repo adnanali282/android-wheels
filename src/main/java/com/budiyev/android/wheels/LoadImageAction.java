@@ -72,23 +72,25 @@ final class LoadImageAction<T> {
         }
         Bitmap image = null;
         StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
+        String key = mImageSource.getKey();
+        final T data = mImageSource.getData();
         if (storageImageCache != null) {
-            image = storageImageCache.get(mImageSource.getKey());
+            image = storageImageCache.get(key);
             if (image != null && mImageLoadCallback != null) {
-                mImageLoadCallback.onImageLoaded(mImageSource, image, false, true);
+                mImageLoadCallback.onImageLoaded(data, image, false, true);
             }
         }
         if (image == null) {
             BitmapLoader<T> bitmapLoader = mImageLoader.getBitmapLoader();
             if (bitmapLoader != null) {
                 try {
-                    image = bitmapLoader.load(mImageLoader.getContext(), mImageSource.getData());
+                    image = bitmapLoader.load(mImageLoader.getContext(), data);
                 } catch (final Exception exception) {
                     if (mImageLoadCallback != null) {
                         ThreadUtils.runOnMainThread(new Runnable() {
                             @Override
                             public void run() {
-                                mImageLoadCallback.onError(mImageSource, exception);
+                                mImageLoadCallback.onError(data, exception);
                             }
                         });
                     }
@@ -96,10 +98,10 @@ final class LoadImageAction<T> {
             }
             if (image != null) {
                 if (mImageLoadCallback != null) {
-                    mImageLoadCallback.onImageLoaded(mImageSource, image, false, false);
+                    mImageLoadCallback.onImageLoaded(data, image, false, false);
                 }
                 if (storageImageCache != null) {
-                    storageImageCache.put(mImageSource.getKey(), image);
+                    storageImageCache.put(key, image);
                 }
             }
         }
@@ -108,7 +110,7 @@ final class LoadImageAction<T> {
             drawable = new RecyclingBitmapDrawable(mImageLoader.getContext().getResources(), image);
             MemoryImageCache memoryImageCache = mImageLoader.getMemoryImageCache();
             if (memoryImageCache != null) {
-                memoryImageCache.put(mImageSource.getKey(), drawable);
+                memoryImageCache.put(key, drawable);
             }
         }
         if (isCancelled() || mImageLoader.isExitTasksEarly() || getAttachedImageView() == null) {

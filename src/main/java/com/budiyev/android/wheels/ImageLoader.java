@@ -159,7 +159,7 @@ public class ImageLoader<T> {
             if (imageLoadCallback != null) {
                 Bitmap image = drawable.getBitmap();
                 if (image != null) {
-                    imageLoadCallback.onImageLoaded(imageSource, image, true, false);
+                    imageLoadCallback.onImageLoaded(imageSource.getData(), image, true, false);
                 }
             }
             ThreadUtils.runOnMainThread(

@@ -38,14 +38,14 @@ public interface ImageLoadCallback<T> {
     /**
      * Called when image is loaded and ready to be displayed
      *
-     * @param imageSource      Image source
+     * @param data             Source data
      * @param image            Image
      * @param fromMemoryCache  Image loaded from memory cache
      * @param fromStorageCache Image loaded from storage cache
      */
     @MainThread
-    void onImageLoaded(@NonNull ImageSource<T> imageSource, @NonNull Bitmap image,
-            boolean fromMemoryCache, boolean fromStorageCache);
+    void onImageLoaded(@NonNull T data, @NonNull Bitmap image, boolean fromMemoryCache,
+            boolean fromStorageCache);
 
     /**
      * Called when image displayed; if fade effect is enabled, this method will be called
@@ -59,10 +59,10 @@ public interface ImageLoadCallback<T> {
     /**
      * Called when {@link BitmapLoader} was unable to load {@link Bitmap}
      *
-     * @param imageSource Image source
-     * @param exception   Exception that was thrown by
-     *                    {@link BitmapLoader#load(Context, Object)} method
+     * @param data      Source data
+     * @param exception Exception that was thrown by
+     *                  {@link BitmapLoader#load(Context, Object)} method
      */
     @MainThread
-    void onError(@NonNull ImageSource<T> imageSource, @NonNull Exception exception);
+    void onError(@NonNull T data, @NonNull Exception exception);
 }
