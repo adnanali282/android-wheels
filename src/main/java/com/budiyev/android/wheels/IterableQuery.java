@@ -89,6 +89,48 @@ public final class IterableQuery<T> extends AbstractIterableQuery<T> {
     }
 
     /**
+     * Make union of this {@link IterableQuery} and specified {@link Iterable}
+     */
+    public IterableQuery<T> union(@NonNull final Iterable<T> iterable) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> union = getMutableIterable();
+                Collection<T> collection;
+                if (iterable instanceof Collection<?>) {
+                    collection = (Collection<T>) iterable;
+                } else {
+                    collection = CollectionUtils.copy(iterable);
+                }
+                union.removeAll(collection);
+                union.addAll(collection);
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Make intersection of this {@link IterableQuery} and specified {@link Iterable}
+     */
+    @NonNull
+    public IterableQuery<T> intersect(@NonNull final Iterable<T> iterable) {
+        enqueueTask(new Runnable() {
+            @Override
+            public void run() {
+                List<T> intersection = getMutableIterable();
+                Collection<T> collection;
+                if (iterable instanceof Collection<?>) {
+                    collection = (Collection<T>) iterable;
+                } else {
+                    collection = CollectionUtils.copy(iterable);
+                }
+                intersection.retainAll(collection);
+            }
+        });
+        return this;
+    }
+
+    /**
      * Remove all elements that doesn't match specified {@code predicate}
      */
     @NonNull

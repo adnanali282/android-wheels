@@ -355,6 +355,170 @@ public final class CollectionUtils {
     }
 
     /**
+     * Whether if specified {@link Iterable} contains {@code element}
+     *
+     * @param iterable an iterable to be checked
+     * @param element  element
+     * @return {@code true} if {@code iterable} contains {@code element}, {@code false} otherwise
+     */
+    public static <T> boolean contains(@NonNull Iterable<T> iterable, @Nullable T element) {
+        if (iterable instanceof Collection<?>) {
+            return ((Collection<T>) iterable).contains(element);
+        } else {
+            for (T e : iterable) {
+                if (Objects.equals(e, element)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static <T> boolean contains(@NonNull T[] array, @Nullable T element) {
+        for (T e : array) {
+            if (Objects.equals(e, element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull boolean[] array, boolean element) {
+        for (boolean e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull byte[] array, byte element) {
+        for (byte e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull short[] array, short element) {
+        for (short e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull int[] array, int element) {
+        for (int e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull long[] array, long element) {
+        for (long e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull float[] array, float element) {
+        for (float e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull double[] array, double element) {
+        for (double e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether if specified {@code array} contains {@code element}
+     *
+     * @param array   an array to be checked
+     * @param element element
+     * @return {@code true} if {@code array} contains {@code element}, {@code false} otherwise
+     */
+    public static boolean contains(@NonNull char[] array, char element) {
+        for (char e : array) {
+            if (e == element) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Swap the elements of {@code list} at positions {@code a} and {@code b}
      */
     public static <T> void swap(@NonNull List<T> list, int a, int b) {
