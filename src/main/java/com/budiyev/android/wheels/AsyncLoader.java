@@ -44,6 +44,7 @@ import java.util.concurrent.Future;
 public abstract class AsyncLoader<A, D> extends Loader<D> {
     private volatile LoadTask mLoadTask;
     private volatile A mArguments;
+    private volatile boolean mForceReload;
 
     /**
      * AsyncLoader
@@ -82,10 +83,18 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
     }
 
     /**
-     * Set arguments that will be transferred to the {@link #load(Object, LoadState)} method
+     * Set {@code arguments} that will be transferred to the {@link #load(Object, LoadState)} method
      */
     public void setArguments(@Nullable A arguments) {
         mArguments = arguments;
+    }
+
+    /**
+     * Set whether to force data reload on each {@link #startLoading()} call,
+     * {@code false} by default
+     */
+    public void setForceReload(boolean forceReload) {
+        mForceReload = forceReload;
     }
 
     /**
@@ -141,7 +150,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         LoadTask loadTask = mLoadTask;
         if (loadTask == null) {
             startNewLoadTask();
-        } else if (loadTask.loaded) {
+        } else if (!mForceReload && loadTask.loaded) {
             deliverResult(loadTask.data);
         } else {
             forceLoad();
