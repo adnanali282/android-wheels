@@ -77,12 +77,12 @@ public final class ImageUtils {
         if (sourceWidth == resultWidth && sourceHeight == resultHeight) {
             return image;
         }
-        int sourceDenominator = greatestCommonDivisor(sourceWidth, sourceHeight);
-        int sourceRatioWidth = sourceWidth / sourceDenominator;
-        int sourceRatioHeight = sourceHeight / sourceDenominator;
-        int resultDenominator = greatestCommonDivisor(resultWidth, resultHeight);
-        int resultRatioWidth = resultWidth / resultDenominator;
-        int resultRatioHeight = resultHeight / resultDenominator;
+        int sourceDivisor = greatestCommonDivisor(sourceWidth, sourceHeight);
+        int sourceRatioWidth = sourceWidth / sourceDivisor;
+        int sourceRatioHeight = sourceHeight / sourceDivisor;
+        int resultDivisor = greatestCommonDivisor(resultWidth, resultHeight);
+        int resultRatioWidth = resultWidth / resultDivisor;
+        int resultRatioHeight = resultHeight / resultDivisor;
         if (sourceRatioWidth == resultRatioWidth && sourceRatioHeight == resultRatioHeight) {
             return Bitmap.createScaledBitmap(image, resultWidth, resultHeight, true);
         }
