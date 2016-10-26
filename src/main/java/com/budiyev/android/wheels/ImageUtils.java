@@ -42,112 +42,13 @@ public final class ImageUtils {
     }
 
     /**
-     * Crop image to specified size
+     * Invert image colors
      *
-     * @param image  Source image
-     * @param width  Result width
-     * @param height Result height
-     * @return Cropped (and resized) image
+     * @param image Source image
+     * @return Inverted image
      */
     @NonNull
-    public static Bitmap crop(@NonNull Bitmap image, int width, int height) {
-        int w = width;
-        int h = height;
-        while (w > 0 && h > 0) {
-            if (w > h) {
-                w %= h;
-            } else {
-                h %= w;
-            }
-        }
-        int d = w + h;
-        int arW = width / d;
-        int arH = height / d;
-        final int CROP_MODE_NONE = 1;
-        final int CROP_MODE_WIDTH = 2;
-        final int CROP_MODE_HEIGHT = 3;
-        int cropMode = CROP_MODE_HEIGHT;
-        int resultH = image.getHeight();
-        int resultW = arW * resultH / arH;
-        if (resultW > image.getWidth()) {
-            cropMode = CROP_MODE_WIDTH;
-            resultW = image.getWidth();
-            resultH = arH * resultW / arW;
-        }
-        if (resultH == image.getHeight() && resultW == image.getWidth()) {
-            cropMode = CROP_MODE_NONE;
-        }
-        Bitmap cropped = null;
-        switch (cropMode) {
-            case CROP_MODE_NONE:
-                cropped = image;
-                break;
-            case CROP_MODE_HEIGHT:
-                cropped = Bitmap.createBitmap(image, (image.getWidth() - resultW) / 2, 0, resultW,
-                        resultH);
-                break;
-            case CROP_MODE_WIDTH:
-                cropped = Bitmap.createBitmap(image, 0, (image.getHeight() - resultH) / 2, resultW,
-                        resultH);
-                break;
-        }
-        return Bitmap.createScaledBitmap(cropped, width, height, true);
-    }
-
-    /**
-     * Round image corners with specified radius
-     *
-     * @param image  Source image
-     * @param radius Corner radius
-     * @return Image with rounded corners
-     */
-    @NonNull
-    public static Bitmap roundCorners(@NonNull Bitmap image, float radius) {
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(0xff424242);
-        Rect rect = new Rect(0, 0, image.getWidth(), image.getHeight());
-        RectF rectF = new RectF(rect);
-        Bitmap bitmap =
-                Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawARGB(0, 0, 0, 0);
-        canvas.drawRoundRect(rectF, radius, radius, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(image, rect, rect, paint);
-        return bitmap;
-    }
-
-    /**
-     * Rotate image by specified amount of degrees
-     *
-     * @param image   Source image
-     * @param degrees Amount of degrees
-     * @return Rotated image
-     */
-    @NonNull
-    public static Bitmap rotate(@NonNull Bitmap image, float degrees) {
-        Matrix matrix = new Matrix();
-        matrix.setRotate(degrees);
-        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-    }
-
-    @NonNull
-    public static Bitmap mirrorHorizontally(@NonNull Bitmap image) {
-        Matrix matrix = new Matrix();
-        matrix.setScale(-1, 1);
-        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-    }
-
-    @NonNull
-    public static Bitmap mirrorVertically(@NonNull Bitmap image) {
-        Matrix matrix = new Matrix();
-        matrix.setScale(1, -1);
-        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-    }
-
-    @NonNull
-    private Bitmap invertColors(@NonNull Bitmap image) {
+    public static Bitmap invertColors(@NonNull Bitmap image) {
         Bitmap bitmap =
                 Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -156,5 +57,131 @@ public final class ImageUtils {
                 new float[]{-1, 0, 0, 0, 255, 0, -1, 0, 0, 255, 0, 0, -1, 0, 255, 0, 0, 0, 1, 0}));
         canvas.drawBitmap(image, 0, 0, paint);
         return bitmap;
+    }
+
+    /**
+     * Crop center of image in proportions of {@code resultWidth} and {@code resultHeight}
+     * and, if needed, resize it to {@code resultWidth} x {@code resultHeight} size.
+     * If specified {@code resultWidth} and {@code resultHeight} are the same as the current
+     * width and height of the source image, the source image will be returned.
+     *
+     * @param image        Source image
+     * @param resultWidth  Result width
+     * @param resultHeight Result height
+     * @return Cropped (and/or resized) image or source image
+     */
+    @NonNull
+    public static Bitmap cropCenter(@NonNull Bitmap image, int resultWidth, int resultHeight) {
+        int sourceWidth = image.getWidth();
+        int sourceHeight = image.getHeight();
+        if (sourceWidth == resultWidth && sourceHeight == resultHeight) {
+            return image;
+        }
+        int sourceDenominator = greatestCommonDivisor(sourceWidth, sourceHeight);
+        int sourceRatioWidth = sourceWidth / sourceDenominator;
+        int sourceRatioHeight = sourceHeight / sourceDenominator;
+        int resultDenominator = greatestCommonDivisor(resultWidth, resultHeight);
+        int resultRatioWidth = resultWidth / resultDenominator;
+        int resultRatioHeight = resultHeight / resultDenominator;
+        if (sourceRatioWidth == resultRatioWidth && sourceRatioHeight == resultRatioHeight) {
+            return Bitmap.createScaledBitmap(image, resultWidth, resultHeight, true);
+        }
+        Bitmap cropped;
+        if (resultRatioWidth >= sourceRatioWidth) {
+            int cropHeight = resultRatioHeight * sourceWidth / resultRatioWidth;
+            cropped = Bitmap.createBitmap(image, 0, (sourceHeight - cropHeight) / 2, sourceWidth,
+                    cropHeight);
+            if (cropHeight == resultHeight && sourceWidth == resultWidth) {
+                return cropped;
+            }
+        } else {
+            int cropWidth = resultRatioWidth * sourceHeight / resultRatioHeight;
+            cropped = Bitmap.createBitmap(image, (sourceWidth - cropWidth) / 2, 0, cropWidth,
+                    sourceHeight);
+            if (cropWidth == resultWidth && sourceHeight == resultHeight) {
+                return cropped;
+            }
+        }
+        Bitmap scaled = Bitmap.createScaledBitmap(cropped, resultWidth, resultHeight, true);
+        if (cropped != image && cropped != scaled) {
+            cropped.recycle();
+        }
+        return scaled;
+    }
+
+    /**
+     * Round image corners with specified corner radius
+     *
+     * @param image        Source image
+     * @param cornerRadius Corner radius
+     * @return Image with rounded corners
+     */
+    @NonNull
+    public static Bitmap roundCorners(@NonNull Bitmap image, float cornerRadius) {
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setColor(0xff424242);
+        int width = image.getWidth();
+        int height = image.getHeight();
+        Rect rect = new Rect(0, 0, width, height);
+        RectF rectF = new RectF(rect);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(image, rect, rect, paint);
+        return bitmap;
+    }
+
+    /**
+     * Rotate image by specified amount of degrees
+     *
+     * @param image         Source image
+     * @param rotationAngle Amount of degrees
+     * @return Rotated image
+     */
+    @NonNull
+    public static Bitmap rotate(@NonNull Bitmap image, float rotationAngle) {
+        Matrix matrix = new Matrix();
+        matrix.setRotate(rotationAngle);
+        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
+    /**
+     * Mirror image horizontally
+     *
+     * @param image Source image
+     * @return Mirrored image
+     */
+    @NonNull
+    public static Bitmap mirrorHorizontally(@NonNull Bitmap image) {
+        Matrix matrix = new Matrix();
+        matrix.setScale(-1, 1);
+        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
+    /**
+     * Mirror image vertically
+     *
+     * @param image Source image
+     * @return Mirrored image
+     */
+    @NonNull
+    public static Bitmap mirrorVertically(@NonNull Bitmap image) {
+        Matrix matrix = new Matrix();
+        matrix.setScale(1, -1);
+        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
+    private static int greatestCommonDivisor(int a, int b) {
+        while (a > 0 && b > 0) {
+            if (a > b) {
+                a %= b;
+            } else {
+                b %= a;
+            }
+        }
+        return a + b;
     }
 }

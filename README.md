@@ -8,6 +8,7 @@ Some useful tools for Android
 * AsyncLoader - Abstract Loader based on ThreadUtils
 * CollectionUtils - Tools for collections
 * CommonUtils - Common useful tools
+* ImageUtils - Tools for images
 * HashUtils - Tools for hashing
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * CsvParser - Parser/encoder of CSV format
@@ -17,7 +18,7 @@ Some useful tools for Android
 ### Usage
 ```
 dependencies {
-    compile 'com.budiyev.android:android-wheels:4.1.0'
+    compile 'com.budiyev.android:android-wheels:4.2.0'
 }
 ```
 
