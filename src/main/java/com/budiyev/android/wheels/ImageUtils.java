@@ -25,6 +25,7 @@ package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -33,6 +34,8 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
+
+import java.util.Objects;
 
 /**
  * Tools for images
@@ -49,13 +52,24 @@ public final class ImageUtils {
      */
     @NonNull
     public static Bitmap invertColors(@NonNull Bitmap image) {
+        return applyColorFilter(image, new ColorMatrixColorFilter(
+                new float[]{-1, 0, 0, 0, 255, 0, -1, 0, 0, 255, 0, 0, -1, 0, 255, 0, 0, 0, 1, 0}));
+    }
+
+    /**
+     * Apply color filter to the specified image
+     *
+     * @param image       Source image
+     * @param colorFilter Color filter
+     * @return Filtered image
+     */
+    @NonNull
+    public static Bitmap applyColorFilter(@NonNull Bitmap image, @NonNull ColorFilter colorFilter) {
+        Paint paint = new Paint();
+        paint.setColorFilter(Objects.requireNonNull(colorFilter));
         Bitmap bitmap =
                 Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(
-                new float[]{-1, 0, 0, 0, 255, 0, -1, 0, 0, 255, 0, 0, -1, 0, 255, 0, 0, 0, 1, 0}));
-        canvas.drawBitmap(image, 0, 0, paint);
+        new Canvas(bitmap).drawBitmap(image, 0, 0, paint);
         return bitmap;
     }
 
