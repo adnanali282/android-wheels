@@ -27,13 +27,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -65,10 +58,6 @@ public class ImageLoader<T> {
     private static final int DEFAULT_COMPRESS_QUALITY = 85;
     private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
     private static final String DEFAULT_STORAGE_CACHE_DIRECTORY = "image_loader_cache";
-    private static final String ERROR_MESSAGE_MEMORY_FRACTION_RANGE =
-            "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)";
-    private static final String ERROR_MESSAGE_STORAGE_FRACTION_RANGE =
-            "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)";
     private final Object mPauseWorkLock = new Object();
     private final Context mContext;
     private volatile boolean mImageFadeIn = true;
@@ -426,7 +415,8 @@ public class ImageLoader<T> {
      */
     public static int getMaxMemoryFraction(@FloatRange(from = 0.1, to = 0.8) float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
-            throw new IllegalArgumentException(ERROR_MESSAGE_MEMORY_FRACTION_RANGE);
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.1 and 0.8 (inclusive)");
         }
         return Math.round(fraction * Runtime.getRuntime().maxMemory());
     }
@@ -441,7 +431,8 @@ public class ImageLoader<T> {
     public static long getAvailableStorageFraction(@NonNull File path,
             @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
         }
         return Math.round(CommonUtils.getAvailableBytes(path) * fraction);
     }
@@ -456,7 +447,8 @@ public class ImageLoader<T> {
     public static long getTotalStorageFraction(@NonNull File path,
             @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
-            throw new IllegalArgumentException(ERROR_MESSAGE_STORAGE_FRACTION_RANGE);
+            throw new IllegalArgumentException(
+                    "Argument \"fraction\" must be between 0.01 and 1.0 (inclusive)");
         }
         return Math.round(CommonUtils.getTotalBytes(path) * fraction);
     }
@@ -495,101 +487,6 @@ public class ImageLoader<T> {
             }
         }
         return sampleSize;
-    }
-
-    /**
-     * Crop {@link Bitmap} to specified size
-     *
-     * @param bitmap Source bitmap
-     * @param width  Result width
-     * @param height Result height
-     * @return Cropped bitmap
-     */
-    @NonNull
-    public static Bitmap cropBitmap(@NonNull Bitmap bitmap, int width, int height) {
-        int w = width;
-        int h = height;
-        while (w > 0 && h > 0) {
-            if (w > h) {
-                w %= h;
-            } else {
-                h %= w;
-            }
-        }
-        int d = w + h;
-        int arW = width / d;
-        int arH = height / d;
-        final int CROP_MODE_NONE = 1;
-        final int CROP_MODE_WIDTH = 2;
-        final int CROP_MODE_HEIGHT = 3;
-        int cropMode = CROP_MODE_HEIGHT;
-        int resultH = bitmap.getHeight();
-        int resultW = arW * resultH / arH;
-        if (resultW > bitmap.getWidth()) {
-            cropMode = CROP_MODE_WIDTH;
-            resultW = bitmap.getWidth();
-            resultH = arH * resultW / arW;
-        }
-        if (resultH == bitmap.getHeight() && resultW == bitmap.getWidth()) {
-            cropMode = CROP_MODE_NONE;
-        }
-        Bitmap croppedBitmap = null;
-        switch (cropMode) {
-            case CROP_MODE_NONE:
-                croppedBitmap = bitmap;
-                break;
-            case CROP_MODE_HEIGHT:
-                croppedBitmap =
-                        Bitmap.createBitmap(bitmap, (bitmap.getWidth() - resultW) / 2, 0, resultW,
-                                resultH);
-                break;
-            case CROP_MODE_WIDTH:
-                croppedBitmap =
-                        Bitmap.createBitmap(bitmap, 0, (bitmap.getHeight() - resultH) / 2, resultW,
-                                resultH);
-                break;
-        }
-        return Bitmap.createScaledBitmap(croppedBitmap, width, height, true);
-    }
-
-    /**
-     * Round {@link Bitmap} corners
-     *
-     * @param bitmap Bitmap
-     * @param radius Corner radius
-     * @return Rounded bitmap
-     */
-    @NonNull
-    public static Bitmap roundBitmapCorners(@NonNull Bitmap bitmap, float radius) {
-        int maskColor = 0xff424242;
-        Paint cornerPaint = new Paint();
-        cornerPaint.setAntiAlias(true);
-        cornerPaint.setColor(maskColor);
-        Rect rcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        RectF rcRectF = new RectF(rcRect);
-        Bitmap rcBitmap =
-                Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas rcCanvas = new Canvas(rcBitmap);
-        rcCanvas.drawARGB(0, 0, 0, 0);
-        rcCanvas.drawRoundRect(rcRectF, radius, radius, cornerPaint);
-        cornerPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        rcCanvas.drawBitmap(bitmap, rcRect, rcRect, cornerPaint);
-        return rcBitmap;
-    }
-
-    /**
-     * Rotate {@link Bitmap} by specified amount of degrees
-     *
-     * @param bitmap  Bitmap
-     * @param degrees Amount of degrees
-     * @return Rotated bitmap
-     */
-    @NonNull
-    public static Bitmap rotateBitmap(@NonNull Bitmap bitmap, float degrees) {
-        Matrix matrix = new Matrix();
-        matrix.setRotate(degrees);
-        return Bitmap
-                .createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     /**
