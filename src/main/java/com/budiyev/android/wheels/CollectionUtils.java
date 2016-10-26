@@ -28,7 +28,6 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -240,6 +239,83 @@ public final class CollectionUtils {
     }
 
     /**
+     * Search {@code item} in {@code list}, starting from specified {@code position}
+     * in both directions
+     * <br>
+     * Such approach is effective if approximate position of an element in the list is known
+     *
+     * @param list     List of items
+     * @param item     Item to search for
+     * @param position Search start position
+     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
+     */
+    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position) {
+        int step = Math.round(list.size() * 0.05F);
+        if (step < 4) {
+            step = 4;
+        } else if (step > 16) {
+            step = 16;
+        }
+        return search(list, item, position, step);
+    }
+
+    /**
+     * Search {@code item} in {@code list}, starting from specified {@code position}
+     * in both directions
+     * <br>
+     * Such approach is effective if approximate position of an element in the list is known
+     * <br>
+     * Starting from {@code position} it checks {@code step} of elements on the left
+     * and at the right, if {@code item} is not found among them, another {@code step} of
+     * elements on the left and at the right, and so on while {@code item} found or list ended
+     *
+     * @param list     List of items
+     * @param item     Item to search for
+     * @param position Search start position
+     * @param step     Search step
+     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
+     */
+    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position, int step) {
+        if (position < 0 || step < 1) {
+            throw new IllegalArgumentException();
+        }
+        if (Objects.equals(item, list.get(position))) {
+            return position;
+        } else {
+            int listSize = list.size();
+            int currentOffset = step;
+            int previousOffset = 0;
+            for (; ; ) {
+                int start = position - currentOffset;
+                if (start < 0) {
+                    start = 0;
+                }
+                int end = position + currentOffset + 1;
+                if (end > listSize) {
+                    end = listSize;
+                }
+                int startOffset = position - previousOffset - 1;
+                for (int i = startOffset; i >= start; i--) {
+                    if (Objects.equals(item, list.get(i))) {
+                        return i;
+                    }
+                }
+                int endOffset = position + previousOffset + 1;
+                for (int i = endOffset; i < end; i++) {
+                    if (Objects.equals(item, list.get(i))) {
+                        return i;
+                    }
+                }
+                previousOffset = currentOffset;
+                currentOffset += step;
+                if (start == 0 && end == listSize) {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    /**
      * Whether if specified {@link Iterable} contains {@code element}
      *
      * @param iterable an iterable to be checked
@@ -401,140 +477,6 @@ public final class CollectionUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Swap the elements of {@code list} at positions {@code a} and {@code b}
-     */
-    public static <T> void swap(@NonNull List<T> list, int a, int b) {
-        list.set(b, list.set(a, list.get(b)));
-    }
-
-    /**
-     * Sorts the {@code list} in ascending natural order
-     * <br>
-     * Sorting algorithm is <b>unstable</b> (Heapsort)
-     */
-    public static <T extends Comparable<T>> void sort(@NonNull List<T> list) {
-        sort(list, new Comparator<T>() {
-            @Override
-            public int compare(T lhs, T rhs) {
-                return lhs.compareTo(rhs);
-            }
-        });
-    }
-
-    /**
-     * Sorts the {@code list} using the {@code comparator}
-     * <br>
-     * Sorting algorithm is <b>unstable</b> (Heapsort)
-     */
-    public static <T> void sort(@NonNull List<T> list, @NonNull Comparator<? super T> comparator) {
-        int size = list.size();
-        for (int i = size / 2 - 1; i >= 0; i--) {
-            shift(list, comparator, i, size);
-        }
-        for (int i = size - 1; i >= 1; i--) {
-            swap(list, 0, i);
-            shift(list, comparator, 0, i);
-        }
-    }
-
-    private static <T> void shift(@NonNull List<T> list, @NonNull Comparator<? super T> comparator,
-            int i, int j) {
-        int max;
-        int di = i * 2;
-        while (di + 1 < j) {
-            if (di + 1 == j - 1 || comparator.compare(list.get(di + 1), list.get(di + 2)) > 0) {
-                max = di + 1;
-            } else {
-                max = di + 2;
-            }
-            if (comparator.compare(list.get(i), list.get(max)) < 0) {
-                swap(list, i, max);
-                i = max;
-                di = i * 2;
-            } else {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Search {@code item} in {@code list}, starting from specified {@code position}
-     * in both directions
-     * <br>
-     * Such approach is effective if approximate position of an element in the list is known
-     *
-     * @param list     List of items
-     * @param item     Item to search for
-     * @param position Search start position
-     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
-     */
-    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position) {
-        int step = Math.round(list.size() * 0.05F);
-        if (step < 4) {
-            step = 4;
-        } else if (step > 16) {
-            step = 16;
-        }
-        return search(list, item, position, step);
-    }
-
-    /**
-     * Search {@code item} in {@code list}, starting from specified {@code position}
-     * in both directions
-     * <br>
-     * Such approach is effective if approximate position of an element in the list is known
-     * <br>
-     * Starting from {@code position} it checks {@code step} of elements on the left
-     * and at the right, if {@code item} is not found among them, another {@code step} of
-     * elements on the left and at the right, and so on while {@code item} found or list ended
-     *
-     * @param list     List of items
-     * @param item     Item to search for
-     * @param position Search start position
-     * @param step     Search step
-     * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
-     */
-    public static <T> int search(@NonNull List<T> list, @Nullable T item, int position, int step) {
-        if (position < 0 || step < 1) {
-            throw new IllegalArgumentException();
-        }
-        if (Objects.equals(item, list.get(position))) {
-            return position;
-        } else {
-            int listSize = list.size();
-            int currentOffset = step;
-            int previousOffset = 0;
-            for (; ; ) {
-                int start = position - currentOffset;
-                if (start < 0) {
-                    start = 0;
-                }
-                int end = position + currentOffset + 1;
-                if (end > listSize) {
-                    end = listSize;
-                }
-                int startOffset = position - previousOffset - 1;
-                for (int i = startOffset; i >= start; i--) {
-                    if (Objects.equals(item, list.get(i))) {
-                        return i;
-                    }
-                }
-                int endOffset = position + previousOffset + 1;
-                for (int i = endOffset; i < end; i++) {
-                    if (Objects.equals(item, list.get(i))) {
-                        return i;
-                    }
-                }
-                previousOffset = currentOffset;
-                currentOffset += step;
-                if (start == 0 && end == listSize) {
-                    return -1;
-                }
-            }
-        }
     }
 
     /**
