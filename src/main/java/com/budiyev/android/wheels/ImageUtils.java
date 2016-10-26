@@ -87,7 +87,8 @@ public final class ImageUtils {
             return Bitmap.createScaledBitmap(image, resultWidth, resultHeight, true);
         }
         Bitmap cropped;
-        if (resultRatioWidth >= sourceRatioWidth) {
+        int cropWidth = resultRatioWidth * sourceHeight / resultRatioHeight;
+        if (cropWidth >= sourceWidth) {
             int cropHeight = resultRatioHeight * sourceWidth / resultRatioWidth;
             cropped = Bitmap.createBitmap(image, 0, (sourceHeight - cropHeight) / 2, sourceWidth,
                     cropHeight);
@@ -95,7 +96,6 @@ public final class ImageUtils {
                 return cropped;
             }
         } else {
-            int cropWidth = resultRatioWidth * sourceHeight / resultRatioHeight;
             cropped = Bitmap.createBitmap(image, (sourceWidth - cropWidth) / 2, 0, cropWidth,
                     sourceHeight);
             if (cropWidth == resultWidth && sourceHeight == resultHeight) {
