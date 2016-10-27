@@ -202,19 +202,6 @@ public final class ImageUtils {
         return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
     }
 
-    /**
-     * Copy specified image
-     *
-     * @param image Source image
-     * @return Copy of source image
-     */
-    @NonNull
-    public static Bitmap copy(@NonNull Bitmap image) {
-        Bitmap result = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
-        new Canvas(result).drawBitmap(image, 0, 0, null);
-        return result;
-    }
-
     private static int greatestCommonDivisor(int a, int b) {
         while (a > 0 && b > 0) {
             if (a > b) {
