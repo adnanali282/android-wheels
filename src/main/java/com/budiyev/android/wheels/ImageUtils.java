@@ -196,7 +196,7 @@ public final class ImageUtils {
      * @return Rotated image
      */
     @NonNull
-    public static Bitmap rotate(@NonNull Bitmap image, float rotationAngle) {
+    public static Bitmap rotateInside(@NonNull Bitmap image, float rotationAngle) {
         Matrix matrix = new Matrix();
         matrix.setRotate(rotationAngle);
         return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
