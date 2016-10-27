@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -54,6 +55,19 @@ public final class ImageUtils {
     public static Bitmap invertColors(@NonNull Bitmap image) {
         return applyColorFilter(image, new ColorMatrixColorFilter(
                 new float[]{-1, 0, 0, 0, 255, 0, -1, 0, 0, 255, 0, 0, -1, 0, 255, 0, 0, 0, 1, 0}));
+    }
+
+    /**
+     * Convert image colors to gray-scale
+     *
+     * @param image Source image
+     * @return Converted image
+     */
+    @NonNull
+    public static Bitmap convertToGrayScale(@NonNull Bitmap image) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(0);
+        return applyColorFilter(image, new ColorMatrixColorFilter(colorMatrix));
     }
 
     /**
@@ -149,20 +163,6 @@ public final class ImageUtils {
     }
 
     /**
-     * Rotate image by specified amount of degrees
-     *
-     * @param image         Source image
-     * @param rotationAngle Amount of degrees
-     * @return Rotated image
-     */
-    @NonNull
-    public static Bitmap rotate(@NonNull Bitmap image, float rotationAngle) {
-        Matrix matrix = new Matrix();
-        matrix.setRotate(rotationAngle);
-        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-    }
-
-    /**
      * Mirror image horizontally
      *
      * @param image Source image
@@ -186,6 +186,33 @@ public final class ImageUtils {
         Matrix matrix = new Matrix();
         matrix.setScale(1, -1);
         return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
+    /**
+     * Rotate image by specified amount of degrees
+     *
+     * @param image         Source image
+     * @param rotationAngle Amount of degrees
+     * @return Rotated image
+     */
+    @NonNull
+    public static Bitmap rotate(@NonNull Bitmap image, float rotationAngle) {
+        Matrix matrix = new Matrix();
+        matrix.setRotate(rotationAngle);
+        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
+    /**
+     * Copy specified image
+     *
+     * @param image Source image
+     * @return Copy of source image
+     */
+    @NonNull
+    public static Bitmap copy(@NonNull Bitmap image) {
+        Bitmap result = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
+        new Canvas(result).drawBitmap(image, 0, 0, null);
+        return result;
     }
 
     private static int greatestCommonDivisor(int a, int b) {
