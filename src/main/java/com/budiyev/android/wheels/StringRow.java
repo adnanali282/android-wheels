@@ -219,7 +219,7 @@ public class StringRow implements Iterable<String> {
             for (int i = 0, s = mCells.size(); i < s; i++) {
                 stringBuilder.append(mCells.get(i));
                 if (i < s - 1) {
-                    stringBuilder.append(", ");
+                    stringBuilder.append("; ");
                 }
             }
             return stringBuilder.append(']').toString();
