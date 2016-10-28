@@ -58,8 +58,9 @@ final class InternalExecutors {
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    executor = new AsyncExecutor(CPU_COUNT, CPU_COUNT * 2, 90, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<Runnable>(128), new AsyncThreadFactory());
+                    int threadCount = CPU_COUNT * 2;
+                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
+                            new LinkedBlockingQueue<Runnable>(), new AsyncThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
