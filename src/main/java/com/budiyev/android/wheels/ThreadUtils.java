@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.support.annotation.AnyThread;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Tools for asynchronous tasks in Android
@@ -44,6 +46,51 @@ public final class ThreadUtils {
     }
 
     /**
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
+     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * and naming scheme as rest threads used by mentioned components.
+     *
+     * @return New thread factory
+     */
+    @NonNull
+    @AnyThread
+    public static ThreadFactory newThreadFactory() {
+        return new AsyncThreadFactory(Thread.NORM_PRIORITY);
+    }
+
+    /**
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
+     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * and naming scheme as rest threads used by mentioned components.
+     *
+     * @param threadPriority Priority of threads created by the factory
+     * @return New thread factory
+     */
+    @NonNull
+    @AnyThread
+    public static ThreadFactory newThreadFactory(
+            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority) {
+        return new AsyncThreadFactory(threadPriority);
+    }
+
+    /**
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
+     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * and naming scheme as rest threads used by mentioned components.
+     *
+     * @param threadPriority Priority of threads created by the factory
+     * @param daemonThreads  Whether if created threads will be daemon threads
+     * @return New thread factory
+     */
+    @NonNull
+    @AnyThread
+    public static ThreadFactory newThreadFactory(
+            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
+            boolean daemonThreads) {
+        return new AsyncThreadFactory(threadPriority, daemonThreads);
+    }
+
+    /**
      * Get current name prefix of background threads (threads named like [prefix][number])
      * <br><br>
      * <b>Affects:</b>
@@ -51,6 +98,8 @@ public final class ThreadUtils {
      * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
+     * <li>Threads, created thread factories, returned by {@link #newThreadFactory()},
+     * {@link #newThreadFactory(int)} and {@link #newThreadFactory(int, boolean)}</li>
      * </ul>
      *
      * @return Thread name prefix
@@ -72,6 +121,8 @@ public final class ThreadUtils {
      * <li>{@link ThreadUtils}</li>
      * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
+     * <li>Threads, created thread factories, returned by {@link #newThreadFactory()},
+     * {@link #newThreadFactory(int)} and {@link #newThreadFactory(int, boolean)}</li>
      * </ul>
      *
      * @param prefix Thread name prefix

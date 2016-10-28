@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -58,9 +59,8 @@ final class InternalExecutors {
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    int threadCount = CPU_COUNT * 2;
-                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
-                            new LinkedBlockingQueue<Runnable>(), new AsyncThreadFactory());
+                    executor = new AsyncExecutor(0, Integer.MAX_VALUE, 90, TimeUnit.SECONDS,
+                            new SynchronousQueue<Runnable>(), new AsyncThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
