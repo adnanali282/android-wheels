@@ -48,9 +48,7 @@ public final class CollectionUtils {
     public static <T> List<T> copy(@NonNull Iterable<T> iterable) {
         List<T> copy;
         if (iterable instanceof Collection<?>) {
-            Collection<T> collection = (Collection<T>) iterable;
-            copy = new ArrayList<>(collection.size());
-            copy.addAll(collection);
+            copy = new ArrayList<>((Collection<T>) iterable);
         } else {
             copy = new ArrayList<>();
             for (T element : iterable) {
