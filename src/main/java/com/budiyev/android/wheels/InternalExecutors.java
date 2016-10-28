@@ -26,7 +26,6 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -36,6 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Executors for internal usage in AndroidWheels
  */
 final class InternalExecutors {
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
@@ -58,8 +58,8 @@ final class InternalExecutors {
             try {
                 executor = sThreadUtilsExecutor;
                 if (executor == null) {
-                    executor = new AsyncExecutor(0, Integer.MAX_VALUE, 90, TimeUnit.SECONDS,
-                            new SynchronousQueue<Runnable>(), new AsyncThreadFactory());
+                    executor = new AsyncExecutor(CPU_COUNT, CPU_COUNT * 2, 90, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<Runnable>(128), new AsyncThreadFactory());
                     sThreadUtilsExecutor = executor;
                 }
             } finally {
@@ -77,8 +77,7 @@ final class InternalExecutors {
             try {
                 executor = sHttpRequestExecutor;
                 if (executor == null) {
-                    int threadCount = Runtime.getRuntime().availableProcessors();
-                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
+                    executor = new AsyncExecutor(CPU_COUNT, CPU_COUNT, 0, TimeUnit.NANOSECONDS,
                             new LinkedBlockingQueue<Runnable>(), new AsyncThreadFactory());
                     sHttpRequestExecutor = executor;
                 }
@@ -97,7 +96,7 @@ final class InternalExecutors {
             try {
                 executor = sImageLoaderExecutor;
                 if (executor == null) {
-                    int threadCount = Math.round(Runtime.getRuntime().availableProcessors() * 1.5F);
+                    int threadCount = Math.round(CPU_COUNT * 1.5F);
                     executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
                             new LinkedBlockingQueue<Runnable>(),
                             new AsyncThreadFactory(Thread.MIN_PRIORITY));
