@@ -41,6 +41,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public final class ThreadUtils {
     private static volatile boolean sThrowExecutionExceptions = true;
+    private static volatile boolean sAsyncExecutorShutDown = false;
 
     private ThreadUtils() {
     }
@@ -63,14 +64,14 @@ public final class ThreadUtils {
      * and {@link ImageLoader}; this factory will use the same thread name prefix
      * and naming scheme as rest threads used by mentioned components.
      *
-     * @param threadPriority Priority of threads created by the factory
+     * @param threadsPriority Priority of threads created by the factory
      * @return New thread factory
      */
     @NonNull
     @AnyThread
     public static ThreadFactory newThreadFactory(
-            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority) {
-        return new AsyncThreadFactory(threadPriority);
+            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadsPriority) {
+        return new AsyncThreadFactory(threadsPriority);
     }
 
     /**
@@ -78,16 +79,16 @@ public final class ThreadUtils {
      * and {@link ImageLoader}; this factory will use the same thread name prefix
      * and naming scheme as rest threads used by mentioned components.
      *
-     * @param threadPriority Priority of threads created by the factory
-     * @param daemonThreads  Whether if created threads will be daemon threads
+     * @param threadsPriority Priority of threads created by the factory
+     * @param daemonThreads   Whether if created threads will be daemon threads
      * @return New thread factory
      */
     @NonNull
     @AnyThread
     public static ThreadFactory newThreadFactory(
-            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
+            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadsPriority,
             boolean daemonThreads) {
-        return new AsyncThreadFactory(threadPriority, daemonThreads);
+        return new AsyncThreadFactory(threadsPriority, daemonThreads);
     }
 
     /**
@@ -165,14 +166,38 @@ public final class ThreadUtils {
     }
 
     /**
+     * Shutdown asynchronous executor, attempt to stop all actively executing tasks, halt
+     * processing of waiting tasks.
+     * <br>
+     * All {@code runAsync*} methods calls will be ignored and will return {@code null} after
+     * this method returns. This operation can't be undone.
+     */
+    public static void shutdownAsyncExecutor() {
+        sAsyncExecutorShutDown = true;
+        InternalExecutors.getThreadUtilsExecutor().shutdownNow();
+    }
+
+    /**
+     * Whether if asynchronous executor has been shut down, all {@code runAsync*} methods calls
+     * will be ignored and will return {@code null} if this method returns {@code true}.
+     */
+    public static boolean isAsyncExecutorShutDown() {
+        return sAsyncExecutorShutDown;
+    }
+
+    /**
      * Run task asynchronous
      *
      * @param task Task
-     * @return a {@link Future} representing pending completion of the task
+     * @return a {@link Future} representing pending completion of the task, or {@code null}
+     * if asynchronous executor has been shut down
      */
-    @NonNull
+    @Nullable
     @AnyThread
     public static Future<?> runAsync(@NonNull Runnable task) {
+        if (sAsyncExecutorShutDown) {
+            return null;
+        }
         return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
 
@@ -180,11 +205,15 @@ public final class ThreadUtils {
      * Run task asynchronous
      *
      * @param task Task
-     * @return a {@link Future} representing pending completion of the task
+     * @return a {@link Future} representing pending completion of the task, or {@code null}
+     * if asynchronous executor has been shut down
      */
-    @NonNull
+    @Nullable
     @AnyThread
     public static <T> Future<T> runAsync(@NonNull Callable<T> task) {
+        if (sAsyncExecutorShutDown) {
+            return null;
+        }
         return InternalExecutors.getThreadUtilsExecutor().submit(task);
     }
 
@@ -193,13 +222,16 @@ public final class ThreadUtils {
      *
      * @param task       Task
      * @param parameters Parameters
-     * @return Task
+     * @return Task or {@code null} if asynchronous executor has been shut down
      */
-    @NonNull
+    @Nullable
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
+        if (sAsyncExecutorShutDown) {
+            return null;
+        }
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
         return task;
     }
@@ -212,6 +244,9 @@ public final class ThreadUtils {
      */
     @AnyThread
     public static void runAsync(@NonNull final Runnable task, long delay) {
+        if (sAsyncExecutorShutDown) {
+            return;
+        }
         InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -228,6 +263,9 @@ public final class ThreadUtils {
      */
     @AnyThread
     public static void runAsync(@NonNull final Callable<?> task, long delay) {
+        if (sAsyncExecutorShutDown) {
+            return;
+        }
         InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -242,14 +280,17 @@ public final class ThreadUtils {
      * @param task       Task
      * @param delay      Delay
      * @param parameters Parameters
-     * @return Task
+     * @return Task or {@code null} if asynchronous executor has been shut down
      */
-    @NonNull
+    @Nullable
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             Parameters... parameters) {
+        if (sAsyncExecutorShutDown) {
+            return null;
+        }
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
         return task;
     }
@@ -363,6 +404,9 @@ public final class ThreadUtils {
         return new Runnable() {
             @Override
             public void run() {
+                if (sAsyncExecutorShutDown) {
+                    return;
+                }
                 asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
             }
         };
