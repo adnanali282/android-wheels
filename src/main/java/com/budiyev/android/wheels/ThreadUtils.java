@@ -312,7 +312,7 @@ public final class ThreadUtils {
      */
     @AnyThread
     public static void requireMainThread(@Nullable String message) {
-        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+        if (Thread.currentThread() != MainThreadHolder.MAIN_THREAD) {
             throw new NotMainThreadException(message);
         }
     }
@@ -322,9 +322,19 @@ public final class ThreadUtils {
      */
     @AnyThread
     public static void requireMainThread() {
-        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+        if (Thread.currentThread() != MainThreadHolder.MAIN_THREAD) {
             throw new NotMainThreadException();
         }
+    }
+
+    /**
+     * Check if current thread is the main (UI) thread or not
+     *
+     * @return {@code true} if current thread is the main (UI) thread, {@code false} otherwise
+     */
+    @AnyThread
+    public static boolean isMainThread() {
+        return Thread.currentThread() == MainThreadHolder.MAIN_THREAD;
     }
 
     static void throwExecutionExceptionIfNeeded(@Nullable Runnable runnable,
@@ -356,5 +366,9 @@ public final class ThreadUtils {
                 asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
             }
         };
+    }
+
+    private static final class MainThreadHolder {
+        public static final Thread MAIN_THREAD = Looper.getMainLooper().getThread();
     }
 }
