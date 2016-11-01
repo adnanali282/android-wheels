@@ -34,7 +34,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tools for asynchronous tasks in Android
@@ -207,33 +209,71 @@ public final class ThreadUtils {
     /**
      * Run task asynchronous with specified delay
      *
-     * @param task  Task
-     * @param delay Delay
+     * @param task  Task to execute
+     * @param delay Time in milliseconds from now to delay execution
+     * @return {@link ScheduledFuture} representing pending completion of the task
+     * and whose {@code get()} method will return {@code null} upon completion
      */
-    @AnyThread
-    public static void runAsync(@NonNull final Runnable task, long delay) {
-        InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                runAsync(task);
-            }
-        }, delay);
+    @NonNull
+    public static ScheduledFuture<Future<?>> runAsync(@NonNull Runnable task, long delay) {
+        return runAsync(task, delay, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Run task asynchronous with specified delay
      *
-     * @param task  Task
-     * @param delay Delay
+     * @param task  Task to execute
+     * @param delay Time from now to delay execution
+     * @param unit  Time unit of the {@code delay} parameter
+     * @return {@link ScheduledFuture} representing pending completion of the task
+     * and whose {@code get()} method will return {@code null} upon completion
      */
+    @NonNull
     @AnyThread
-    public static void runAsync(@NonNull final Callable<?> task, long delay) {
-        InternalExecutors.getMainThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                runAsync(task);
-            }
-        }, delay);
+    public static ScheduledFuture<Future<?>> runAsync(@NonNull final Runnable task, long delay,
+            TimeUnit unit) {
+        return InternalExecutors.getThreadUtilsScheduledExecutor()
+                .schedule(new Callable<Future<?>>() {
+                    @Override
+                    public Future<?> call() throws Exception {
+                        return InternalExecutors.getThreadUtilsExecutor().submit(task);
+                    }
+                }, delay, unit);
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task  Task to execute
+     * @param delay Time in milliseconds from now to delay execution
+     * @return {@link ScheduledFuture} representing pending completion of the task
+     * and whose {@code get()} method will return {@code null} upon completion
+     */
+    @NonNull
+    public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull Callable<T> task, long delay) {
+        return runAsync(task, delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task  Task to execute
+     * @param delay Time from now to delay execution
+     * @param unit  Time unit of the {@code delay} parameter
+     * @return {@link ScheduledFuture} representing pending completion of the task
+     * and whose {@code get()} method will return {@code null} upon completion
+     */
+    @NonNull
+    @AnyThread
+    public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull final Callable<T> task,
+            long delay, TimeUnit unit) {
+        return InternalExecutors.getThreadUtilsScheduledExecutor()
+                .schedule(new Callable<Future<T>>() {
+                    @Override
+                    public Future<T> call() throws Exception {
+                        return InternalExecutors.getThreadUtilsExecutor().submit(task);
+                    }
+                }, delay, unit);
     }
 
     /**

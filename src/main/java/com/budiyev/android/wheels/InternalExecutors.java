@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,11 +39,13 @@ import java.util.concurrent.locks.ReentrantLock;
 final class InternalExecutors {
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
+    private static final Lock THREAD_UTILS_SCHEDULED_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock STORAGE_IMAGE_CACHE_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
     private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
+    private static volatile ScheduledThreadPoolExecutor sThreadUtilsScheduledExecutor;
     private static volatile ThreadPoolExecutor sHttpRequestExecutor;
     private static volatile ThreadPoolExecutor sImageLoaderExecutor;
     private static volatile ThreadPoolExecutor sStorageImageCacheExecutor;
@@ -65,6 +68,24 @@ final class InternalExecutors {
                 }
             } finally {
                 THREAD_UTILS_EXECUTOR_LOCK.unlock();
+            }
+        }
+        return executor;
+    }
+
+    @NonNull
+    public static ScheduledThreadPoolExecutor getThreadUtilsScheduledExecutor() {
+        ScheduledThreadPoolExecutor executor = sThreadUtilsScheduledExecutor;
+        if (executor == null) {
+            THREAD_UTILS_SCHEDULED_EXECUTOR_LOCK.lock();
+            try {
+                executor = sThreadUtilsScheduledExecutor;
+                if (executor == null) {
+                    executor = new ScheduledThreadPoolExecutor(1, new AsyncThreadFactory());
+                    sThreadUtilsScheduledExecutor = executor;
+                }
+            } finally {
+                THREAD_UTILS_SCHEDULED_EXECUTOR_LOCK.unlock();
             }
         }
         return executor;
