@@ -65,9 +65,9 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
     @Override
     public void draw(Canvas canvas) {
         if (mFadeState == FADE_RUNNING) {
-            int alpha = Math.min((int) Math
-                    .ceil(MAX_ALPHA * (float) (System.currentTimeMillis() - mStartTime) /
-                            mDuration), MAX_ALPHA);
+            int alpha = Math.min(Math.round(
+                    MAX_ALPHA * (float) (System.currentTimeMillis() - mStartTime) /
+                            (float) mDuration), MAX_ALPHA);
             Drawable startDrawable = getStartDrawable();
             if (startDrawable != null) {
                 draw(canvas, startDrawable, MAX_ALPHA - alpha);
