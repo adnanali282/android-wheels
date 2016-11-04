@@ -106,7 +106,7 @@ final class StorageImageCacheImplementation implements StorageImageCache {
                 size -= removing.length();
                 removing.delete();
             }
-        } catch (Exception ignored) {
+        } catch (Throwable ignored) {
         }
         if (mCacheSizeFitRequested.compareAndSet(true, false)) {
             doFitCacheSize();
