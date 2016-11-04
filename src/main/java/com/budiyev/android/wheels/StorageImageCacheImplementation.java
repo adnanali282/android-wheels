@@ -38,11 +38,14 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Default implementation of {@link StorageImageCache} for {@link ImageLoader}
  */
 final class StorageImageCacheImplementation implements StorageImageCache {
+    private final Lock mCacheFitLock = new ReentrantLock();
     private final AtomicBoolean mCacheSizeFitting = new AtomicBoolean();
     private final AtomicBoolean mCacheSizeFitRequested = new AtomicBoolean();
     private final File mDirectory;
@@ -86,6 +89,7 @@ final class StorageImageCacheImplementation implements StorageImageCache {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doFitCacheSize() {
+        mCacheFitLock.lock();
         try {
             File[] files = getCacheFiles();
             if (files == null || files.length < 2) {
@@ -107,6 +111,8 @@ final class StorageImageCacheImplementation implements StorageImageCache {
                 removing.delete();
             }
         } catch (Throwable ignored) {
+        } finally {
+            mCacheFitLock.unlock();
         }
         if (mCacheSizeFitRequested.compareAndSet(true, false)) {
             doFitCacheSize();
