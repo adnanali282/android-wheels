@@ -38,20 +38,49 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Default implementation of {@link StorageImageCache} for {@link ImageLoader}
  */
 final class StorageImageCacheImplementation implements StorageImageCache {
-    private final Lock mCacheFitLock = new ReentrantLock();
     private final AtomicBoolean mCacheSizeFitting = new AtomicBoolean();
     private final AtomicBoolean mCacheSizeFitRequested = new AtomicBoolean();
     private final File mDirectory;
     private final long mMaxSize;
     private final Bitmap.CompressFormat mCompressFormat;
     private final int mCompressQuality;
+
+    private final Runnable mFitCacheSizeAction = new Runnable() {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        @Override
+        public void run() {
+            do {
+                try {
+                    File[] files = getCacheFiles();
+                    if (files == null || files.length < 2) {
+                        return;
+                    }
+                    Arrays.sort(files, new Comparator<File>() {
+                        @Override
+                        public int compare(File lhs, File rhs) {
+                            return Long.signum(rhs.lastModified() - lhs.lastModified());
+                        }
+                    });
+                    long size = 0;
+                    for (File file : files) {
+                        size += file.length();
+                    }
+                    for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
+                        File removing = files[i];
+                        size -= removing.length();
+                        removing.delete();
+                    }
+                } catch (Throwable ignored) {
+                }
+            } while (mCacheSizeFitRequested.compareAndSet(true, false));
+            mCacheSizeFitting.set(false);
+        }
+    };
 
     /**
      * Storage image cache
@@ -68,70 +97,6 @@ final class StorageImageCacheImplementation implements StorageImageCache {
         mCompressFormat = compressFormat;
         mCompressQuality = compressQuality;
         fitCacheSize();
-    }
-
-    @Nullable
-    private File[] getCacheFiles() {
-        return mDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isFile();
-            }
-        });
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void deleteCacheFile(@NonNull File file) {
-        if (file.exists() && file.isFile()) {
-            file.delete();
-        }
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void doFitCacheSize() {
-        mCacheFitLock.lock();
-        try {
-            File[] files = getCacheFiles();
-            if (files == null || files.length < 2) {
-                return;
-            }
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File lhs, File rhs) {
-                    return Long.signum(rhs.lastModified() - lhs.lastModified());
-                }
-            });
-            long size = 0;
-            for (File file : files) {
-                size += file.length();
-            }
-            for (int i = files.length - 1; size > mMaxSize && i >= 0; i--) {
-                File removing = files[i];
-                size -= removing.length();
-                removing.delete();
-            }
-        } catch (Throwable ignored) {
-        } finally {
-            mCacheFitLock.unlock();
-        }
-        if (mCacheSizeFitRequested.compareAndSet(true, false)) {
-            doFitCacheSize();
-        } else {
-            mCacheSizeFitting.set(false);
-        }
-    }
-
-    public void fitCacheSize() {
-        if (mCacheSizeFitting.compareAndSet(false, true)) {
-            InternalExecutors.getStorageImageCacheExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    doFitCacheSize();
-                }
-            });
-        } else {
-            mCacheSizeFitRequested.set(true);
-        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -181,6 +146,31 @@ final class StorageImageCacheImplementation implements StorageImageCache {
         }
         for (File file : files) {
             file.delete();
+        }
+    }
+
+    @Nullable
+    private File[] getCacheFiles() {
+        return mDirectory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.isFile();
+            }
+        });
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void deleteCacheFile(@NonNull File file) {
+        if (file.exists() && file.isFile()) {
+            file.delete();
+        }
+    }
+
+    private void fitCacheSize() {
+        if (mCacheSizeFitting.compareAndSet(false, true)) {
+            InternalExecutors.getStorageImageCacheExecutor().execute(mFitCacheSizeAction);
+        } else {
+            mCacheSizeFitRequested.set(true);
         }
     }
 }
