@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -75,9 +76,7 @@ public final class CollectionUtils {
             result.addAll(collectionA);
             result.addAll(collectionB);
         } else if (a instanceof Collection<?>) {
-            Collection<T> collectionA = (Collection<T>) a;
-            result = new ArrayList<>(collectionA.size());
-            result.addAll(collectionA);
+            result = new ArrayList<>((Collection<T>) a);
             for (T element : b) {
                 result.add(element);
             }
@@ -98,19 +97,16 @@ public final class CollectionUtils {
     }
 
     /**
-     * Merge two arrays
+     * Merge two arrays into the new one
      *
-     * @param a      First array
-     * @param b      Second array
-     * @param result Result array (length must be equal or greater than
-     *               sum of {@code a} and {@code b} lengths)
-     * @return Result array, filled by elements of {@code a}, followed by elements of {@code b}
+     * @param a First array
+     * @param b Second array
+     * @return New array, filled by elements of {@code a}, followed by elements of {@code b}
      */
     @NonNull
-    public static <T> T[] merge(@NonNull T[] a, @NonNull T[] b, @NonNull T[] result) {
-        if (result.length < a.length + b.length) {
-            throw new IllegalArgumentException();
-        }
+    @SuppressWarnings("unchecked")
+    public static <T> T[] merge(@NonNull T[] a, @NonNull T[] b) {
+        T[] result = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);
         return result;
