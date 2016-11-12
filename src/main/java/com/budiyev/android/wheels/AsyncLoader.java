@@ -27,6 +27,7 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
@@ -314,6 +315,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
         private volatile boolean loaded;
 
         @Override
+        @WorkerThread
         public void run() {
             final D localData = load(mArguments, state);
             boolean loadInterrupted = state.abandoned || state.stopped || state.forcedStop;
@@ -326,6 +328,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
             }
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
+                @MainThread
                 public void run() {
                     if (state.cancelled) {
                         deliverCancellation();

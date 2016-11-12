@@ -215,6 +215,7 @@ public final class ThreadUtils {
      * and whose {@code get()} method will return {@code null} upon completion
      */
     @NonNull
+    @AnyThread
     public static ScheduledFuture<Future<?>> runAsync(@NonNull Runnable task, long delay) {
         return runAsync(task, delay, TimeUnit.MILLISECONDS);
     }
@@ -250,6 +251,7 @@ public final class ThreadUtils {
      * and whose {@code get()} method will return {@code null} upon completion
      */
     @NonNull
+    @AnyThread
     public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull Callable<T> task, long delay) {
         return runAsync(task, delay, TimeUnit.MILLISECONDS);
     }

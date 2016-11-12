@@ -187,6 +187,7 @@ final class LoadImageAction<T> {
         if (mImageLoadCallback != null) {
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
+                @MainThread
                 public void run() {
                     mImageLoadCallback.onLoaded(data, image, fromMemoryCache, fromStorageCache);
                 }
@@ -199,6 +200,7 @@ final class LoadImageAction<T> {
         if (mImageLoadCallback != null) {
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
+                @MainThread
                 public void run() {
                     mImageLoadCallback.onError(data, exception);
                 }

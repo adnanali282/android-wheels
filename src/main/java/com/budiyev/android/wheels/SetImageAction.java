@@ -51,6 +51,7 @@ final class SetImageAction<T> implements Runnable {
     }
 
     @Override
+    @MainThread
     public void run() {
         if (!mLoadImageAction.isCancelled() && !mImageLoader.isExitTasksEarly()) {
             final ImageView imageView = mLoadImageAction.getAttachedImageView();

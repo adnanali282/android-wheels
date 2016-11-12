@@ -26,6 +26,7 @@ package com.budiyev.android.wheels;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 
 /**
@@ -80,6 +81,7 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
                 mFadeState = FADE_DONE;
                 ThreadUtils.runOnMainThread(new Runnable() {
                     @Override
+                    @MainThread
                     public void run() {
                         FadeCallback fadeCallback = getFadeCallback();
                         if (fadeCallback != null) {
