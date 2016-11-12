@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 
 /**
@@ -37,6 +38,7 @@ public interface FadeCallback {
      *
      * @param drawable Drawable
      */
+    @MainThread
     void onStart(@NonNull FadeDrawable drawable);
 
     /**
@@ -44,5 +46,6 @@ public interface FadeCallback {
      *
      * @param drawable Drawable
      */
+    @MainThread
     void onEnd(@NonNull FadeDrawable drawable);
 }

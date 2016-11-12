@@ -68,10 +68,12 @@ final class SetImageAction<T> implements Runnable {
                 imageView.setImageDrawable(fadeDrawable);
                 fadeDrawable.setFadeCallback(new FadeCallback() {
                     @Override
+                    @MainThread
                     public void onStart(@NonNull FadeDrawable drawable) {
                     }
 
                     @Override
+                    @MainThread
                     public void onEnd(@NonNull FadeDrawable drawable) {
                         reportDisplayed(image, imageView);
                     }

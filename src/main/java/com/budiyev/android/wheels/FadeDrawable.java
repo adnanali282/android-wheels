@@ -83,7 +83,7 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
                     @Override
                     @MainThread
                     public void run() {
-                        FadeCallback fadeCallback = getFadeCallback();
+                        FadeCallback fadeCallback = mFadeCallback;
                         if (fadeCallback != null) {
                             fadeCallback.onEnd(FadeDrawable.this);
                         }
@@ -114,13 +114,22 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
         mDuration = duration;
         mStartTime = System.currentTimeMillis();
         mFadeState = FADE_RUNNING;
-        FadeCallback fadeCallback = mFadeCallback;
-        if (fadeCallback != null) {
-            fadeCallback.onStart(this);
-        }
         invalidateSelf();
+        ThreadUtils.runOnMainThread(new Runnable() {
+            @Override
+            @MainThread
+            public void run() {
+                FadeCallback fadeCallback = mFadeCallback;
+                if (fadeCallback != null) {
+                    fadeCallback.onStart(FadeDrawable.this);
+                }
+            }
+        }, 0);
     }
 
+    /**
+     * Reset fade to initial state
+     */
     public void resetFade() {
         mFadeState = FADE_NONE;
         invalidateSelf();
@@ -152,5 +161,4 @@ public class FadeDrawable extends LayerDrawable implements Drawable.Callback {
     public void setFadeCallback(@Nullable FadeCallback fadeCallback) {
         mFadeCallback = fadeCallback;
     }
-
 }
