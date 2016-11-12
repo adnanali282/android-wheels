@@ -34,7 +34,7 @@ import android.support.annotation.NonNull;
  */
 public interface FadeCallback {
     /**
-     * Called on start of fade effect
+     * Called when wade effect is started
      *
      * @param drawable Drawable
      */
