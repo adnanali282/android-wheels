@@ -201,7 +201,8 @@ public final class ThreadUtils {
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
-            @NonNull AsyncTask<Parameters, Progress, Result> task, Parameters... parameters) {
+            @NonNull AsyncTask<Parameters, Progress, Result> task,
+            @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
         return task;
     }
@@ -232,7 +233,7 @@ public final class ThreadUtils {
     @NonNull
     @AnyThread
     public static ScheduledFuture<Future<?>> runAsync(@NonNull final Runnable task, long delay,
-            TimeUnit unit) {
+            @NonNull TimeUnit unit) {
         return InternalExecutors.getThreadUtilsScheduledExecutor()
                 .schedule(new Callable<Future<?>>() {
                     @Override
@@ -268,7 +269,7 @@ public final class ThreadUtils {
     @NonNull
     @AnyThread
     public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull final Callable<T> task,
-            long delay, TimeUnit unit) {
+            long delay, @NonNull TimeUnit unit) {
         return InternalExecutors.getThreadUtilsScheduledExecutor()
                 .schedule(new Callable<Future<T>>() {
                     @Override
@@ -281,9 +282,9 @@ public final class ThreadUtils {
     /**
      * Run task asynchronous with specified delay
      *
-     * @param task       Task
-     * @param delay      Delay
-     * @param parameters Parameters
+     * @param task       Task to execute
+     * @param delay      Time in milliseconds from now to delay execution
+     * @param parameters AsyncTask parameters
      * @return Task
      */
     @NonNull
@@ -291,15 +292,36 @@ public final class ThreadUtils {
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
-            Parameters... parameters) {
+            @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
+        return task;
+    }
+
+    /**
+     * Run task asynchronous with specified delay
+     *
+     * @param task       Task to execute
+     * @param delay      Time from now to delay execution
+     * @param unit       Time unit of the {@code delay} parameter; time units lesser
+     *                   than millisecond are irrelevant
+     * @param parameters AsyncTask parameters
+     * @return Task
+     */
+    @NonNull
+    @AnyThread
+    @SafeVarargs
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
+            @NonNull TimeUnit unit, @Nullable Parameters... parameters) {
+        InternalExecutors.getMainThreadExecutor()
+                .execute(wrapAsyncTask(task, parameters), unit.toMillis(delay));
         return task;
     }
 
     /**
      * Run task on the main (UI) thread
      *
-     * @param task Task
+     * @param task Task to execute
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
@@ -311,7 +333,7 @@ public final class ThreadUtils {
     /**
      * Run task on the main (UI) thread
      *
-     * @param task Task
+     * @param task Task to execute
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
@@ -323,8 +345,8 @@ public final class ThreadUtils {
     /**
      * Run task on the main (UI) thread with specified delay
      *
-     * @param task  Task
-     * @param delay Delay
+     * @param task  Task to execute
+     * @param delay Time in milliseconds from now to delay execution
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
@@ -336,14 +358,46 @@ public final class ThreadUtils {
     /**
      * Run task on the main (UI) thread with specified delay
      *
+     * @param task  Task to execute
+     * @param delay Time from now to delay execution; time units lesser
+     *              than millisecond are irrelevant
+     * @param unit  Time unit of the {@code delay} parameter
+     * @return a {@link Future} representing pending completion of the task
+     */
+    @NonNull
+    @AnyThread
+    public static Future<?> runOnMainThread(@NonNull Runnable task, long delay,
+            @NonNull TimeUnit unit) {
+        return InternalExecutors.getMainThreadExecutor().submit(task, unit.toMillis(delay));
+    }
+
+    /**
+     * Run task on the main (UI) thread with specified delay
+     *
      * @param task  Task
-     * @param delay Delay
+     * @param delay Time in milliseconds from now to delay execution
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
     @AnyThread
     public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay) {
         return InternalExecutors.getMainThreadExecutor().submit(task, delay);
+    }
+
+    /**
+     * Run task on the main (UI) thread with specified delay
+     *
+     * @param task  Task to execute
+     * @param delay Time from now to delay execution; time units lesser
+     *              than millisecond are irrelevant
+     * @param unit  Time unit of the {@code delay} parameter
+     * @return a {@link Future} representing pending completion of the task
+     */
+    @NonNull
+    @AnyThread
+    public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay,
+            @NonNull TimeUnit unit) {
+        return InternalExecutors.getMainThreadExecutor().submit(task, unit.toMillis(delay));
     }
 
     /**
