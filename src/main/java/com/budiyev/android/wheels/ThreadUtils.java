@@ -302,15 +302,16 @@ public final class ThreadUtils {
      *
      * @param task       Task to execute
      * @param delay      Time from now to delay execution
-     * @param unit       Time unit of the {@code delay} parameter; time units lesser
-     *                   than millisecond are irrelevant
+     * @param unit       Time unit of the {@code delay} parameter; time units lesser than
+     *                   milliseconds ({@link TimeUnit#NANOSECONDS}, {@link TimeUnit#MICROSECONDS})
+     *                   are irrelevant and not recommended to use
      * @param parameters AsyncTask parameters
      * @return Task
      */
     @NonNull
     @AnyThread
     @SafeVarargs
-    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsQync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             @NonNull TimeUnit unit, @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor()
@@ -359,8 +360,7 @@ public final class ThreadUtils {
      * Run task on the main (UI) thread with specified delay
      *
      * @param task  Task to execute
-     * @param delay Time from now to delay execution; time units lesser
-     *              than millisecond are irrelevant
+     * @param delay Time from now to delay execution
      * @param unit  Time unit of the {@code delay} parameter
      * @return a {@link Future} representing pending completion of the task
      */
@@ -388,9 +388,10 @@ public final class ThreadUtils {
      * Run task on the main (UI) thread with specified delay
      *
      * @param task  Task to execute
-     * @param delay Time from now to delay execution; time units lesser
-     *              than millisecond are irrelevant
-     * @param unit  Time unit of the {@code delay} parameter
+     * @param delay Time from now to delay execution
+     * @param unit  Time unit of the {@code delay} parameter; time units lesser than
+     *              milliseconds ({@link TimeUnit#NANOSECONDS}, {@link TimeUnit#MICROSECONDS})
+     *              are irrelevant and not recommended to use
      * @return a {@link Future} representing pending completion of the task
      */
     @NonNull
