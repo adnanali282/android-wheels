@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewManager;
@@ -147,14 +148,26 @@ public final class CommonUtils {
 
     /**
      * Check if specified text is {@code null} or empty
+     * <br>
+     * This method will be removed in version <b>4.4.0</b>
+     *
+     * @see TextUtils
+     * @deprecated
      */
+    @Deprecated
     public static boolean isNullOrEmpty(@Nullable CharSequence text) {
-        return text == null || text.length() == 0;
+        return TextUtils.isEmpty(text);
     }
 
     /**
      * Check if specified {@link String} is {@code null} or empty or white space
+     * <br>
+     * This method will be removed in version <b>4.4.0</b>
+     *
+     * @see TextUtils
+     * @deprecated
      */
+    @Deprecated
     public static boolean isNullOrWhiteSpace(@Nullable String string) {
         return string == null || string.trim().length() == 0;
     }
