@@ -238,7 +238,7 @@ public abstract class AsyncLoader<A, D> extends Loader<D> {
      * Represents loading state for concrete {@link AsyncLoader#load(Object, LoadState)}
      * method call
      */
-    protected static final class LoadState {
+    public static final class LoadState {
         private volatile boolean abandoned;
         private volatile boolean cancelled;
         private volatile boolean stopped;
