@@ -11,6 +11,7 @@ Some useful tools for Android
 * ImageUtils - Tools for images
 * HashUtils - Tools for hashing
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
+* NumberUtils - Convenience methods to unpack nullable packed numbers
 * CsvParser - Parser/encoder of CSV format
 * CircularProgressBar - Progress bar view, supports indeterminate mode
 * and more...
