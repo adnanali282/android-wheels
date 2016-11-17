@@ -263,12 +263,16 @@ public final class CommonUtils {
      * @return {@code true} if all files deleted successfully, {@code false} otherwise
      */
     public static boolean deletePath(@NonNull File path) {
+        //TODO: Rewrite to depth search
         if (!path.exists()) {
             return false;
         }
         boolean result = true;
         Queue<File> queue = new LinkedList<>();
         for (File current = path; current != null; current = queue.poll()) {
+            if (!current.exists()) {
+                continue;
+            }
             if (current.isDirectory()) {
                 File[] content = current.listFiles();
                 if (CollectionUtils.isNullOrEmpty(content)) {
