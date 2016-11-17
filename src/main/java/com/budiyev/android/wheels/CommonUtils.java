@@ -23,16 +23,19 @@
  */
 package com.budiyev.android.wheels;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
+import android.support.annotation.RequiresPermission;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewManager;
@@ -44,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -144,32 +146,6 @@ public final class CommonUtils {
      */
     public static int dpToPx(@NonNull Context context, float dp) {
         return dpToPx(context.getResources().getDisplayMetrics(), dp);
-    }
-
-    /**
-     * Check if specified text is {@code null} or empty
-     * <br>
-     * This method will be removed in version <b>4.4.0</b>
-     *
-     * @see TextUtils
-     * @deprecated
-     */
-    @Deprecated
-    public static boolean isNullOrEmpty(@Nullable CharSequence text) {
-        return TextUtils.isEmpty(text);
-    }
-
-    /**
-     * Check if specified {@link String} is {@code null} or empty or white space
-     * <br>
-     * This method will be removed in version <b>4.4.0</b>
-     *
-     * @see TextUtils
-     * @deprecated
-     */
-    @Deprecated
-    public static boolean isNullOrWhiteSpace(@Nullable String string) {
-        return string == null || string.trim().length() == 0;
     }
 
     /**
@@ -292,24 +268,59 @@ public final class CommonUtils {
         }
         boolean result = true;
         Queue<File> queue = new LinkedList<>();
-        queue.add(path);
-        while (!queue.isEmpty()) {
-            File current = queue.remove();
-            if (!current.exists()) {
-                continue;
-            }
+        for (File current = path; current != null; current = queue.poll()) {
             if (current.isDirectory()) {
                 File[] content = current.listFiles();
                 if (CollectionUtils.isNullOrEmpty(content)) {
                     result &= current.delete();
                 } else {
-                    Collections.addAll(queue, content);
-                    queue.add(current);
+                    for (File file : content) {
+                        queue.offer(file);
+                    }
+                    queue.offer(current);
                 }
             } else {
                 result &= current.delete();
             }
         }
         return result;
+    }
+
+    /**
+     * Returns details about the currently active default data network. When
+     * connected, this network is the default route for outgoing connections.
+     * <br>
+     * Requires permission {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @param context Context
+     * @return a {@link NetworkInfo} object for the current default network or
+     * {@code null} either if no default network is currently active or
+     * {@link ConnectivityManager} is not available from specified {@link Context}.
+     */
+    @Nullable
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    public static NetworkInfo getActiveNetworkInfo(@NonNull Context context) {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            return connectivityManager.getActiveNetworkInfo();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Indicates whether network connectivity exists and it is possible to establish
+     * connections and pass data.
+     * <br>
+     * Requires permission {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @param context Context
+     * @return {@code true} if network connectivity exists, {@code false} otherwise
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    public static boolean isConnectedToNetwork(@NonNull Context context) {
+        NetworkInfo activeNetworkInfo = getActiveNetworkInfo(context);
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
