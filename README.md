@@ -1,6 +1,10 @@
 # Android Wheels
 Some useful tools for Android
 
+### Download
+[![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)]
+(https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
+
 ### Contents
 * ThreadUtils - Tools for asynchronous tasks in Android
 * ImageLoader - Universal image loading tool
@@ -153,7 +157,3 @@ public class PictureLoader extends AsyncLoader<Bundle, Bitmap> {
     }
 }
 ```
-
-### Download
-[![Download](https://api.bintray.com/packages/yuriy-budiyev/maven/android-wheels/images/download.svg)]
-(https://bintray.com/yuriy-budiyev/maven/android-wheels/_latestVersion)
