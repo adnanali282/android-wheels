@@ -38,6 +38,7 @@ import android.view.Window;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Tools for Snackbar
@@ -54,26 +55,17 @@ public final class SnackbarUtils {
      */
     @NonNull
     private static View findSuitableView(@NonNull View view) {
-        if (view instanceof CoordinatorLayout) {
-            return view;
-        }
-        ViewGroup viewGroup;
         if (view instanceof ViewGroup) {
-            viewGroup = (ViewGroup) view;
-        } else {
-            return view;
-        }
-        LinkedList<View> queue = new LinkedList<>();
-        queue.add(viewGroup);
-        while (!queue.isEmpty()) {
-            View currentView = queue.remove();
-            if (currentView instanceof CoordinatorLayout) {
-                return currentView;
-            }
-            if (currentView instanceof ViewGroup) {
-                ViewGroup currentViewGroup = (ViewGroup) currentView;
-                for (int i = 0; i < currentViewGroup.getChildCount(); i++) {
-                    queue.add(currentViewGroup.getChildAt(i));
+            Queue<View> queue = new LinkedList<>();
+            for (View current = view; current != null; current = queue.poll()) {
+                if (current instanceof CoordinatorLayout) {
+                    return current;
+                }
+                if (current instanceof ViewGroup) {
+                    ViewGroup group = (ViewGroup) current;
+                    for (int i = 0, c = group.getChildCount(); i < c; i++) {
+                        queue.offer(group.getChildAt(i));
+                    }
                 }
             }
         }
