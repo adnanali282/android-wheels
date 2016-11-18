@@ -23,30 +23,31 @@
  */
 package com.budiyev.android.wheels;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 /**
- * Thrown when current thread is not the main (UI) thread
+ * Thrown if given {@link Context} is not valid
  */
-public class NotMainThreadException extends RuntimeException {
-    public NotMainThreadException() {
+public class InvalidContextException extends RuntimeException {
+    public InvalidContextException() {
     }
 
-    public NotMainThreadException(String message) {
+    public InvalidContextException(String message) {
         super(message);
     }
 
-    public NotMainThreadException(String message, Throwable cause) {
+    public InvalidContextException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public NotMainThreadException(Throwable cause) {
+    public InvalidContextException(Throwable cause) {
         super(cause);
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    public NotMainThreadException(String message, Throwable cause, boolean enableSuppression,
+    public InvalidContextException(String message, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

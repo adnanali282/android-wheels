@@ -295,7 +295,7 @@ public final class CommonUtils {
      * @param context Context
      * @return a {@link NetworkInfo} object for the current default network or
      * {@code null} either if no default network is currently active or
-     * {@link ConnectivityManager} is not available from specified {@link Context}.
+     * {@link ConnectivityManager} is not available from specified {@link Context}
      */
     @Nullable
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
@@ -316,7 +316,8 @@ public final class CommonUtils {
      * Requires permission {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param context Context
-     * @return {@code true} if network connectivity exists, {@code false} otherwise
+     * @return {@code true} if network connectivity exists, {@code false} if it doesn't or
+     * {@link ConnectivityManager} is not available from specified {@link Context}
      */
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     public static boolean isConnectedToNetwork(@NonNull Context context) {
