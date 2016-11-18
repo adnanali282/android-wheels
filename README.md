@@ -11,6 +11,7 @@ Some useful tools for Android
 * HttpRequest - API for HTTP requests based on HttpURLConnection
 * AsyncLoader - Abstract Loader based on ThreadUtils
 * CollectionUtils - Tools for collections
+* ContextUtils - Convenience methods to get system services from context
 * CommonUtils - Common useful tools
 * ImageUtils - Tools for images
 * HashUtils - Tools for hashing
