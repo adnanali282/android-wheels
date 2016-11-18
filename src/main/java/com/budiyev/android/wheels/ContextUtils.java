@@ -776,7 +776,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     public static UsageStatsManager getUsageStatsManager(@NonNull Context context) {
         return checkService(context.getSystemService(Context.USAGE_STATS_SERVICE));
     }
@@ -790,7 +790,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static JobScheduler getJobScheduler(@NonNull Context context) {
         return checkService(context.getSystemService(Context.JOB_SCHEDULER_SERVICE));
     }
@@ -804,7 +804,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static MediaProjectionManager getMediaProjectionManager(@NonNull Context context) {
         return checkService(context.getSystemService(Context.MEDIA_PROJECTION_SERVICE));
     }
@@ -818,7 +818,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static MidiManager getMidiManager(@NonNull Context context) {
         return checkService(context.getSystemService(Context.MIDI_SERVICE));
     }
@@ -832,7 +832,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(Build.VERSION_CODES.N)
     public static HardwarePropertiesManager getHardwarePropertiesManager(@NonNull Context context) {
         return checkService(context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE));
     }
