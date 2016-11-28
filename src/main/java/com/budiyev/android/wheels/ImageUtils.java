@@ -83,6 +83,7 @@ public final class ImageUtils {
         paint.setColorFilter(Objects.requireNonNull(colorFilter));
         Bitmap bitmap =
                 Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
+        bitmap.setDensity(image.getDensity());
         new Canvas(bitmap).drawBitmap(image, 0, 0, paint);
         return bitmap;
     }
@@ -154,6 +155,7 @@ public final class ImageUtils {
         Rect rect = new Rect(0, 0, width, height);
         RectF rectF = new RectF(rect);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setDensity(image.getDensity());
         Canvas canvas = new Canvas(bitmap);
         canvas.drawARGB(0, 0, 0, 0);
         canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
