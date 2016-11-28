@@ -149,6 +149,20 @@ public final class CommonUtils {
     }
 
     /**
+     * Check if specified text is {@code null} or empty
+     */
+    public static boolean isNullOrEmpty(@Nullable CharSequence text) {
+        return text == null || text.length() == 0;
+    }
+
+    /**
+     * Check if specified {@link String} is {@code null} or empty or white space
+     */
+    public static boolean isNullOrWhiteSpace(@Nullable String string) {
+        return string == null || string.trim().length() == 0;
+    }
+
+    /**
      * Get text resource value by name of identifier
      *
      * @param context      Context
@@ -287,10 +301,28 @@ public final class CommonUtils {
     }
 
     /**
+     * Get extension of specified path
+     *
+     * @param path Path
+     * @return Extension or {@code null} if there are no extension in the path
+     */
+    @Nullable
+    public static String getFileExtension(@NonNull String path) {
+        int dot = path.lastIndexOf('.');
+        int separator = Math.max(path.lastIndexOf(File.pathSeparatorChar),
+                path.lastIndexOf(File.separatorChar));
+        if (dot > separator) {
+            return path.substring(dot + 1);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Returns details about the currently active default data network. When
      * connected, this network is the default route for outgoing connections.
      * <br>
-     * Requires permission {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * Requires permission {@link Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param context Context
      * @return a {@link NetworkInfo} object for the current default network or
@@ -313,7 +345,7 @@ public final class CommonUtils {
      * Indicates whether network connectivity exists and it is possible to establish
      * connections and pass data.
      * <br>
-     * Requires permission {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * Requires permission {@link Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param context Context
      * @return {@code true} if network connectivity exists, {@code false} if it doesn't or
