@@ -117,10 +117,25 @@ public final class CommonUtils {
      */
     @NonNull
     public static Bitmap drawViewOnBitmap(@NonNull View view, int width, int height) {
+        return drawViewOnBitmap(view, width, height, Bitmap.Config.ARGB_8888);
+    }
+
+    /**
+     * Draw specified {@link View} on a {@link Bitmap}
+     *
+     * @param view   View
+     * @param width  Bitmap width
+     * @param height Bitmap height
+     * @param config Bitmap config
+     * @return Bitmap
+     */
+    @NonNull
+    public static Bitmap drawViewOnBitmap(@NonNull View view, int width, int height,
+            @NonNull Bitmap.Config config) {
         if (view.getWidth() != width || view.getHeight() != height) {
             view.layout(0, 0, width, height);
         }
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, config);
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
         return bitmap;
