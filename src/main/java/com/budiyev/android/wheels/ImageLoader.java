@@ -56,8 +56,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * is usable without {@link BitmapLoader} (loading new bitmaps is not available in this case).
  */
 public class ImageLoader<T> {
-    private static final float DEFAULT_MEMORY_FRACTION = 0.25F;
-    private static final double DEFAULT_STORAGE_FRACTION = 0.1D;
+    private static final float DEFAULT_MEMORY_FRACTION = 0.25f;
+    private static final double DEFAULT_STORAGE_FRACTION = 0.1d;
     private static final int DEFAULT_COMPRESS_QUALITY = 85;
     private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
     private static final String DEFAULT_STORAGE_CACHE_DIRECTORY = "image_loader_cache";
