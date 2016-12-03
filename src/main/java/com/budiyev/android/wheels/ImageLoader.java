@@ -45,6 +45,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link ImageLoader} is a universal tool for loading bitmaps efficiently in Android, which
@@ -58,11 +61,12 @@ public class ImageLoader<T> {
     private static final int DEFAULT_COMPRESS_QUALITY = 85;
     private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
     private static final String DEFAULT_STORAGE_CACHE_DIRECTORY = "image_loader_cache";
-    private final Object mPauseWorkLock = new Object();
+    private final Lock mPauseLoadingLock = new ReentrantLock();
+    private final Condition mPauseLoadingCondition = mPauseLoadingLock.newCondition();
     private final Context mContext;
     private volatile boolean mImageFadeIn = true;
     private volatile boolean mExitTasksEarly;
-    private volatile boolean mPauseWork;
+    private volatile boolean mLoadingPaused;
     private volatile int mImageFadeInTime = 200;
     private volatile BitmapLoader<T> mBitmapLoader;
     private volatile MemoryImageCache mMemoryImageCache;
@@ -125,19 +129,23 @@ public class ImageLoader<T> {
     /**
      * Whether to pause image loading
      */
-    public boolean isPauseWork() {
-        return mPauseWork;
+    public boolean isLoadingPaused() {
+        return mLoadingPaused;
     }
 
     /**
-     * Whether to pause image loading
+     * Whether to pause image loading. If this method is invoked with {@code true} parameter,
+     * all loading actions will be paused until it will be invoked with {@code false}.
      */
-    public void setPauseWork(boolean pauseWork) {
-        synchronized (mPauseWorkLock) {
-            mPauseWork = pauseWork;
-            if (!pauseWork) {
-                mPauseWorkLock.notifyAll();
+    public void setPauseLoading(boolean pause) {
+        mPauseLoadingLock.lock();
+        try {
+            mLoadingPaused = pause;
+            if (!pause) {
+                mPauseLoadingCondition.signalAll();
             }
+        } finally {
+            mPauseLoadingLock.unlock();
         }
     }
 
@@ -168,8 +176,8 @@ public class ImageLoader<T> {
             }
         } else if (cancelPotentialWork(imageSource, imageView)) {
             LoadImageAction<T> loadAction =
-                    new LoadImageAction<>(imageSource, imageView, this, mPauseWorkLock,
-                            imageLoadCallback);
+                    new LoadImageAction<>(imageSource, imageView, this, mPauseLoadingLock,
+                            mPauseLoadingCondition, imageLoadCallback);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
@@ -329,7 +337,7 @@ public class ImageLoader<T> {
     public void setExitTasksEarly(boolean exitTasksEarly) {
         mExitTasksEarly = exitTasksEarly;
         if (exitTasksEarly) {
-            mPauseWorkLock.notifyAll();
+            mPauseLoadingLock.notifyAll();
         }
     }
 

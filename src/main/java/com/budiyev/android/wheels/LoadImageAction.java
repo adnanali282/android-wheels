@@ -35,6 +35,8 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Load image action for {@link ImageLoader}
@@ -43,7 +45,8 @@ final class LoadImageAction<T> {
     private final ImageSource<T> mImageSource;
     private final WeakReference<ImageView> mImageViewReference;
     private final ImageLoader<T> mImageLoader;
-    private final Object mPauseWorkLock;
+    private final Lock mPauseWorkLock;
+    private final Condition mPauseWorkCondition;
     private final ImageLoadCallback<T> mImageLoadCallback;
     private final AtomicBoolean mSubmitted = new AtomicBoolean();
     private final AtomicBoolean mFinished = new AtomicBoolean();
@@ -51,12 +54,14 @@ final class LoadImageAction<T> {
     private final AtomicReference<Future<?>> mFuture = new AtomicReference<>();
 
     public LoadImageAction(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @NonNull ImageLoader<T> imageLoader, @NonNull Object pauseWorkLock,
+            @NonNull ImageLoader<T> imageLoader, @NonNull Lock pauseWorkLock,
+            @NonNull Condition pauseWorkCondition,
             @Nullable ImageLoadCallback<T> imageLoadCallback) {
         mImageSource = imageSource;
         mImageViewReference = new WeakReference<>(imageView);
         mImageLoader = imageLoader;
         mPauseWorkLock = pauseWorkLock;
+        mPauseWorkCondition = pauseWorkCondition;
         mImageLoadCallback = imageLoadCallback;
     }
 
@@ -123,14 +128,14 @@ final class LoadImageAction<T> {
 
     @WorkerThread
     private void loadImage() {
-        synchronized (mPauseWorkLock) {
-            while (mImageLoader.isPauseWork() && !mImageLoader.isExitTasksEarly() &&
-                    !isCancelled()) {
-                try {
-                    mPauseWorkLock.wait();
-                } catch (InterruptedException ignored) {
-                }
+        mPauseWorkLock.lock();
+        try {
+            while (!isCancelled() && mImageLoader.isLoadingPaused() &&
+                    !mImageLoader.isExitTasksEarly()) {
+                mPauseWorkCondition.awaitUninterruptibly();
             }
+        } finally {
+            mPauseWorkLock.unlock();
         }
         if (isCancelled() || mImageLoader.isExitTasksEarly()) {
             return;

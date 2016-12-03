@@ -28,14 +28,17 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import java.io.InputStream;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link BitmapDrawable} that recycles it's bitmap.
  */
 public class RecyclingBitmapDrawable extends BitmapDrawable {
-    private int mDisplayReferencesCount;
-    private int mCacheReferencesCount;
-    private boolean mHasBeenDisplayed;
+    private final Lock mRecycleLock = new ReentrantLock();
+    private volatile int mDisplayReferencesCount;
+    private volatile int mCacheReferencesCount;
+    private volatile boolean mHasBeenDisplayed;
 
     public RecyclingBitmapDrawable(Resources res, Bitmap bitmap) {
         super(res, bitmap);
@@ -49,30 +52,40 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
         super(res, is);
     }
 
+    public void setDisplayed(boolean displayed) {
+        mRecycleLock.lock();
+        try {
+            if (displayed) {
+                mDisplayReferencesCount++;
+                mHasBeenDisplayed = true;
+            } else {
+                mCacheReferencesCount--;
+            }
+            checkStateAndRecycleIfNeeded();
+        } finally {
+            mRecycleLock.unlock();
+        }
+    }
+
+    public void setCached(boolean cached) {
+        mRecycleLock.lock();
+        try {
+            if (cached) {
+                mCacheReferencesCount++;
+            } else {
+                mCacheReferencesCount--;
+            }
+            checkStateAndRecycleIfNeeded();
+        } finally {
+            mRecycleLock.unlock();
+        }
+    }
+
     private void checkStateAndRecycleIfNeeded() {
         Bitmap bitmap = getBitmap();
         if (bitmap != null && !bitmap.isRecycled() && mCacheReferencesCount <= 0 &&
                 mDisplayReferencesCount <= 0 && mHasBeenDisplayed) {
             bitmap.recycle();
         }
-    }
-
-    public synchronized void setDisplayed(boolean displayed) {
-        if (displayed) {
-            mDisplayReferencesCount++;
-            mHasBeenDisplayed = true;
-        } else {
-            mCacheReferencesCount--;
-        }
-        checkStateAndRecycleIfNeeded();
-    }
-
-    public synchronized void setCached(boolean cached) {
-        if (cached) {
-            mCacheReferencesCount++;
-        } else {
-            mCacheReferencesCount--;
-        }
-        checkStateAndRecycleIfNeeded();
     }
 }
