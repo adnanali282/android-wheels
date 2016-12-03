@@ -138,7 +138,7 @@ final class LoadImageAction<T> {
         Bitmap image = null;
         StorageImageCache storageImageCache = mImageLoader.getStorageImageCache();
         String key = mImageSource.getKey();
-        final T data = mImageSource.getData();
+        T data = mImageSource.getData();
         if (storageImageCache != null) {
             image = storageImageCache.get(key);
             if (image != null && mImageLoadCallback != null) {
@@ -150,7 +150,7 @@ final class LoadImageAction<T> {
             if (bitmapLoader != null) {
                 try {
                     image = bitmapLoader.load(mImageLoader.getContext(), data);
-                } catch (final Exception exception) {
+                } catch (Exception exception) {
                     reportError(data, exception);
                     return;
                 }
