@@ -67,7 +67,7 @@ final class LoadImageAction<T> {
 
     @AnyThread
     public boolean execute() {
-        if (!isCancelled() && !isFinished() && mSubmitted.compareAndSet(false, true)) {
+        if (!mCancelled.get() && !mFinished.get() && mSubmitted.compareAndSet(false, true)) {
             mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
                 @Override
                 public void run() {
@@ -107,7 +107,7 @@ final class LoadImageAction<T> {
     }
 
     public boolean reset() {
-        if (isFinished() || isCancelled()) {
+        if (mFinished.get() || mCancelled.get()) {
             mFuture.set(null);
             mFinished.set(false);
             mCancelled.set(false);
@@ -130,14 +130,14 @@ final class LoadImageAction<T> {
     private void loadImage() {
         mPauseWorkLock.lock();
         try {
-            while (!isCancelled() && mImageLoader.isLoadingPaused() &&
+            while (!mCancelled.get() && mImageLoader.isLoadingPaused() &&
                     !mImageLoader.isExitTasksEarly()) {
                 mPauseWorkCondition.awaitUninterruptibly();
             }
         } finally {
             mPauseWorkLock.unlock();
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly()) {
+        if (mCancelled.get() || mImageLoader.isExitTasksEarly()) {
             return;
         }
         Bitmap image = null;
@@ -179,7 +179,7 @@ final class LoadImageAction<T> {
                 memoryImageCache.put(key, drawable);
             }
         }
-        if (isCancelled() || mImageLoader.isExitTasksEarly()) {
+        if (mCancelled.get() || mImageLoader.isExitTasksEarly()) {
             return;
         }
         ThreadUtils.runOnMainThread(

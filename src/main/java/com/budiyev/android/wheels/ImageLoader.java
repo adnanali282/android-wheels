@@ -127,63 +127,38 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Check if image loading is paused
-     *
-     * @see #setPauseLoading(boolean)
-     */
-    public boolean isLoadingPaused() {
-        return mLoadingPaused;
-    }
-
-    /**
-     * Whether to pause image loading. If this method is invoked with {@code true} parameter,
-     * all loading actions will be paused until it will be invoked with {@code false}.
-     */
-    public void setPauseLoading(boolean pause) {
-        mPauseLoadingLock.lock();
-        try {
-            mLoadingPaused = pause;
-            if (!pause) {
-                mPauseLoadingCondition.signalAll();
-            }
-        } finally {
-            mPauseLoadingLock.unlock();
-        }
-    }
-
-    /**
      * Load image to imageView from imageSource
      *
-     * @param imageSource       Image source
-     * @param imageView         Image view
-     * @param imageLoadCallback Optional callback
+     * @param source   Image source
+     * @param view     Image view
+     * @param callback Optional callback
      */
     @MainThread
-    public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @Nullable ImageLoadCallback<T> imageLoadCallback) {
+    public void loadImage(@NonNull ImageSource<T> source, @NonNull ImageView view,
+            @Nullable ImageLoadCallback<T> callback) {
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         BitmapDrawable drawable = null;
         if (memoryImageCache != null) {
-            drawable = memoryImageCache.get(imageSource.getKey());
+            drawable = memoryImageCache.get(source.getKey());
         }
         Bitmap image;
         if (drawable != null && (image = drawable.getBitmap()) != null) {
-            T data = imageSource.getData();
-            if (imageLoadCallback != null) {
-                imageLoadCallback.onLoaded(data, image, true, false);
+            T data = source.getData();
+            if (callback != null) {
+                callback.onLoaded(data, image, true, false);
             }
-            imageView.setImageDrawable(drawable);
-            if (imageLoadCallback != null) {
-                imageLoadCallback.onDisplayed(data, image, imageView);
+            view.setImageDrawable(drawable);
+            if (callback != null) {
+                callback.onDisplayed(data, image, view);
             }
-        } else if (cancelPotentialWork(imageSource, imageView)) {
+        } else if (cancelPotentialWork(source, view)) {
             LoadImageAction<T> loadAction =
-                    new LoadImageAction<>(imageSource, imageView, this, mPauseLoadingLock,
-                            mPauseLoadingCondition, imageLoadCallback);
+                    new LoadImageAction<>(source, view, this, mPauseLoadingLock,
+                            mPauseLoadingCondition, callback);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
-            imageView.setImageDrawable(asyncBitmapDrawable);
+            view.setImageDrawable(asyncBitmapDrawable);
             loadAction.execute();
         }
     }
@@ -191,20 +166,20 @@ public class ImageLoader<T> {
     /**
      * Load image to imageView from imageSource
      *
-     * @param imageSource Image source
-     * @param imageView   Image view
+     * @param source Image source
+     * @param view   Image view
      */
     @MainThread
-    public void loadImage(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView) {
-        loadImage(imageSource, imageView, null);
+    public void loadImage(@NonNull ImageSource<T> source, @NonNull ImageView view) {
+        loadImage(source, view, null);
     }
 
     /**
      * Delete cached image for specified {@link ImageSource}
      */
     @AnyThread
-    public void invalidate(@NonNull ImageSource<T> imageSource) {
-        String key = imageSource.getKey();
+    public void invalidate(@NonNull ImageSource<T> source) {
+        String key = source.getKey();
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
             memoryImageCache.remove(key);
@@ -230,10 +205,10 @@ public class ImageLoader<T> {
      * <br>
      * Displayed while image is loading
      *
-     * @param bitmap Image bitmap
+     * @param image Image bitmap
      */
-    public void setPlaceholderImage(@Nullable Bitmap bitmap) {
-        mPlaceholderBitmap = bitmap;
+    public void setPlaceholderImage(@Nullable Bitmap image) {
+        mPlaceholderBitmap = image;
     }
 
     /**
@@ -264,8 +239,8 @@ public class ImageLoader<T> {
      * {@link BitmapLoader} is used for loading new bitmaps
      * if there are no cached images with the same key
      */
-    public void setBitmapLoader(@Nullable BitmapLoader<T> bitmapLoader) {
-        mBitmapLoader = bitmapLoader;
+    public void setBitmapLoader(@Nullable BitmapLoader<T> loader) {
+        mBitmapLoader = loader;
     }
 
     /**
@@ -283,8 +258,8 @@ public class ImageLoader<T> {
      * <br>
      * {@link MemoryImageCache} is used for caching images in memory
      */
-    public void setMemoryImageCache(@Nullable MemoryImageCache memoryImageCache) {
-        mMemoryImageCache = memoryImageCache;
+    public void setMemoryImageCache(@Nullable MemoryImageCache cache) {
+        mMemoryImageCache = cache;
     }
 
     /**
@@ -302,8 +277,8 @@ public class ImageLoader<T> {
      * <br>
      * {@link StorageImageCache} is used for caching images in storage
      */
-    public void setStorageImageCache(@Nullable StorageImageCache storageImageCache) {
-        mStorageImageCache = storageImageCache;
+    public void setStorageImageCache(@Nullable StorageImageCache cache) {
+        mStorageImageCache = cache;
     }
 
     /**
@@ -322,8 +297,33 @@ public class ImageLoader<T> {
      * @see #getImageFadeInTime()
      * @see #setImageFadeInTime(int)
      */
-    public void setImageFadeIn(boolean imageFadeIn) {
-        mImageFadeIn = imageFadeIn;
+    public void setImageFadeIn(boolean fadeIn) {
+        mImageFadeIn = fadeIn;
+    }
+
+    /**
+     * Check if image loading is paused
+     *
+     * @see #setPauseLoading(boolean)
+     */
+    public boolean isLoadingPaused() {
+        return mLoadingPaused;
+    }
+
+    /**
+     * Whether to pause image loading. If this method is invoked with {@code true} parameter,
+     * all loading actions will be paused until it will be invoked with {@code false}.
+     */
+    public void setPauseLoading(boolean pause) {
+        mPauseLoadingLock.lock();
+        try {
+            mLoadingPaused = pause;
+            if (!pause) {
+                mPauseLoadingCondition.signalAll();
+            }
+        } finally {
+            mPauseLoadingLock.unlock();
+        }
     }
 
     /**
@@ -336,10 +336,15 @@ public class ImageLoader<T> {
     /**
      * Whether to exit all image loading tasks before start of image loading
      */
-    public void setExitTasksEarly(boolean exitTasksEarly) {
-        mExitTasksEarly = exitTasksEarly;
-        if (exitTasksEarly) {
-            mPauseLoadingLock.notifyAll();
+    public void setExitTasksEarly(boolean exit) {
+        mExitTasksEarly = exit;
+        if (exit) {
+            mPauseLoadingLock.lock();
+            try {
+                mPauseLoadingCondition.signalAll();
+            } finally {
+                mPauseLoadingLock.unlock();
+            }
         }
     }
 
@@ -359,8 +364,8 @@ public class ImageLoader<T> {
      * @see #isImageFadeIn()
      * @see #setImageFadeIn(boolean)
      */
-    public void setImageFadeInTime(int imageFadeInTime) {
-        mImageFadeInTime = imageFadeInTime;
+    public void setImageFadeInTime(int time) {
+        mImageFadeInTime = time;
     }
 
     /**
@@ -385,9 +390,9 @@ public class ImageLoader<T> {
 
     @Nullable
     @MainThread
-    protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView imageView) {
-        if (imageView != null) {
-            Drawable drawable = imageView.getDrawable();
+    protected static LoadImageAction<?> getLoadImageAction(@Nullable ImageView view) {
+        if (view != null) {
+            Drawable drawable = view.getDrawable();
             if (drawable instanceof AsyncBitmapDrawable) {
                 return ((AsyncBitmapDrawable) drawable).getLoadImageAction();
             }
@@ -396,19 +401,19 @@ public class ImageLoader<T> {
     }
 
     @MainThread
-    protected static void cancelWork(@Nullable ImageView imageView) {
-        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
+    protected static void cancelWork(@Nullable ImageView view) {
+        LoadImageAction<?> loadImageAction = getLoadImageAction(view);
         if (loadImageAction != null) {
             loadImageAction.cancel();
         }
     }
 
     @MainThread
-    protected static boolean cancelPotentialWork(@NonNull ImageSource<?> imageSource,
-            @Nullable ImageView imageView) {
-        LoadImageAction<?> loadImageAction = getLoadImageAction(imageView);
+    protected static boolean cancelPotentialWork(@NonNull ImageSource<?> source,
+            @Nullable ImageView view) {
+        LoadImageAction<?> loadImageAction = getLoadImageAction(view);
         if (loadImageAction != null) {
-            if (!Objects.equals(loadImageAction.getImageSource().getKey(), imageSource.getKey())) {
+            if (!Objects.equals(loadImageAction.getImageSource().getKey(), source.getKey())) {
                 loadImageAction.cancel();
             } else {
                 return false;
