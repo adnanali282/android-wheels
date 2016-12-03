@@ -127,7 +127,9 @@ public class ImageLoader<T> {
     }
 
     /**
-     * Whether to pause image loading
+     * Check if image loading is paused
+     *
+     * @see #setPauseLoading(boolean)
      */
     public boolean isLoadingPaused() {
         return mLoadingPaused;
