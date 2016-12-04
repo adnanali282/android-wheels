@@ -154,7 +154,7 @@ final class LoadImageAction<T> {
                     return;
                 }
                 if (image == null) {
-                    reportError(data, new NullPointerException("BitmapLoader returned null"));
+                    reportError(data, new NullPointerException("BitmapLoader returned null."));
                     return;
                 }
             }
