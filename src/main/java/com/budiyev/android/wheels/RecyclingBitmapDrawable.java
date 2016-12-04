@@ -40,16 +40,16 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
     private volatile int mCacheReferencesCount;
     private volatile boolean mHasBeenDisplayed;
 
-    public RecyclingBitmapDrawable(Resources res, Bitmap bitmap) {
-        super(res, bitmap);
+    public RecyclingBitmapDrawable(Resources resources, Bitmap bitmap) {
+        super(resources, bitmap);
     }
 
-    public RecyclingBitmapDrawable(Resources res, String filepath) {
-        super(res, filepath);
+    public RecyclingBitmapDrawable(Resources resources, String filePath) {
+        super(resources, filePath);
     }
 
-    public RecyclingBitmapDrawable(Resources res, InputStream is) {
-        super(res, is);
+    public RecyclingBitmapDrawable(Resources resources, InputStream inputStream) {
+        super(resources, inputStream);
     }
 
     public void setDisplayed(boolean displayed) {
