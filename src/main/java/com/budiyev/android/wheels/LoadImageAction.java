@@ -51,8 +51,8 @@ final class LoadImageAction<T> {
     private volatile boolean mCancelled;
 
     public LoadImageAction(@NonNull ImageSource<T> source, @NonNull ImageView view,
-            @NonNull ImageLoader<T> loader, @NonNull Lock lock, @NonNull Condition condition,
-            @Nullable ImageLoadCallback<T> callback) {
+            @Nullable ImageLoadCallback<T> callback, @NonNull ImageLoader<T> loader,
+            @NonNull Lock lock, @NonNull Condition condition) {
         mImageSource = source;
         mImageViewReference = new WeakReference<>(view);
         mImageLoader = loader;

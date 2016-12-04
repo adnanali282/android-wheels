@@ -45,7 +45,8 @@ public interface ImageSource<T> {
 
     /**
      * Must be unique for each image source. If you want to use storage caching, ensure that
-     * returned value doesn't contain symbols that can't be used in file name
+     * returned value doesn't contain symbols that can't be used in file name.
+     * {@link ImageSource}s considered to be equal if their keys are equal.
      *
      * @return Unique key
      */

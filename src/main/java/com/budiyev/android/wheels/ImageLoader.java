@@ -153,8 +153,8 @@ public class ImageLoader<T> {
             }
         } else if (cancelPotentialWork(source, view)) {
             LoadImageAction<T> loadAction =
-                    new LoadImageAction<>(source, view, this, mPauseLoadingLock,
-                            mPauseLoadingCondition, callback);
+                    new LoadImageAction<>(source, view, callback, this, mPauseLoadingLock,
+                            mPauseLoadingCondition);
             AsyncBitmapDrawable asyncBitmapDrawable =
                     new AsyncBitmapDrawable(getContext().getResources(), getPlaceholderImage(),
                             loadAction);
