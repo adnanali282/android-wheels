@@ -51,13 +51,13 @@ public interface ImageLoadCallback<T> {
      * Called when image displayed; if fade effect is enabled, this method will be called
      * when fade will done
      *
-     * @param data      Source data
-     * @param image     Image, loaded from {@code data}
-     * @param imageView {@link ImageView}, on which {@code image} loaded form {@code data}
-     *                  is displayed
+     * @param data  Source data
+     * @param image Image, loaded from {@code data}
+     * @param view  {@link ImageView}, on which {@code image} loaded form {@code data}
+     *              is displayed
      */
     @MainThread
-    void onDisplayed(@NonNull T data, @NonNull Bitmap image, @NonNull ImageView imageView);
+    void onDisplayed(@NonNull T data, @NonNull Bitmap image, @NonNull ImageView view);
 
     /**
      * Called when {@link BitmapLoader} was unable to load {@link Bitmap}

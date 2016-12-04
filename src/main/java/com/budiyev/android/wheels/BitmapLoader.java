@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 /**
  * {@link Bitmap} loader for {@link ImageLoader}
@@ -51,5 +52,6 @@ public interface BitmapLoader<T> {
      *                   to {@link ImageLoadCallback#onError(Object, Exception)} method.
      */
     @Nullable
+    @WorkerThread
     Bitmap load(@NonNull Context context, T data) throws Exception;
 }
