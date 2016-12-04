@@ -124,8 +124,17 @@ public abstract class HttpRequest {
     public static void setParallelRequestsLimit(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
         ThreadPoolExecutor executor = InternalExecutors.getHttpRequestExecutor();
-        executor.setCorePoolSize(limit);
-        executor.setMaximumPoolSize(limit);
+        int corePoolSize = executor.getCorePoolSize();
+        if (limit == corePoolSize) {
+            return;
+        }
+        if (limit > corePoolSize) {
+            executor.setMaximumPoolSize(limit);
+            executor.setCorePoolSize(limit);
+        } else {
+            executor.setCorePoolSize(limit);
+            executor.setMaximumPoolSize(limit);
+        }
     }
 
     /**
