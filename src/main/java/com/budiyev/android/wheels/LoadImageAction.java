@@ -48,8 +48,7 @@ final class LoadImageAction<T> {
     private final Lock mPauseWorkLock;
     private final Condition mPauseWorkCondition;
     private final ImageLoadCallback<T> mImageLoadCallback;
-    private final AtomicBoolean mSubmitted = new AtomicBoolean();
-    private final AtomicBoolean mFinished = new AtomicBoolean();
+    private final AtomicBoolean mExecuting = new AtomicBoolean();
     private final AtomicBoolean mCancelled = new AtomicBoolean();
     private final AtomicReference<Future<?>> mFuture = new AtomicReference<>();
 
@@ -67,13 +66,13 @@ final class LoadImageAction<T> {
 
     @AnyThread
     public boolean execute() {
-        if (!mCancelled.get() && !mFinished.get() && mSubmitted.compareAndSet(false, true)) {
+        if (!mCancelled.get() && mExecuting.compareAndSet(false, true)) {
             mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
                 @Override
                 public void run() {
                     loadImage();
-                    mFinished.set(true);
-                    mSubmitted.set(false);
+                    mFuture.set(null);
+                    mExecuting.set(false);
                 }
             }));
             return true;
@@ -104,22 +103,6 @@ final class LoadImageAction<T> {
         if (future != null) {
             future.cancel(false);
         }
-    }
-
-    public boolean reset() {
-        if (mFinished.get() || mCancelled.get()) {
-            mFuture.set(null);
-            mFinished.set(false);
-            mCancelled.set(false);
-            mSubmitted.set(false);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isFinished() {
-        return mFinished.get();
     }
 
     public boolean isCancelled() {
