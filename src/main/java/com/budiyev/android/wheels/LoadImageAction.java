@@ -24,7 +24,6 @@
 package com.budiyev.android.wheels;
 
 import android.graphics.Bitmap;
-import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,25 +40,16 @@ import java.util.concurrent.locks.Lock;
  * Load image action for {@link ImageLoader}
  */
 final class LoadImageAction<T> {
-    @NonNull
     private final ImageSource<T> mImageSource;
-    @NonNull
     private final WeakReference<ImageView> mImageViewReference;
-    @NonNull
     private final ImageLoader<T> mImageLoader;
-    @NonNull
     private final Lock mPauseLoadingLock;
-    @NonNull
     private final Condition mPauseLoadingCondition;
-    @Nullable
     private final ImageLoadCallback<T> mImageLoadCallback;
-    @NonNull
     private final AtomicBoolean mExecuting = new AtomicBoolean();
-    @Nullable
     private volatile Future<?> mFuture;
     private volatile boolean mCancelled;
 
-    @AnyThread
     public LoadImageAction(@NonNull ImageSource<T> source, @NonNull ImageView view,
             @NonNull ImageLoader<T> loader, @NonNull Lock lock, @NonNull Condition condition,
             @Nullable ImageLoadCallback<T> callback) {
@@ -71,7 +61,6 @@ final class LoadImageAction<T> {
         mImageLoadCallback = callback;
     }
 
-    @AnyThread
     public boolean execute() {
         if (!mCancelled && mExecuting.compareAndSet(false, true)) {
             mFuture = InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
@@ -88,7 +77,6 @@ final class LoadImageAction<T> {
         }
     }
 
-    @AnyThread
     public void cancel() {
         mCancelled = true;
         Future<?> future = mFuture;
@@ -98,7 +86,6 @@ final class LoadImageAction<T> {
     }
 
     @NonNull
-    @AnyThread
     public ImageSource<T> getImageSource() {
         return mImageSource;
     }
@@ -115,7 +102,6 @@ final class LoadImageAction<T> {
         }
     }
 
-    @AnyThread
     public boolean isCancelled() {
         return mCancelled;
     }
@@ -180,7 +166,6 @@ final class LoadImageAction<T> {
                 new SetImageAction<>(drawable, mImageLoader, mImageLoadCallback, this));
     }
 
-    @AnyThread
     private void reportImageLoaded(@NonNull final T data, @NonNull final Bitmap image,
             final boolean fromMemoryCache, final boolean fromStorageCache) {
         if (mImageLoadCallback != null) {
@@ -194,7 +179,6 @@ final class LoadImageAction<T> {
         }
     }
 
-    @AnyThread
     private void reportError(@NonNull final T data, @NonNull final Exception exception) {
         if (mImageLoadCallback != null) {
             ThreadUtils.runOnMainThread(new Runnable() {

@@ -30,7 +30,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.AnyThread;
 import android.support.annotation.FloatRange;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -57,26 +56,17 @@ import java.util.concurrent.locks.ReentrantLock;
  * is usable without {@link BitmapLoader} (loading new bitmaps is not available in this case).
  */
 public class ImageLoader<T> {
-    @NonNull
     private static final String DEFAULT_STORAGE_CACHE_DIRECTORY = "image_loader_cache";
-    @NonNull
     private static final Bitmap.CompressFormat DEFAULT_COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
     private static final double DEFAULT_STORAGE_FRACTION = 0.1d;
     private static final float DEFAULT_MEMORY_FRACTION = 0.25f;
     private static final int DEFAULT_COMPRESS_QUALITY = 85;
-    @NonNull
     private final Lock mPauseLoadingLock = new ReentrantLock();
-    @NonNull
     private final Condition mPauseLoadingCondition = mPauseLoadingLock.newCondition();
-    @NonNull
     private final Context mContext;
-    @Nullable
     private volatile BitmapLoader<T> mBitmapLoader;
-    @Nullable
     private volatile MemoryImageCache mMemoryImageCache;
-    @Nullable
     private volatile StorageImageCache mStorageImageCache;
-    @Nullable
     private volatile Bitmap mPlaceholderBitmap;
     private volatile boolean mImageFadeIn = true;
     private volatile boolean mExitTasksEarly;
@@ -91,7 +81,6 @@ public class ImageLoader<T> {
      * @param context Context
      * @see Context#getApplicationContext()
      */
-    @AnyThread
     public ImageLoader(@NonNull Context context) {
         this(context, null, null, null);
     }
@@ -105,7 +94,6 @@ public class ImageLoader<T> {
      * @param bitmapLoader Bitmap loader
      * @see Context#getApplicationContext()
      */
-    @AnyThread
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader) {
         this(context, bitmapLoader, newMemoryImageCache(), newStorageImageCache(context));
     }
@@ -121,7 +109,6 @@ public class ImageLoader<T> {
      * @param storageImageCache Storage image cache
      * @see Context#getApplicationContext()
      */
-    @AnyThread
     public ImageLoader(@NonNull Context context, @Nullable BitmapLoader<T> bitmapLoader,
             @Nullable MemoryImageCache memoryImageCache,
             @Nullable StorageImageCache storageImageCache) {
@@ -135,7 +122,6 @@ public class ImageLoader<T> {
      * Context of this {@link ImageLoader} instance
      */
     @NonNull
-    @AnyThread
     protected Context getContext() {
         return mContext;
     }
@@ -191,7 +177,6 @@ public class ImageLoader<T> {
     /**
      * Delete cached image for specified {@link ImageSource}
      */
-    @AnyThread
     public void invalidate(@NonNull ImageSource<T> source) {
         String key = source.getKey();
         MemoryImageCache memoryImageCache = getMemoryImageCache();
@@ -210,7 +195,6 @@ public class ImageLoader<T> {
      * Displayed while image is loading
      */
     @Nullable
-    @AnyThread
     public Bitmap getPlaceholderImage() {
         return mPlaceholderBitmap;
     }
@@ -222,7 +206,6 @@ public class ImageLoader<T> {
      *
      * @param image Image bitmap
      */
-    @AnyThread
     public void setPlaceholderImage(@Nullable Bitmap image) {
         mPlaceholderBitmap = image;
     }
@@ -247,7 +230,6 @@ public class ImageLoader<T> {
      * if there are no cached images with the same key
      */
     @Nullable
-    @AnyThread
     public BitmapLoader<T> getBitmapLoader() {
         return mBitmapLoader;
     }
@@ -258,7 +240,6 @@ public class ImageLoader<T> {
      * {@link BitmapLoader} is used for loading new bitmaps
      * if there are no cached images with the same key
      */
-    @AnyThread
     public void setBitmapLoader(@Nullable BitmapLoader<T> loader) {
         mBitmapLoader = loader;
     }
@@ -269,7 +250,6 @@ public class ImageLoader<T> {
      * {@link MemoryImageCache} is used for caching images in memory
      */
     @Nullable
-    @AnyThread
     public MemoryImageCache getMemoryImageCache() {
         return mMemoryImageCache;
     }
@@ -279,7 +259,6 @@ public class ImageLoader<T> {
      * <br>
      * {@link MemoryImageCache} is used for caching images in memory
      */
-    @AnyThread
     public void setMemoryImageCache(@Nullable MemoryImageCache cache) {
         mMemoryImageCache = cache;
     }
@@ -290,7 +269,6 @@ public class ImageLoader<T> {
      * {@link StorageImageCache} is used for caching images in storage
      */
     @Nullable
-    @AnyThread
     public StorageImageCache getStorageImageCache() {
         return mStorageImageCache;
     }
@@ -300,7 +278,6 @@ public class ImageLoader<T> {
      * <br>
      * {@link StorageImageCache} is used for caching images in storage
      */
-    @AnyThread
     public void setStorageImageCache(@Nullable StorageImageCache cache) {
         mStorageImageCache = cache;
     }
@@ -311,7 +288,6 @@ public class ImageLoader<T> {
      * @see #getImageFadeInTime()
      * @see #setImageFadeInTime(int)
      */
-    @AnyThread
     public boolean isImageFadeIn() {
         return mImageFadeIn;
     }
@@ -322,7 +298,6 @@ public class ImageLoader<T> {
      * @see #getImageFadeInTime()
      * @see #setImageFadeInTime(int)
      */
-    @AnyThread
     public void setImageFadeIn(boolean fadeIn) {
         mImageFadeIn = fadeIn;
     }
@@ -332,7 +307,6 @@ public class ImageLoader<T> {
      *
      * @see #setPauseLoading(boolean)
      */
-    @AnyThread
     public boolean isLoadingPaused() {
         return mLoadingPaused;
     }
@@ -341,7 +315,6 @@ public class ImageLoader<T> {
      * Whether to pause image loading. If this method is invoked with {@code true} parameter,
      * all loading actions will be paused until it will be invoked with {@code false}.
      */
-    @AnyThread
     public void setPauseLoading(boolean pause) {
         mPauseLoadingLock.lock();
         try {
@@ -357,7 +330,6 @@ public class ImageLoader<T> {
     /**
      * Whether to exit all image loading tasks before start of image loading
      */
-    @AnyThread
     public boolean isExitTasksEarly() {
         return mExitTasksEarly;
     }
@@ -365,7 +337,6 @@ public class ImageLoader<T> {
     /**
      * Whether to exit all image loading tasks before start of image loading
      */
-    @AnyThread
     public void setExitTasksEarly(boolean exit) {
         mExitTasksEarly = exit;
         if (exit) {
@@ -384,7 +355,6 @@ public class ImageLoader<T> {
      * @see #isImageFadeIn()
      * @see #setImageFadeIn(boolean)
      */
-    @AnyThread
     public int getImageFadeInTime() {
         return mImageFadeInTime;
     }
@@ -395,7 +365,6 @@ public class ImageLoader<T> {
      * @see #isImageFadeIn()
      * @see #setImageFadeIn(boolean)
      */
-    @AnyThread
     public void setImageFadeInTime(int time) {
         mImageFadeInTime = time;
     }
@@ -408,7 +377,6 @@ public class ImageLoader<T> {
      * @see #getStorageImageCache()
      * @see #setStorageImageCache(StorageImageCache)
      */
-    @AnyThread
     public void clearCache() {
         MemoryImageCache memoryImageCache = getMemoryImageCache();
         if (memoryImageCache != null) {
@@ -460,7 +428,6 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    @AnyThread
     public static int getMaxMemoryFraction(@FloatRange(from = 0.1, to = 0.8) float fraction) {
         if (fraction < 0.1F || fraction > 0.8F) {
             throw new IllegalArgumentException(
@@ -476,7 +443,6 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    @AnyThread
     public static long getAvailableStorageFraction(@NonNull File path,
             @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
@@ -493,7 +459,6 @@ public class ImageLoader<T> {
      * @param fraction Fraction
      * @return Number of bytes
      */
-    @AnyThread
     public static long getTotalStorageFraction(@NonNull File path,
             @FloatRange(from = 0.01, to = 1.0) double fraction) {
         if (fraction < 0.01D || fraction > 1.0D) {
@@ -516,7 +481,6 @@ public class ImageLoader<T> {
      *                                  (requiredWidth * requiredHeight)
      * @return Sample size
      */
-    @AnyThread
     public static int calculateSampleSize(int sourceWidth, int sourceHeight, int requiredWidth,
             int requiredHeight, boolean ignoreTotalNumberOfPixels) {
         int sampleSize = 1;
@@ -721,7 +685,6 @@ public class ImageLoader<T> {
      * @return bitmap loader
      */
     @NonNull
-    @AnyThread
     public static BitmapLoader<Uri> newUriBitmapLoader() {
         return new BitmapLoader<Uri>() {
             @Nullable
@@ -739,7 +702,6 @@ public class ImageLoader<T> {
      * @return bitmap loader
      */
     @NonNull
-    @AnyThread
     public static BitmapLoader<File> newFileBitmapLoader() {
         return new BitmapLoader<File>() {
             @Nullable
@@ -756,7 +718,6 @@ public class ImageLoader<T> {
      * @return bitmap loader
      */
     @NonNull
-    @AnyThread
     public static BitmapLoader<FileDescriptor> newFileDescriptorBitmapLoader() {
         return new BitmapLoader<FileDescriptor>() {
             @Nullable
@@ -774,7 +735,6 @@ public class ImageLoader<T> {
      * @return bitmap loader
      */
     @NonNull
-    @AnyThread
     public static BitmapLoader<Integer> newResourceBitmapLoader() {
         return new BitmapLoader<Integer>() {
             @Nullable
@@ -792,7 +752,6 @@ public class ImageLoader<T> {
      * @return bitmap loader
      */
     @NonNull
-    @AnyThread
     public static BitmapLoader<byte[]> newByteArrayBitmapLoader() {
         return new BitmapLoader<byte[]>() {
             @Nullable
@@ -813,7 +772,6 @@ public class ImageLoader<T> {
      * @return Image source
      */
     @NonNull
-    @AnyThread
     public static <T> ImageSource<T> newImageSource(@NonNull T data) {
         return new ImageSourceImplementation<>(data);
     }
@@ -825,7 +783,6 @@ public class ImageLoader<T> {
      * @return Memory image cache
      */
     @NonNull
-    @AnyThread
     public static MemoryImageCache newMemoryImageCache(int maxSize) {
         return new MemoryImageCacheImplementation(maxSize);
     }
@@ -837,7 +794,6 @@ public class ImageLoader<T> {
      * @return Memory image cache
      */
     @NonNull
-    @AnyThread
     public static MemoryImageCache newMemoryImageCache() {
         return newMemoryImageCache(getMaxMemoryFraction(DEFAULT_MEMORY_FRACTION));
     }
@@ -852,7 +808,6 @@ public class ImageLoader<T> {
      * @return Storage image cache
      */
     @NonNull
-    @AnyThread
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static StorageImageCache newStorageImageCache(@NonNull File directory, long maxSize,
             @NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
@@ -871,7 +826,6 @@ public class ImageLoader<T> {
      * @return Storage image cache
      */
     @NonNull
-    @AnyThread
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static StorageImageCache newStorageImageCache(@NonNull File directory) {
         if (!directory.exists()) {
@@ -890,7 +844,6 @@ public class ImageLoader<T> {
      * @return Storage image cache
      */
     @NonNull
-    @AnyThread
     public static StorageImageCache newStorageImageCache(@NonNull Context context) {
         return newStorageImageCache(getDefaultStorageCacheDirectory(context));
     }
@@ -902,7 +855,6 @@ public class ImageLoader<T> {
      * @return Cache directory
      */
     @NonNull
-    @AnyThread
     public static File getDefaultStorageCacheDirectory(@NonNull Context context) {
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {
