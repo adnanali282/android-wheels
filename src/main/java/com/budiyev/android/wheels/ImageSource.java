@@ -41,6 +41,7 @@ public interface ImageSource<T> {
      *
      * @return Source data
      */
+    @NonNull
     T getData();
 
     /**
