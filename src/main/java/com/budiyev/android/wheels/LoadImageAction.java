@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
@@ -49,8 +48,8 @@ final class LoadImageAction<T> {
     private final Condition mPauseWorkCondition;
     private final ImageLoadCallback<T> mImageLoadCallback;
     private final AtomicBoolean mExecuting = new AtomicBoolean();
-    private final AtomicBoolean mCancelled = new AtomicBoolean();
-    private final AtomicReference<Future<?>> mFuture = new AtomicReference<>();
+    private volatile Future<?> mFuture;
+    private volatile boolean mCancelled;
 
     public LoadImageAction(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
             @NonNull ImageLoader<T> imageLoader, @NonNull Lock pauseWorkLock,
@@ -66,15 +65,15 @@ final class LoadImageAction<T> {
 
     @AnyThread
     public boolean execute() {
-        if (!mCancelled.get() && mExecuting.compareAndSet(false, true)) {
-            mFuture.set(InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
+        if (!mCancelled && mExecuting.compareAndSet(false, true)) {
+            mFuture = InternalExecutors.getImageLoaderExecutor().submit(new Runnable() {
                 @Override
                 public void run() {
                     loadImage();
-                    mFuture.set(null);
+                    mFuture = null;
                     mExecuting.set(false);
                 }
-            }));
+            });
             return true;
         } else {
             return false;
@@ -98,29 +97,29 @@ final class LoadImageAction<T> {
     }
 
     public void cancel() {
-        mCancelled.set(true);
-        Future<?> future = mFuture.get();
+        mCancelled = true;
+        Future<?> future = mFuture;
         if (future != null) {
             future.cancel(false);
         }
     }
 
     public boolean isCancelled() {
-        return mCancelled.get();
+        return mCancelled;
     }
 
     @WorkerThread
     private void loadImage() {
         mPauseWorkLock.lock();
         try {
-            while (!mCancelled.get() && mImageLoader.isLoadingPaused() &&
+            while (!mCancelled && mImageLoader.isLoadingPaused() &&
                     !mImageLoader.isExitTasksEarly()) {
                 mPauseWorkCondition.awaitUninterruptibly();
             }
         } finally {
             mPauseWorkLock.unlock();
         }
-        if (mCancelled.get() || mImageLoader.isExitTasksEarly()) {
+        if (mCancelled || mImageLoader.isExitTasksEarly()) {
             return;
         }
         Bitmap image = null;
@@ -162,7 +161,7 @@ final class LoadImageAction<T> {
                 memoryImageCache.put(key, drawable);
             }
         }
-        if (mCancelled.get() || mImageLoader.isExitTasksEarly()) {
+        if (mCancelled || mImageLoader.isExitTasksEarly()) {
             return;
         }
         ThreadUtils.runOnMainThread(
