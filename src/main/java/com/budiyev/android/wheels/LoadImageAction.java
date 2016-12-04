@@ -41,26 +41,34 @@ import java.util.concurrent.locks.Lock;
  * Load image action for {@link ImageLoader}
  */
 final class LoadImageAction<T> {
+    @NonNull
     private final ImageSource<T> mImageSource;
+    @NonNull
     private final WeakReference<ImageView> mImageViewReference;
+    @NonNull
     private final ImageLoader<T> mImageLoader;
-    private final Lock mPauseWorkLock;
-    private final Condition mPauseWorkCondition;
+    @NonNull
+    private final Lock mPauseLoadingLock;
+    @NonNull
+    private final Condition mPauseLoadingCondition;
+    @Nullable
     private final ImageLoadCallback<T> mImageLoadCallback;
+    @NonNull
     private final AtomicBoolean mExecuting = new AtomicBoolean();
+    @Nullable
     private volatile Future<?> mFuture;
     private volatile boolean mCancelled;
 
-    public LoadImageAction(@NonNull ImageSource<T> imageSource, @NonNull ImageView imageView,
-            @NonNull ImageLoader<T> imageLoader, @NonNull Lock pauseWorkLock,
-            @NonNull Condition pauseWorkCondition,
-            @Nullable ImageLoadCallback<T> imageLoadCallback) {
-        mImageSource = imageSource;
-        mImageViewReference = new WeakReference<>(imageView);
-        mImageLoader = imageLoader;
-        mPauseWorkLock = pauseWorkLock;
-        mPauseWorkCondition = pauseWorkCondition;
-        mImageLoadCallback = imageLoadCallback;
+    @AnyThread
+    public LoadImageAction(@NonNull ImageSource<T> source, @NonNull ImageView view,
+            @NonNull ImageLoader<T> loader, @NonNull Lock lock, @NonNull Condition condition,
+            @Nullable ImageLoadCallback<T> callback) {
+        mImageSource = source;
+        mImageViewReference = new WeakReference<>(view);
+        mImageLoader = loader;
+        mPauseLoadingLock = lock;
+        mPauseLoadingCondition = condition;
+        mImageLoadCallback = callback;
     }
 
     @AnyThread
@@ -80,7 +88,17 @@ final class LoadImageAction<T> {
         }
     }
 
+    @AnyThread
+    public void cancel() {
+        mCancelled = true;
+        Future<?> future = mFuture;
+        if (future != null) {
+            future.cancel(false);
+        }
+    }
+
     @NonNull
+    @AnyThread
     public ImageSource<T> getImageSource() {
         return mImageSource;
     }
@@ -90,34 +108,28 @@ final class LoadImageAction<T> {
     public ImageView getAttachedImageView() {
         ImageView imageView = mImageViewReference.get();
         LoadImageAction<?> loadImageAction = ImageLoader.getLoadImageAction(imageView);
-        if (this == loadImageAction) {
+        if (loadImageAction == this) {
             return imageView;
-        }
-        return null;
-    }
-
-    public void cancel() {
-        mCancelled = true;
-        Future<?> future = mFuture;
-        if (future != null) {
-            future.cancel(false);
+        } else {
+            return null;
         }
     }
 
+    @AnyThread
     public boolean isCancelled() {
         return mCancelled;
     }
 
     @WorkerThread
     private void loadImage() {
-        mPauseWorkLock.lock();
+        mPauseLoadingLock.lock();
         try {
             while (!mCancelled && mImageLoader.isLoadingPaused() &&
                     !mImageLoader.isExitTasksEarly()) {
-                mPauseWorkCondition.awaitUninterruptibly();
+                mPauseLoadingCondition.awaitUninterruptibly();
             }
         } finally {
-            mPauseWorkLock.unlock();
+            mPauseLoadingLock.unlock();
         }
         if (mCancelled || mImageLoader.isExitTasksEarly()) {
             return;
@@ -169,8 +181,8 @@ final class LoadImageAction<T> {
     }
 
     @AnyThread
-    private void reportImageLoaded(final T data, final Bitmap image, final boolean fromMemoryCache,
-            final boolean fromStorageCache) {
+    private void reportImageLoaded(@NonNull final T data, @NonNull final Bitmap image,
+            final boolean fromMemoryCache, final boolean fromStorageCache) {
         if (mImageLoadCallback != null) {
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
@@ -183,7 +195,7 @@ final class LoadImageAction<T> {
     }
 
     @AnyThread
-    private void reportError(final T data, final Exception exception) {
+    private void reportError(@NonNull final T data, @NonNull final Exception exception) {
         if (mImageLoadCallback != null) {
             ThreadUtils.runOnMainThread(new Runnable() {
                 @Override
