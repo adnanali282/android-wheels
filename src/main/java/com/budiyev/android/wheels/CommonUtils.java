@@ -25,6 +25,7 @@ package com.budiyev.android.wheels;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -33,6 +34,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.StatFs;
+import android.support.annotation.AnyRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
@@ -370,5 +372,21 @@ public final class CommonUtils {
     public static boolean isConnectedToNetwork(@NonNull Context context) {
         NetworkInfo activeNetworkInfo = getActiveNetworkInfo(context);
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     * Get {@link Uri} representing given resource
+     *
+     * @param context    Context
+     * @param resourceId Resource identifier
+     * @return Resource uri
+     */
+    @NonNull
+    public static Uri getResourceUri(@NonNull Context context, @AnyRes int resourceId) {
+        Resources resources = context.getResources();
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                resources.getResourcePackageName(resourceId) + "/" +
+                resources.getResourceTypeName(resourceId) + "/" +
+                resources.getResourceEntryName(resourceId));
     }
 }
