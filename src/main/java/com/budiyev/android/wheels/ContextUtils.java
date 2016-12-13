@@ -43,6 +43,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.RestrictionsManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraManager;
@@ -835,6 +836,20 @@ public final class ContextUtils {
     @RequiresApi(Build.VERSION_CODES.N)
     public static HardwarePropertiesManager getHardwarePropertiesManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE));
+    }
+
+    /**
+     * Obtain a {@link ShortcutManager} instance associated with specified {@link Context}
+     *
+     * @param context Context
+     * @return {@link ShortcutManager} associated with specified {@link Context}
+     * @throws InvalidContextException if {@link HardwarePropertiesManager} can't be obtained
+     *                                 from specified {@link Context}
+     */
+    @NonNull
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    public static ShortcutManager getShortcutManager(@NonNull Context context) {
+        return validate(context.getSystemService(Context.SHORTCUT_SERVICE));
     }
 
     @NonNull
