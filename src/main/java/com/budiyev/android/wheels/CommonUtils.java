@@ -203,18 +203,20 @@ public final class CommonUtils {
      *
      * @param context Context
      * @param view    View
+     * @throws InvalidContextException if {@link InputMethodManager} can't be obtained
+     *                                 from specified {@link Context}
      */
     public static void hideSoftwareInput(@NonNull Context context, @NonNull View view) {
-        InputMethodManager manager =
-                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-
+        ContextUtils.getInputMethodManager(context)
+                .hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     /**
      * Hide software input in window associated with specified {@link View}
      *
      * @param view View
+     * @throws InvalidContextException if {@link InputMethodManager} can't be obtained
+     *                                 from {@code view}'s {@link Context}
      */
     public static void hideSoftwareInput(@NonNull View view) {
         hideSoftwareInput(view.getContext(), view);
@@ -224,6 +226,8 @@ public final class CommonUtils {
      * Hide software input in window associated with specified {@link Activity}
      *
      * @param activity Activity
+     * @throws InvalidContextException if {@link InputMethodManager} can't be obtained
+     *                                 from specified {@link Context}
      */
     public static void hideSoftwareInput(@NonNull Context context, @NonNull Activity activity) {
         Window window = activity.getWindow();
@@ -241,13 +245,15 @@ public final class CommonUtils {
      * Hide software input in window associated with specified {@link Activity}
      *
      * @param activity Activity
+     * @throws InvalidContextException if {@link InputMethodManager} can't be obtained
+     *                                 from specified {@link Activity}
      */
     public static void hideSoftwareInput(@NonNull Activity activity) {
         hideSoftwareInput(activity, activity);
     }
 
     /**
-     * Get input stream from uri
+     * Get input stream from {@link Uri}
      *
      * @param context Context
      * @param uri     Uri
@@ -343,19 +349,14 @@ public final class CommonUtils {
      *
      * @param context Context
      * @return a {@link NetworkInfo} object for the current default network or
-     * {@code null} either if no default network is currently active or
-     * {@link ConnectivityManager} is not available from specified {@link Context}
+     * {@code null} if no default network is currently active
+     * @throws InvalidContextException if {@link ConnectivityManager} can't be obtained
+     *                                 from specified {@link Context}
      */
     @Nullable
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     public static NetworkInfo getActiveNetworkInfo(@NonNull Context context) {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            return connectivityManager.getActiveNetworkInfo();
-        } else {
-            return null;
-        }
+        return ContextUtils.getConnectivityManager(context).getActiveNetworkInfo();
     }
 
     /**
@@ -365,8 +366,9 @@ public final class CommonUtils {
      * Requires permission {@link Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param context Context
-     * @return {@code true} if network connectivity exists, {@code false} if it doesn't or
-     * {@link ConnectivityManager} is not available from specified {@link Context}
+     * @return {@code true} if network connectivity exists, {@code false} otherwise
+     * @throws InvalidContextException if {@link ConnectivityManager} can't be obtained
+     *                                 from specified {@link Context}
      */
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     public static boolean isConnectedToNetwork(@NonNull Context context) {
