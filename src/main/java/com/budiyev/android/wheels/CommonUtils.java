@@ -324,6 +324,17 @@ public final class CommonUtils {
     }
 
     /**
+     * Get extension of specified {@link File}
+     *
+     * @param file File
+     * @return Extension or {@code null} if there are no extension in the path
+     */
+    @Nullable
+    public static String getFileExtension(@NonNull File file) {
+        return getFileExtension(file.getPath());
+    }
+
+    /**
      * Get extension of specified path
      *
      * @param path Path
