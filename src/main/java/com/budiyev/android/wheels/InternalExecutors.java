@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -167,5 +168,20 @@ final class InternalExecutors {
             }
         }
         return executor;
+    }
+
+    public static void setPoolSize(@NonNull ThreadPoolExecutor executor,
+            @IntRange(from = 1, to = Integer.MAX_VALUE) int size) {
+        int corePoolSize = executor.getCorePoolSize();
+        if (size == corePoolSize) {
+            return;
+        }
+        if (size > corePoolSize) {
+            executor.setMaximumPoolSize(size);
+            executor.setCorePoolSize(size);
+        } else {
+            executor.setCorePoolSize(size);
+            executor.setMaximumPoolSize(size);
+        }
     }
 }

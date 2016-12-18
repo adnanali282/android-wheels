@@ -37,7 +37,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * HTTP request API, based on {@link HttpURLConnection}
@@ -123,18 +122,7 @@ public abstract class HttpRequest {
      */
     public static void setParallelRequestsLimit(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
-        ThreadPoolExecutor executor = InternalExecutors.getHttpRequestExecutor();
-        int corePoolSize = executor.getCorePoolSize();
-        if (limit == corePoolSize) {
-            return;
-        }
-        if (limit > corePoolSize) {
-            executor.setMaximumPoolSize(limit);
-            executor.setCorePoolSize(limit);
-        } else {
-            executor.setCorePoolSize(limit);
-            executor.setMaximumPoolSize(limit);
-        }
+        InternalExecutors.setPoolSize(InternalExecutors.getHttpRequestExecutor(), limit);
     }
 
     /**

@@ -122,14 +122,7 @@ final class GetHttpRequest extends HttpRequest {
 
     @Override
     public int hashCode() {
-        int hash = 31 + mUrl.hashCode();
-        if (mHeaderParameters != null) {
-            hash = 31 * hash + mHeaderParameters.hashCode();
-        }
-        if (mQueryParameters != null) {
-            hash = 31 * hash + mQueryParameters.hashCode();
-        }
-        return hash;
+        return Objects.hash(mUrl, mHeaderParameters, mQueryParameters);
     }
 
     @Override

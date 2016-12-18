@@ -296,11 +296,7 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public int hashCode() {
-        int hashCode = Integer.MAX_VALUE;
-        for (StringRow row : mRows) {
-            hashCode ^= row.hashCode();
-        }
-        return hashCode;
+        return mRows.hashCode();
     }
 
     @Override

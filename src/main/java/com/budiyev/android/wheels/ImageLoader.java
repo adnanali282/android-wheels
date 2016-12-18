@@ -31,6 +31,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.FloatRange;
+import android.support.annotation.IntRange;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -861,5 +862,20 @@ public class ImageLoader<T> {
             cacheDir = context.getCacheDir();
         }
         return new File(cacheDir, DEFAULT_STORAGE_CACHE_DIRECTORY);
+    }
+
+    /**
+     * Global number of loading threads for all {@link ImageLoader} instances
+     */
+    public static int getLoadingThreadsCount() {
+        return InternalExecutors.getImageLoaderExecutor().getPoolSize();
+    }
+
+    /**
+     * Global number of loading threads for all {@link ImageLoader} instances
+     */
+    public static void setLoadingThreadsCount(
+            @IntRange(from = 1, to = Integer.MAX_VALUE) int count) {
+        InternalExecutors.setPoolSize(InternalExecutors.getImageLoaderExecutor(), count);
     }
 }

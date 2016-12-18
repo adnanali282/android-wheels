@@ -202,11 +202,7 @@ public class StringRow implements Iterable<String> {
 
     @Override
     public int hashCode() {
-        int hashCode = Integer.MAX_VALUE;
-        for (String cell : mCells) {
-            hashCode ^= cell.hashCode();
-        }
-        return hashCode;
+        return mCells.hashCode();
     }
 
     @Override
