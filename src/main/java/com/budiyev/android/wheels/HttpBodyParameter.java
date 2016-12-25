@@ -27,7 +27,6 @@ import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -71,7 +70,7 @@ public final class HttpBodyParameter {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{key, value, file, stream, fileName, contentType});
+        return Objects.hash(key, value, file, stream, fileName, contentType);
     }
 
     @Override

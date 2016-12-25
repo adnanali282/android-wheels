@@ -79,7 +79,7 @@ public final class ImageUtils {
      */
     @NonNull
     public static Bitmap applyColorFilter(@NonNull Bitmap image, @NonNull ColorFilter colorFilter) {
-        Paint paint = new Paint();
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         paint.setColorFilter(Objects.requireNonNull(colorFilter));
         Bitmap bitmap =
                 Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
@@ -117,7 +117,7 @@ public final class ImageUtils {
         }
         Bitmap cropped;
         int cropWidth = resultRatioWidth * sourceHeight / resultRatioHeight;
-        if (cropWidth >= sourceWidth) {
+        if (cropWidth > sourceWidth) {
             int cropHeight = resultRatioHeight * sourceWidth / resultRatioWidth;
             cropped = Bitmap.createBitmap(image, 0, (sourceHeight - cropHeight) / 2, sourceWidth,
                     cropHeight);
@@ -139,6 +139,114 @@ public final class ImageUtils {
     }
 
     /**
+     * Fit image to specified frame ({@code resultWidth} x {@code resultHeight},
+     * image will be scaled if needed.
+     * If specified {@code resultWidth} and {@code resultHeight} are the same as the current
+     * width and height of the source image, the source image will be returned.
+     *
+     * @param image        Source image
+     * @param resultWidth  Result width
+     * @param resultHeight Result height
+     * @return Frame image with source image drawn in center of it or original image
+     * or scaled image
+     */
+    @NonNull
+    public static Bitmap fitCenter(@NonNull Bitmap image, int resultWidth, int resultHeight) {
+        int sourceWidth = image.getWidth();
+        int sourceHeight = image.getHeight();
+        if (sourceWidth == resultWidth && sourceHeight == resultHeight) {
+            return image;
+        }
+        int sourceDivisor = greatestCommonDivisor(sourceWidth, sourceHeight);
+        int sourceRatioWidth = sourceWidth / sourceDivisor;
+        int sourceRatioHeight = sourceHeight / sourceDivisor;
+        int resultDivisor = greatestCommonDivisor(resultWidth, resultHeight);
+        int resultRatioWidth = resultWidth / resultDivisor;
+        int resultRatioHeight = resultHeight / resultDivisor;
+        if (sourceRatioWidth == resultRatioWidth && sourceRatioHeight == resultRatioHeight) {
+            return Bitmap.createScaledBitmap(image, resultWidth, resultHeight, true);
+        }
+        Bitmap result = Bitmap.createBitmap(resultWidth, resultHeight, Bitmap.Config.ARGB_8888);
+        result.setDensity(image.getDensity());
+        Canvas canvas = new Canvas(result);
+        int fitWidth = sourceRatioWidth * resultHeight / sourceRatioHeight;
+        if (fitWidth > resultWidth) {
+            int fitHeight = sourceRatioHeight * resultWidth / sourceRatioWidth;
+            int top = (resultHeight - fitHeight) / 2;
+            canvas.drawBitmap(image, null, new Rect(0, top, resultWidth, top + fitHeight),
+                    new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+        } else {
+            int left = (resultWidth - fitWidth) / 2;
+            canvas.drawBitmap(image, null, new Rect(left, 0, left + fitWidth, resultHeight),
+                    new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+        }
+        return result;
+    }
+
+    /**
+     * Scale image to fit specified frame ({@code resultWidth} x {@code resultHeight}).
+     * If specified {@code resultWidth} and {@code resultHeight} are the same as or smaller than
+     * the current width and height of the source image, the source image will be returned.
+     *
+     * @param image        Source image
+     * @param resultWidth  Result width
+     * @param resultHeight Result height
+     * @return Scaled image or original image
+     */
+    @NonNull
+    public static Bitmap scaleToFit(@NonNull Bitmap image, int resultWidth, int resultHeight) {
+        return scaleToFit(image, resultWidth, resultHeight, false);
+    }
+
+    /**
+     * Scale image to fit specified frame ({@code resultWidth} x {@code resultHeight}).
+     * If specified {@code resultWidth} and {@code resultHeight} are the same as the current
+     * width and height of the source image, the source image will be returned.
+     *
+     * @param image        Source image
+     * @param resultWidth  Result width
+     * @param resultHeight Result height
+     * @param upscale      Upscale image if it is smaller than the frame
+     * @return Scaled image or original image
+     */
+    @NonNull
+    public static Bitmap scaleToFit(@NonNull Bitmap image, int resultWidth, int resultHeight,
+            boolean upscale) {
+        int sourceWidth = image.getWidth();
+        int sourceHeight = image.getHeight();
+        if (sourceWidth == resultWidth && sourceHeight == resultHeight) {
+            return image;
+        }
+        if (!upscale && sourceWidth < resultWidth && sourceHeight < resultHeight) {
+            return image;
+        }
+        int sourceDivisor = greatestCommonDivisor(sourceWidth, sourceHeight);
+        int sourceRatioWidth = sourceWidth / sourceDivisor;
+        int sourceRatioHeight = sourceHeight / sourceDivisor;
+        int resultDivisor = greatestCommonDivisor(resultWidth, resultHeight);
+        int resultRatioWidth = resultWidth / resultDivisor;
+        int resultRatioHeight = resultHeight / resultDivisor;
+        if (sourceRatioWidth == resultRatioWidth && sourceRatioHeight == resultRatioHeight) {
+            return Bitmap.createScaledBitmap(image, resultWidth, resultHeight, true);
+        }
+        int fitWidth = sourceRatioWidth * resultHeight / sourceRatioHeight;
+        if (fitWidth > resultWidth) {
+            if (sourceWidth == resultWidth) {
+                return image;
+            } else {
+                int fitHeight = sourceRatioHeight * resultWidth / sourceRatioWidth;
+                return Bitmap.createScaledBitmap(image, resultWidth, fitHeight, true);
+            }
+        } else {
+            if (sourceHeight == resultHeight) {
+                return image;
+            } else {
+                return Bitmap.createScaledBitmap(image, fitWidth, resultHeight, true);
+            }
+        }
+    }
+
+    /**
      * Round image corners with specified corner radius
      *
      * @param image        Source image
@@ -147,8 +255,7 @@ public final class ImageUtils {
      */
     @NonNull
     public static Bitmap roundCorners(@NonNull Bitmap image, float cornerRadius) {
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         paint.setColor(0xff424242);
         int width = image.getWidth();
         int height = image.getHeight();

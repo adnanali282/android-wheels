@@ -33,7 +33,6 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -359,9 +358,8 @@ public final class HttpRequestResult {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(
-                new Object[]{mDataString, mDataType, mDataStream, mHeaderFields, mResultType,
-                        mHttpCode});
+        return Objects
+                .hash(mDataString, mDataType, mDataStream, mHeaderFields, mResultType, mHttpCode);
     }
 
     @Override

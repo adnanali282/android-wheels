@@ -42,7 +42,7 @@ public final class HttpQueryParameter {
 
     @Override
     public int hashCode() {
-        return 31 * (31 + key.hashCode()) + value.hashCode();
+        return Objects.hash(key, value);
     }
 
     @Override

@@ -866,6 +866,7 @@ public class ImageLoader<T> {
 
     /**
      * Global number of loading threads for all {@link ImageLoader} instances
+     * (1.5 * number of logical CPUs by default)
      */
     public static int getLoadingThreadsCount() {
         return InternalExecutors.getImageLoaderExecutor().getPoolSize();
@@ -873,6 +874,7 @@ public class ImageLoader<T> {
 
     /**
      * Global number of loading threads for all {@link ImageLoader} instances
+     * (1.5 * number of logical CPUs by default)
      */
     public static void setLoadingThreadsCount(
             @IntRange(from = 1, to = Integer.MAX_VALUE) int count) {

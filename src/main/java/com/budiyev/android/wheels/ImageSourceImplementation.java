@@ -53,4 +53,21 @@ final class ImageSourceImplementation<T> implements ImageSource<T> {
     public String getKey() {
         return mKey;
     }
+
+    @Override
+    public int hashCode() {
+        return mKey.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj instanceof ImageSourceImplementation &&
+                Objects.equals(mKey, ((ImageSourceImplementation) obj).mKey);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "ImageSource [key: " + mKey + ", data: " + mData + "]";
+    }
 }

@@ -311,7 +311,7 @@ public final class ThreadUtils {
     @NonNull
     @AnyThread
     @SafeVarargs
-    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsQync(
+    public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
             @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
             @NonNull TimeUnit unit, @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor()

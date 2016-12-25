@@ -45,6 +45,7 @@ final class InternalExecutors {
     private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock STORAGE_IMAGE_CACHE_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
+    private static final Lock POOL_SIZE_LOCK = new ReentrantLock();
     private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
     private static volatile ScheduledThreadPoolExecutor sThreadUtilsScheduledExecutor;
     private static volatile ThreadPoolExecutor sHttpRequestExecutor;
@@ -172,16 +173,21 @@ final class InternalExecutors {
 
     public static void setPoolSize(@NonNull ThreadPoolExecutor executor,
             @IntRange(from = 1, to = Integer.MAX_VALUE) int size) {
-        int corePoolSize = executor.getCorePoolSize();
-        if (size == corePoolSize) {
-            return;
-        }
-        if (size > corePoolSize) {
-            executor.setMaximumPoolSize(size);
-            executor.setCorePoolSize(size);
-        } else {
-            executor.setCorePoolSize(size);
-            executor.setMaximumPoolSize(size);
+        POOL_SIZE_LOCK.lock();
+        try {
+            int corePoolSize = executor.getCorePoolSize();
+            if (size == corePoolSize) {
+                return;
+            }
+            if (size > corePoolSize) {
+                executor.setMaximumPoolSize(size);
+                executor.setCorePoolSize(size);
+            } else {
+                executor.setCorePoolSize(size);
+                executor.setMaximumPoolSize(size);
+            }
+        } finally {
+            POOL_SIZE_LOCK.unlock();
         }
     }
 }
