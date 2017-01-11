@@ -24,8 +24,6 @@
 package com.budiyev.android.wheels;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 /**
  * Thrown if given {@link Context} is not valid
@@ -44,11 +42,5 @@ public class InvalidContextException extends RuntimeException {
 
     public InvalidContextException(Throwable cause) {
         super(cause);
-    }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    public InvalidContextException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

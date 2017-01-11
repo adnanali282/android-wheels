@@ -23,9 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 /**
  * Thrown when current thread is not the main (UI) thread
  */
@@ -43,11 +40,5 @@ public class NotMainThreadException extends RuntimeException {
 
     public NotMainThreadException(Throwable cause) {
         super(cause);
-    }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    public NotMainThreadException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }
