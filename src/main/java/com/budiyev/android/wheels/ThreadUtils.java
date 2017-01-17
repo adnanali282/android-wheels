@@ -402,26 +402,11 @@ public final class ThreadUtils {
     }
 
     /**
-     * Throws {@link NotMainThreadException} with specified message
-     * if current thread is not the main (UI) thread
-     *
-     * @param message Message
+     * Get the main (UI) thread of the application
      */
-    @AnyThread
-    public static void requireMainThread(@Nullable String message) {
-        if (Thread.currentThread() != MainThreadHolder.MAIN_THREAD) {
-            throw new NotMainThreadException(message);
-        }
-    }
-
-    /**
-     * Throws {@link NotMainThreadException} if current thread is not the main (UI) thread
-     */
-    @AnyThread
-    public static void requireMainThread() {
-        if (Thread.currentThread() != MainThreadHolder.MAIN_THREAD) {
-            throw new NotMainThreadException();
-        }
+    @NonNull
+    public static Thread getMainThread() {
+        return Looper.getMainLooper().getThread();
     }
 
     /**
@@ -431,7 +416,30 @@ public final class ThreadUtils {
      */
     @AnyThread
     public static boolean isMainThread() {
-        return Thread.currentThread() == MainThreadHolder.MAIN_THREAD;
+        return Thread.currentThread() == getMainThread();
+    }
+
+    /**
+     * Throws {@link NotMainThreadException} with specified message
+     * if current thread is not the main (UI) thread
+     *
+     * @param message Message
+     */
+    @AnyThread
+    public static void requireMainThread(@Nullable String message) {
+        if (!isMainThread()) {
+            throw new NotMainThreadException(message);
+        }
+    }
+
+    /**
+     * Throws {@link NotMainThreadException} if current thread is not the main (UI) thread
+     */
+    @AnyThread
+    public static void requireMainThread() {
+        if (!isMainThread()) {
+            throw new NotMainThreadException();
+        }
     }
 
     static void throwExecutionExceptionIfNeeded(@Nullable Runnable runnable,
@@ -463,9 +471,5 @@ public final class ThreadUtils {
                 asyncTask.executeOnExecutor(InternalExecutors.getThreadUtilsExecutor(), parameters);
             }
         };
-    }
-
-    private static final class MainThreadHolder {
-        public static final Thread MAIN_THREAD = Looper.getMainLooper().getThread();
     }
 }
