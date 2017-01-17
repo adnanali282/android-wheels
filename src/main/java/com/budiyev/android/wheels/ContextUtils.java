@@ -24,7 +24,6 @@
 package com.budiyev.android.wheels;
 
 import android.accounts.AccountManager;
-import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -44,6 +43,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.RestrictionsManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraManager;
@@ -66,6 +66,7 @@ import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.DropBoxManager;
+import android.os.HardwarePropertiesManager;
 import android.os.PowerManager;
 import android.os.UserManager;
 import android.os.Vibrator;
@@ -73,6 +74,7 @@ import android.os.storage.StorageManager;
 import android.print.PrintManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -321,7 +323,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static NetworkStatsManager getNetworkStatsManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.NETWORK_STATS_SERVICE));
     }
@@ -387,7 +389,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static FingerprintManager getFingerprintManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.FINGERPRINT_SERVICE));
     }
@@ -414,7 +416,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static MediaSessionManager getMediaSessionManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.MEDIA_SESSION_SERVICE));
     }
@@ -441,7 +443,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     public static SubscriptionManager getSubscriptionManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE));
     }
@@ -455,7 +457,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static TelecomManager getTelecomManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.TELECOM_SERVICE));
     }
@@ -469,7 +471,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static CarrierConfigManager getCarrierConfigManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.CARRIER_CONFIG_SERVICE));
     }
@@ -522,7 +524,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static AppWidgetManager getAppWidgetManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.APPWIDGET_SERVICE));
     }
@@ -588,7 +590,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static BatteryManager getBatteryManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.BATTERY_SERVICE));
     }
@@ -680,7 +682,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static LauncherApps getLauncherApps(@NonNull Context context) {
         return validate(context.getSystemService(Context.LAUNCHER_APPS_SERVICE));
     }
@@ -694,7 +696,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static RestrictionsManager getRestrictionsManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.RESTRICTIONS_SERVICE));
     }
@@ -721,7 +723,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static CameraManager getCameraManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.CAMERA_SERVICE));
     }
@@ -761,7 +763,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static TvInputManager getTvInputManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.TV_INPUT_SERVICE));
     }
@@ -775,7 +777,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     public static UsageStatsManager getUsageStatsManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.USAGE_STATS_SERVICE));
     }
@@ -789,7 +791,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static JobScheduler getJobScheduler(@NonNull Context context) {
         return validate(context.getSystemService(Context.JOB_SCHEDULER_SERVICE));
     }
@@ -803,7 +805,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static MediaProjectionManager getMediaProjectionManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.MEDIA_PROJECTION_SERVICE));
     }
@@ -817,9 +819,38 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static MidiManager getMidiManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.MIDI_SERVICE));
+    }
+
+    /**
+     * Obtain a {@link HardwarePropertiesManager} instance associated with specified {@link Context}
+     *
+     * @param context Context
+     * @return {@link HardwarePropertiesManager} associated with specified {@link Context}
+     * @throws InvalidContextException if {@link HardwarePropertiesManager} can't be obtained
+     *                                 from specified {@link Context}
+     */
+    @NonNull
+    @RequiresApi(Build.VERSION_CODES.N)
+    public static HardwarePropertiesManager getHardwarePropertiesManager(@NonNull Context context) {
+        return validate(context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE));
+    }
+
+    /**
+     * Obtain a {@link ShortcutManager} instance associated with specified {@link Context}
+     *
+     * @param context Context
+     * @return {@link ShortcutManager} associated with specified {@link Context}
+     * @throws InvalidContextException if {@link HardwarePropertiesManager} can't be obtained
+     *                                 from specified {@link Context}
+     */
+    @NonNull
+    @SuppressWarnings("WrongConstant")
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    public static ShortcutManager getShortcutManager(@NonNull Context context) {
+        return validate(context.getSystemService(Context.SHORTCUT_SERVICE));
     }
 
     @NonNull
