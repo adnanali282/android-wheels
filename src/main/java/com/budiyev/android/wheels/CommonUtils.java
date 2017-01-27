@@ -388,6 +388,25 @@ public final class CommonUtils {
     }
 
     /**
+     * Indicates whether network connectivity of specified network type exists
+     * and it is possible to establish connections and pass data.
+     * <br>
+     * Requires permission {@link Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @param context     Context
+     * @param networkType Network type
+     * @return {@code true} if network connectivity exists, {@code false} otherwise
+     * @throws InvalidContextException if {@link ConnectivityManager} can't be obtained
+     *                                 from specified {@link Context}
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    public static boolean isConnectedToNetwork(@NonNull Context context, int networkType) {
+        NetworkInfo activeNetworkInfo = getActiveNetworkInfo(context);
+        return activeNetworkInfo != null && activeNetworkInfo.getType() == networkType &&
+                activeNetworkInfo.isConnected();
+    }
+
+    /**
      * Get {@link Uri} representing given resource
      *
      * @param context    Context
