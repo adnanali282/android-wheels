@@ -37,6 +37,7 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.Px;
 import android.support.annotation.StyleRes;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -48,12 +49,12 @@ import android.view.animation.LinearInterpolator;
  * Circular progress bar
  */
 public class CircularProgressBar extends View {
-    private static final float DEFAULT_MAXIMUM = 100F;
-    private static final float DEFAULT_PROGRESS = 0F;
-    private static final float DEFAULT_FOREGROUND_STROKE_WIDTH_DP = 3F;
-    private static final float DEFAULT_BACKGROUND_STROKE_WIDTH_DP = 1F;
-    private static final float DEFAULT_START_ANGLE = -90F;
-    private static final float DEFAULT_INDETERMINATE_MINIMUM_ANGLE = 45F;
+    private static final float DEFAULT_MAXIMUM = 100f;
+    private static final float DEFAULT_PROGRESS = 0f;
+    private static final float DEFAULT_FOREGROUND_STROKE_WIDTH_DP = 3f;
+    private static final float DEFAULT_BACKGROUND_STROKE_WIDTH_DP = 1f;
+    private static final float DEFAULT_START_ANGLE = -90f;
+    private static final float DEFAULT_INDETERMINATE_MINIMUM_ANGLE = 45f;
     private static final int DEFAULT_FOREGROUND_STROKE_COLOR = Color.BLUE;
     private static final int DEFAULT_BACKGROUND_STROKE_COLOR = Color.BLACK;
     private static final int DEFAULT_PROGRESS_ANIMATION_DURATION = 500;
@@ -125,11 +126,11 @@ public class CircularProgressBar extends View {
             mAnimateProgress = DEFAULT_ANIMATE_PROGRESS;
             mDrawBackgroundStroke = DEFAULT_DRAW_BACKGROUND_STROKE;
             mForegroundStrokePaint.setColor(DEFAULT_FOREGROUND_STROKE_COLOR);
-            mForegroundStrokePaint
-                    .setStrokeWidth(DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density);
+            mForegroundStrokePaint.setStrokeWidth(
+                    Math.round(DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density));
             mBackgroundStrokePaint.setColor(DEFAULT_BACKGROUND_STROKE_COLOR);
-            mBackgroundStrokePaint
-                    .setStrokeWidth(DEFAULT_BACKGROUND_STROKE_WIDTH_DP * displayMetrics.density);
+            mBackgroundStrokePaint.setStrokeWidth(
+                    Math.round(DEFAULT_BACKGROUND_STROKE_WIDTH_DP * displayMetrics.density));
             mIndeterminateGrowAnimator.setDuration(DEFAULT_INDETERMINATE_GROW_ANIMATION_DURATION);
             mIndeterminateSweepAnimator.setDuration(DEFAULT_INDETERMINATE_SWEEP_ANIMATION_DURATION);
         } else {
@@ -162,12 +163,12 @@ public class CircularProgressBar extends View {
                 mBackgroundStrokePaint.setColor(attributes
                         .getColor(R.styleable.CircularProgressBar_backgroundStrokeColor,
                                 DEFAULT_BACKGROUND_STROKE_COLOR));
-                mForegroundStrokePaint.setStrokeWidth(attributes
-                        .getDimension(R.styleable.CircularProgressBar_foregroundStrokeWidth,
-                                DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density));
-                mBackgroundStrokePaint.setStrokeWidth(attributes
-                        .getDimension(R.styleable.CircularProgressBar_backgroundStrokeWidth,
-                                DEFAULT_BACKGROUND_STROKE_WIDTH_DP * displayMetrics.density));
+                mForegroundStrokePaint.setStrokeWidth(attributes.getDimensionPixelSize(
+                        R.styleable.CircularProgressBar_foregroundStrokeWidth,
+                        Math.round(DEFAULT_FOREGROUND_STROKE_WIDTH_DP * displayMetrics.density)));
+                mBackgroundStrokePaint.setStrokeWidth(attributes.getDimensionPixelSize(
+                        R.styleable.CircularProgressBar_backgroundStrokeWidth,
+                        Math.round(DEFAULT_BACKGROUND_STROKE_WIDTH_DP * displayMetrics.density)));
                 mAnimateProgress = attributes
                         .getBoolean(R.styleable.CircularProgressBar_animateProgress,
                                 DEFAULT_ANIMATE_PROGRESS);
@@ -190,7 +191,7 @@ public class CircularProgressBar extends View {
                 setProgressInternal((float) animation.getAnimatedValue());
             }
         });
-        mIndeterminateGrowAnimator.setFloatValues(360F);
+        mIndeterminateGrowAnimator.setFloatValues(360f);
         mIndeterminateGrowAnimator.setRepeatMode(ValueAnimator.RESTART);
         mIndeterminateGrowAnimator.setRepeatCount(ValueAnimator.INFINITE);
         mIndeterminateGrowAnimator.setInterpolator(new LinearInterpolator());
@@ -201,7 +202,7 @@ public class CircularProgressBar extends View {
                 invalidate();
             }
         });
-        mIndeterminateSweepAnimator.setFloatValues(360F - mIndeterminateMinimumAngle * 2F);
+        mIndeterminateSweepAnimator.setFloatValues(360f - mIndeterminateMinimumAngle * 2f);
         mIndeterminateSweepAnimator.setRepeatMode(ValueAnimator.RESTART);
         mIndeterminateSweepAnimator.setRepeatCount(ValueAnimator.INFINITE);
         mIndeterminateSweepAnimator.setInterpolator(new DecelerateInterpolator());
@@ -230,31 +231,31 @@ public class CircularProgressBar extends View {
                 mIndeterminateGrowMode = !mIndeterminateGrowMode;
                 if (mIndeterminateGrowMode) {
                     mIndeterminateGrowAngleOffset =
-                            (mIndeterminateGrowAngleOffset + mIndeterminateMinimumAngle * 2F) %
-                                    360F;
+                            (mIndeterminateGrowAngleOffset + mIndeterminateMinimumAngle * 2f) %
+                                    360f;
                 }
             }
         });
     }
 
     private void invalidateDrawRect(int width, int height) {
-        float size;
+        int size;
         if (mDrawBackgroundStroke) {
-            size = Math.max(mForegroundStrokePaint.getStrokeWidth(),
-                    mBackgroundStrokePaint.getStrokeWidth());
+            size = Math.round(Math.max(mForegroundStrokePaint.getStrokeWidth(),
+                    mBackgroundStrokePaint.getStrokeWidth()));
         } else {
-            size = mForegroundStrokePaint.getStrokeWidth();
+            size = Math.round(mForegroundStrokePaint.getStrokeWidth());
         }
         if (width > height) {
-            float space = (width - height) / 2F;
-            mDrawRect.set(space + size / 2F, size / 2F, width - space - size / 2F,
-                    height - size / 2F);
+            int space = (width - height) / 2;
+            mDrawRect.set(space + size / 2 + 1, size / 2 + 1, width - space - size / 2 - 1,
+                    height - size / 2 - 1);
         } else if (width < height) {
-            float space = (height - width) / 2F;
-            mDrawRect.set(size / 2F, space + size / 2F, width - size / 2F,
-                    height - space - size / 2F);
+            int space = (height - width) / 2;
+            mDrawRect.set(size / 2 + 1, space + size / 2 + 1, width - size / 2 - 1,
+                    height - space - size / 2 - 1);
         } else {
-            mDrawRect.set(size / 2F, size / 2F, width - size / 2F, height - size / 2F);
+            mDrawRect.set(size / 2 + 1, size / 2 + 1, width - size / 2 - 1, height - size / 2 - 1);
         }
     }
 
@@ -378,7 +379,7 @@ public class CircularProgressBar extends View {
             } else {
                 startAngle = mIndeterminateGrowAngle + mIndeterminateSweepAngle -
                         mIndeterminateGrowAngleOffset;
-                sweepAngle = 360F - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
+                sweepAngle = 360f - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
             }
             canvas.drawArc(mDrawRect, startAngle, sweepAngle, false, mForegroundStrokePaint);
         } else {
@@ -390,7 +391,7 @@ public class CircularProgressBar extends View {
             } else {
                 progress = mProgress;
             }
-            float sweepAngle = 360F * progress / mMaximum;
+            float sweepAngle = 360f * progress / mMaximum;
             canvas.drawArc(mDrawRect, mStartAngle, sweepAngle, false, mForegroundStrokePaint);
         }
     }
@@ -439,8 +440,9 @@ public class CircularProgressBar extends View {
      * <br>
      * Foreground stroke represents current progress value
      */
-    public float getForegroundStrokeWidth() {
-        return mForegroundStrokePaint.getStrokeWidth();
+    @Px
+    public int getForegroundStrokeWidth() {
+        return (int) mForegroundStrokePaint.getStrokeWidth();
     }
 
     /**
@@ -448,7 +450,7 @@ public class CircularProgressBar extends View {
      * <br>
      * Foreground stroke represents current progress value
      */
-    public void setForegroundStrokeWidth(float width) {
+    public void setForegroundStrokeWidth(@Px int width) {
         mForegroundStrokePaint.setStrokeWidth(width);
         invalidateDrawRect();
         invalidate();
@@ -457,14 +459,15 @@ public class CircularProgressBar extends View {
     /**
      * Background stroke width
      */
-    public float getBackgroundStrokeWidth() {
-        return mBackgroundStrokePaint.getStrokeWidth();
+    @Px
+    public int getBackgroundStrokeWidth() {
+        return (int) mBackgroundStrokePaint.getStrokeWidth();
     }
 
     /**
      * Background stroke width
      */
-    public void setBackgroundStrokeWidth(float width) {
+    public void setBackgroundStrokeWidth(@Px int width) {
         mBackgroundStrokePaint.setStrokeWidth(width);
         invalidateDrawRect();
         invalidate();
