@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
+ * Copyright (c) 2017 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import android.graphics.RectF;
 import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Px;
@@ -101,6 +102,117 @@ public class CircularProgressBar extends View {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initialize(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    /**
+     * Get current progress value for non-indeterminate mode
+     */
+    public float getProgress() {
+        return mProgress;
+    }
+
+    /**
+     * Set current progress value for non-indeterminate mode
+     */
+    public void setProgress(float progress) {
+        if (mIndeterminate) {
+            mProgress = progress;
+        } else {
+            stopProgressAnimation();
+            if (mAnimateProgress && isLaidOutCompat()) {
+                setProgressAnimated(progress);
+            } else {
+                setProgressInternal(progress);
+            }
+        }
+    }
+
+    /**
+     * Configure progress bar
+     */
+    @NonNull
+    public Configurator configure() {
+        return new Configurator();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int measuredWidth = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+        int measuredHeight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+        setMeasuredDimension(measuredWidth, measuredHeight);
+        invalidateDrawRect(measuredWidth, measuredHeight);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        invalidateDrawRect();
+        if (mIndeterminate) {
+            startIndeterminateAnimations();
+        }
+    }
+
+    @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        invalidateDrawRect(width, height);
+    }
+
+    @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility == VISIBLE) {
+            if (mIndeterminate) {
+                startIndeterminateAnimations();
+            }
+        } else {
+            stopIndeterminateAnimations();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mIndeterminate && isLaidOutCompat()) {
+            startIndeterminateAnimations();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        stopIndeterminateAnimations();
+        stopProgressAnimation();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (mDrawBackgroundStroke) {
+            canvas.drawOval(mDrawRect, mBackgroundStrokePaint);
+        }
+        if (mIndeterminate) {
+            float startAngle;
+            float sweepAngle;
+            if (mIndeterminateGrowMode) {
+                startAngle = mIndeterminateGrowAngle - mIndeterminateGrowAngleOffset;
+                sweepAngle = mIndeterminateSweepAngle + mIndeterminateMinimumAngle;
+            } else {
+                startAngle = mIndeterminateGrowAngle + mIndeterminateSweepAngle -
+                        mIndeterminateGrowAngleOffset;
+                sweepAngle = 360f - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
+            }
+            canvas.drawArc(mDrawRect, startAngle, sweepAngle, false, mForegroundStrokePaint);
+        } else {
+            float progress;
+            if (mProgress > mMaximum) {
+                progress = mMaximum;
+            } else if (mProgress < -mMaximum) {
+                progress = -mMaximum;
+            } else {
+                progress = mProgress;
+            }
+            float sweepAngle = 360f * progress / mMaximum;
+            canvas.drawArc(mDrawRect, mStartAngle, sweepAngle, false, mForegroundStrokePaint);
+        }
     }
 
     private void initialize(@NonNull Context context, @Nullable AttributeSet attributeSet,
@@ -188,7 +300,7 @@ public class CircularProgressBar extends View {
         mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                setProgressInternal((float) animation.getAnimatedValue());
+                CircularProgressBar.this.setProgressInternal((float) animation.getAnimatedValue());
             }
         });
         mIndeterminateGrowAnimator.setFloatValues(360f);
@@ -199,7 +311,7 @@ public class CircularProgressBar extends View {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mIndeterminateGrowAngle = (float) animation.getAnimatedValue();
-                invalidate();
+                CircularProgressBar.this.invalidate();
             }
         });
         mIndeterminateSweepAnimator.setFloatValues(360f - mIndeterminateMinimumAngle * 2f);
@@ -210,7 +322,7 @@ public class CircularProgressBar extends View {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mIndeterminateSweepAngle = (float) animation.getAnimatedValue();
-                invalidate();
+                CircularProgressBar.this.invalidate();
             }
         });
         mIndeterminateSweepAnimator.addListener(new Animator.AnimatorListener() {
@@ -238,6 +350,18 @@ public class CircularProgressBar extends View {
         });
     }
 
+    private boolean isLaidOutCompat() {
+        return getWidth() > 0 && getHeight() > 0;
+    }
+
+    private void invalidateDrawRect() {
+        int width = getWidth();
+        int height = getHeight();
+        if (width > 0 && height > 0) {
+            invalidateDrawRect(width, height);
+        }
+    }
+
     private void invalidateDrawRect(int width, int height) {
         int size;
         if (mDrawBackgroundStroke) {
@@ -257,18 +381,6 @@ public class CircularProgressBar extends View {
         } else {
             mDrawRect.set(size / 2 + 1, size / 2 + 1, width - size / 2 - 1, height - size / 2 - 1);
         }
-    }
-
-    private void invalidateDrawRect() {
-        int width = getWidth();
-        int height = getHeight();
-        if (width > 0 && height > 0) {
-            invalidateDrawRect(width, height);
-        }
-    }
-
-    private boolean isLaidOutCompat() {
-        return getWidth() > 0 && getHeight() > 0;
     }
 
     private void setProgressInternal(float progress) {
@@ -317,355 +429,223 @@ public class CircularProgressBar extends View {
         }
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int measuredWidth = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
-        int measuredHeight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
-        setMeasuredDimension(measuredWidth, measuredHeight);
-        invalidateDrawRect(measuredWidth, measuredHeight);
-    }
+    public class Configurator {
+        private long progressAnimationDuration;
+        private long indeterminateGrowAnimationDuration;
+        private long indeterminateSweepAnimationDuration;
+        private float maximum;
+        private float progress;
+        private float startAngle;
+        private float indeterminateGrowAngle;
+        private float indeterminateSweepAngle;
+        private float indeterminateMinimumAngle;
+        private float foregroundStrokeWidth;
+        private float backgroundStrokeWidth;
+        private int foregroundStrokeColor;
+        private int backgroundStrokeColor;
+        private boolean indeterminate;
+        private boolean animateProgress;
+        private boolean drawBackgroundStroke;
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        invalidateDrawRect();
-        if (mIndeterminate) {
-            startIndeterminateAnimations();
+        private Configurator() {
+            progressAnimationDuration = mProgressAnimator.getDuration();
+            indeterminateGrowAnimationDuration = mIndeterminateGrowAnimator.getDuration();
+            indeterminateSweepAnimationDuration = mIndeterminateSweepAnimator.getDuration();
+            maximum = mMaximum;
+            progress = mProgress;
+            startAngle = mStartAngle;
+            indeterminateGrowAngle = mIndeterminateGrowAngle;
+            indeterminateSweepAngle = mIndeterminateSweepAngle;
+            indeterminateMinimumAngle = mIndeterminateMinimumAngle;
+            indeterminate = mIndeterminate;
+            animateProgress = mAnimateProgress;
+            drawBackgroundStroke = mDrawBackgroundStroke;
+            Paint foregroundStrokePaint = mForegroundStrokePaint;
+            Paint backgroundStrokePaint = mBackgroundStrokePaint;
+            foregroundStrokeColor = foregroundStrokePaint.getColor();
+            backgroundStrokeColor = backgroundStrokePaint.getColor();
+            foregroundStrokeWidth = foregroundStrokePaint.getStrokeWidth();
+            backgroundStrokeWidth = backgroundStrokePaint.getStrokeWidth();
         }
-    }
 
-    @Override
-    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
-        invalidateDrawRect(width, height);
-    }
-
-    @Override
-    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (visibility == VISIBLE) {
-            if (mIndeterminate) {
-                startIndeterminateAnimations();
-            }
-        } else {
-            stopIndeterminateAnimations();
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (mIndeterminate && isLaidOutCompat()) {
-            startIndeterminateAnimations();
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        stopIndeterminateAnimations();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        if (mDrawBackgroundStroke) {
-            canvas.drawOval(mDrawRect, mBackgroundStrokePaint);
-        }
-        if (mIndeterminate) {
-            float startAngle;
-            float sweepAngle;
-            if (mIndeterminateGrowMode) {
-                startAngle = mIndeterminateGrowAngle - mIndeterminateGrowAngleOffset;
-                sweepAngle = mIndeterminateSweepAngle + mIndeterminateMinimumAngle;
-            } else {
-                startAngle = mIndeterminateGrowAngle + mIndeterminateSweepAngle -
-                        mIndeterminateGrowAngleOffset;
-                sweepAngle = 360f - mIndeterminateSweepAngle - mIndeterminateMinimumAngle;
-            }
-            canvas.drawArc(mDrawRect, startAngle, sweepAngle, false, mForegroundStrokePaint);
-        } else {
-            float progress;
-            if (mProgress > mMaximum) {
-                progress = mMaximum;
-            } else if (mProgress < -mMaximum) {
-                progress = -mMaximum;
-            } else {
-                progress = mProgress;
-            }
-            float sweepAngle = 360f * progress / mMaximum;
-            canvas.drawArc(mDrawRect, mStartAngle, sweepAngle, false, mForegroundStrokePaint);
-        }
-    }
-
-    /**
-     * Maximum progress value
-     */
-    public float getMaximum() {
-        return mMaximum;
-    }
-
-    /**
-     * Maximum progress value
-     */
-    public void setMaximum(float maximum) {
-        stopProgressAnimation();
-        mMaximum = maximum;
-        invalidate();
-    }
-
-    /**
-     * Current progress value
-     */
-    public float getProgress() {
-        return mProgress;
-    }
-
-    /**
-     * Current progress value
-     */
-    public void setProgress(float progress) {
-        stopProgressAnimation();
-        if (mIndeterminate) {
-            mProgress = progress;
-        } else {
-            if (mAnimateProgress && isLaidOutCompat()) {
-                setProgressAnimated(progress);
-            } else {
-                setProgressInternal(progress);
-            }
-        }
-    }
-
-    /**
-     * Foreground stroke width
-     * <br>
-     * Foreground stroke represents current progress value
-     */
-    @Px
-    public int getForegroundStrokeWidth() {
-        return (int) mForegroundStrokePaint.getStrokeWidth();
-    }
-
-    /**
-     * Foreground stroke width
-     * <br>
-     * Foreground stroke represents current progress value
-     */
-    public void setForegroundStrokeWidth(@Px int width) {
-        mForegroundStrokePaint.setStrokeWidth(width);
-        invalidateDrawRect();
-        invalidate();
-    }
-
-    /**
-     * Background stroke width
-     */
-    @Px
-    public int getBackgroundStrokeWidth() {
-        return (int) mBackgroundStrokePaint.getStrokeWidth();
-    }
-
-    /**
-     * Background stroke width
-     */
-    public void setBackgroundStrokeWidth(@Px int width) {
-        mBackgroundStrokePaint.setStrokeWidth(width);
-        invalidateDrawRect();
-        invalidate();
-    }
-
-    /**
-     * Progress bar start angle
-     */
-    public float getStartAngle() {
-        return mStartAngle;
-    }
-
-    /**
-     * Progress bar start angle
-     */
-    public void setStartAngle(float angle) {
-        stopProgressAnimation();
-        mStartAngle = angle;
-        if (!mIndeterminate) {
-            invalidate();
-        }
-    }
-
-    /**
-     * Foreground stroke color
-     * <br>
-     * Foreground stroke represents current progress value
-     */
-    @ColorInt
-    public int getForegroundStrokeColor() {
-        return mForegroundStrokePaint.getColor();
-    }
-
-    /**
-     * Foreground stroke color
-     * <br>
-     * Foreground stroke represents current progress value
-     */
-    public void setForegroundStrokeColor(@ColorInt int color) {
-        mForegroundStrokePaint.setColor(color);
-        invalidate();
-    }
-
-    /**
-     * Background stroke color
-     */
-    @ColorInt
-    public int getBackgroundStrokeColor() {
-        return mBackgroundStrokePaint.getColor();
-    }
-
-    /**
-     * Background stroke color
-     */
-    public void setBackgroundStrokeColor(@ColorInt int color) {
-        mBackgroundStrokePaint.setColor(color);
-        invalidate();
-    }
-
-    /**
-     * Progress change animation duration
-     */
-    public long getProgressAnimationDuration() {
-        return mProgressAnimator.getDuration();
-    }
-
-    /**
-     * Progress change animation duration
-     */
-    public void setProgressAnimationDuration(long duration) {
-        mProgressAnimator.setDuration(duration);
-    }
-
-    /**
-     * Animation state
-     */
-    public boolean isAnimating() {
-        return mProgressAnimator.isRunning() || mIndeterminateGrowAnimator.isRunning() ||
-                mIndeterminateSweepAnimator.isRunning();
-    }
-
-    /**
-     * Stop all animations
-     */
-    public void stopAnimations() {
-        stopProgressAnimation();
-        stopIndeterminateAnimations();
-    }
-
-    /**
-     * Animate progress changes
-     */
-    public boolean isAnimateProgress() {
-        return mAnimateProgress;
-    }
-
-    /**
-     * Animate progress changes
-     */
-    public void setAnimateProgress(boolean animate) {
-        if (!animate) {
+        @MainThread
+        public void apply() {
             stopProgressAnimation();
-        }
-        mAnimateProgress = animate;
-    }
-
-    /**
-     * Draw background stroke
-     */
-    public boolean isDrawBackgroundStroke() {
-        return mDrawBackgroundStroke;
-    }
-
-    /**
-     * Draw background stroke
-     */
-    public void setDrawBackgroundStroke(boolean draw) {
-        mDrawBackgroundStroke = draw;
-        invalidateDrawRect();
-        invalidate();
-    }
-
-    /**
-     * Minimum angle of indeterminate animation
-     */
-    public float getIndeterminateMinimumAngle() {
-        return mIndeterminateMinimumAngle;
-    }
-
-    /**
-     * Minimum angle of indeterminate animation
-     */
-    public void setIndeterminateMinimumAngle(float angle) {
-        stopIndeterminateAnimations();
-        mIndeterminateMinimumAngle = angle;
-        mIndeterminateSweepAnimator.setFloatValues(360F - mIndeterminateMinimumAngle * 2F);
-        if (mIndeterminate) {
-            invalidate();
-            startIndeterminateAnimations();
-        }
-    }
-
-    /**
-     * Duration of grow animation in indeterminate mode
-     */
-    public long getIndeterminateGrowAnimationDuration() {
-        return mIndeterminateGrowAnimator.getDuration();
-    }
-
-    /**
-     * Duration of grow animation in indeterminate mode
-     */
-    public void setIndeterminateGrowAnimationDuration(long duration) {
-        stopIndeterminateAnimations();
-        mIndeterminateGrowAnimator.setDuration(duration);
-        if (mIndeterminate) {
-            invalidate();
-            startIndeterminateAnimations();
-        }
-    }
-
-    /**
-     * Duration of sweep animation in indeterminate mode
-     */
-    public long getIndeterminateSweepAnimationDuration() {
-        return mIndeterminateSweepAnimator.getDuration();
-    }
-
-    /**
-     * Duration of sweep animation in indeterminate mode
-     */
-    public void setIndeterminateSweepAnimationDuration(long duration) {
-        stopIndeterminateAnimations();
-        mIndeterminateSweepAnimator.setDuration(duration);
-        if (mIndeterminate) {
-            invalidate();
-            startIndeterminateAnimations();
-        }
-    }
-
-    /**
-     * Indeterminate mode
-     */
-    public boolean isIndeterminate() {
-        return mIndeterminate;
-    }
-
-    /**
-     * Indeterminate mode
-     */
-    public void setIndeterminate(boolean indeterminate) {
-        if (indeterminate != mIndeterminate) {
-            mIndeterminate = indeterminate;
-            if (mIndeterminate) {
-                startIndeterminateAnimations();
-            } else {
+            boolean indeterminateChanged = indeterminate != mIndeterminate;
+            if (indeterminateChanged && !indeterminate) {
                 stopIndeterminateAnimations();
             }
+            mIndeterminate = indeterminate;
+            mMaximum = maximum;
+            mAnimateProgress = animateProgress;
+            mProgressAnimator.setDuration(progressAnimationDuration);
+            mIndeterminateGrowAnimator.setDuration(indeterminateGrowAnimationDuration);
+            mIndeterminateSweepAnimator.setDuration(indeterminateSweepAnimationDuration);
+            Paint foregroundStrokePaint = mForegroundStrokePaint;
+            Paint backgroundStrokePaint = mBackgroundStrokePaint;
+            foregroundStrokePaint.setColor(foregroundStrokeColor);
+            backgroundStrokePaint.setColor(backgroundStrokeColor);
+            foregroundStrokePaint.setStrokeWidth(foregroundStrokeWidth);
+            backgroundStrokePaint.setStrokeWidth(backgroundStrokeWidth);
+            mStartAngle = startAngle;
+            mIndeterminateGrowAngle = indeterminateGrowAngle;
+            mIndeterminateSweepAngle = indeterminateSweepAngle;
+            mIndeterminateMinimumAngle = indeterminateMinimumAngle;
+            mDrawBackgroundStroke = drawBackgroundStroke;
+            invalidateDrawRect();
+            if (indeterminate) {
+                mProgress = progress;
+            } else {
+                if (animateProgress && isLaidOutCompat()) {
+                    setProgressAnimated(progress);
+                } else {
+                    setProgressInternal(progress);
+                }
+            }
+            if (indeterminateChanged && indeterminate) {
+                startIndeterminateAnimations();
+            }
+            invalidate();
+        }
+
+        /**
+         * Maximum progress value for non-indeterminate mode
+         */
+        @NonNull
+        public Configurator setMaximum(float value) {
+            maximum = value;
+            return this;
+        }
+
+        /**
+         * Current progress value for non-indeterminate mode
+         */
+        @NonNull
+        public Configurator setProgress(float value) {
+            progress = value;
+            return this;
+        }
+
+        /**
+         * Start angle for non-indeterminate mode
+         */
+        @NonNull
+        public Configurator setStartAngle(float value) {
+            startAngle = value;
+            return this;
+        }
+
+        /**
+         * Grow angle for indeterminate mode
+         */
+        @NonNull
+        public Configurator setIndeterminateGrowAngle(float value) {
+            indeterminateGrowAngle = value;
+            return this;
+        }
+
+        /**
+         * Sweep angle for indeterminate mode
+         */
+        @NonNull
+        public Configurator setIndeterminateSweepAngle(float value) {
+            indeterminateSweepAngle = value;
+            return this;
+        }
+
+        /**
+         * Minimum angle for indeterminate mode
+         */
+        @NonNull
+        public Configurator setIndeterminateMinimumAngle(float value) {
+            indeterminateMinimumAngle = value;
+            return this;
+        }
+
+        /**
+         * Grow animation duration in milliseconds for indeterminate mode
+         */
+        public void setIndeterminateGrowAnimationDuration(long value) {
+            indeterminateGrowAnimationDuration = value;
+        }
+
+        /**
+         * Sweep animation duration in milliseconds for indeterminate mode
+         */
+        public void setIndeterminateSweepAnimationDuration(long value) {
+            indeterminateSweepAnimationDuration = value;
+        }
+
+        /**
+         * Set indeterminate mode enabled or disabled
+         */
+        @NonNull
+        public Configurator setIndeterminate(boolean value) {
+            indeterminate = value;
+            return this;
+        }
+
+        /**
+         * Animate progress change or not for non-indeterminate mode
+         */
+        @NonNull
+        public Configurator setAnimateProgress(boolean value) {
+            animateProgress = value;
+            return this;
+        }
+
+        /**
+         * Progress change animation duration in milliseconds for non-indeterminate mode
+         */
+        @NonNull
+        public Configurator setProgressAnimationDuration(long value) {
+            progressAnimationDuration = value;
+            return this;
+        }
+
+        /**
+         * Draw background stroke or not
+         */
+        @NonNull
+        public Configurator setDrawBackgroundStroke(boolean value) {
+            drawBackgroundStroke = value;
+            return this;
+        }
+
+        /**
+         * Foreground stroke color
+         */
+        @NonNull
+        public Configurator setForegroundStrokeColor(@ColorInt int value) {
+            foregroundStrokeColor = value;
+            return this;
+        }
+
+        /**
+         * Background stroke color
+         */
+        @NonNull
+        public Configurator setBackgroundStrokeColor(@ColorInt int value) {
+            backgroundStrokeColor = value;
+            return this;
+        }
+
+        /**
+         * Foreground stroke width
+         */
+        @NonNull
+        public Configurator setForegroundStrokeWidth(@Px int value) {
+            foregroundStrokeWidth = value;
+            return this;
+        }
+
+        /**
+         * Background stroke width
+         */
+        @NonNull
+        public Configurator setBackgroundStrokeWidth(@Px int value) {
+            backgroundStrokeWidth = value;
+            return this;
         }
     }
 }
