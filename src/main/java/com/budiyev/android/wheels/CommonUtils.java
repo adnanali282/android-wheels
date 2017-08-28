@@ -264,8 +264,7 @@ public final class CommonUtils {
     public static InputStream getDataStreamFromUri(@NonNull Context context,
             @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
-        if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) ||
-                URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
+        if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) || URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
                 URI_SCHEME_FTP.equalsIgnoreCase(scheme)) {
             return new URL(uri.toString()).openConnection().getInputStream();
         } else {

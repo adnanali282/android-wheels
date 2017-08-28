@@ -381,7 +381,7 @@ public final class HttpRequestResult {
     @Override
     public String toString() {
         return "HttpRequestResult [result type: " + getResultTypeString() + "; data type: " +
-                getDataTypeString() + "; response code: " +
-                (mHttpCode == -1 ? "NONE" : mHttpCode) + "]";
+                getDataTypeString() + "; response code: " + (mHttpCode == -1 ? "NONE" : mHttpCode) +
+                "]";
     }
 }

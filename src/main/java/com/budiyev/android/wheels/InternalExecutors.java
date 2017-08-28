@@ -42,15 +42,11 @@ final class InternalExecutors {
     private static final Lock THREAD_UTILS_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock THREAD_UTILS_SCHEDULED_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock HTTP_REQUEST_EXECUTOR_LOCK = new ReentrantLock();
-    private static final Lock IMAGE_LOADER_EXECUTOR_LOCK = new ReentrantLock();
-    private static final Lock STORAGE_IMAGE_CACHE_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock POOL_SIZE_LOCK = new ReentrantLock();
     private static volatile ThreadPoolExecutor sThreadUtilsExecutor;
     private static volatile ScheduledThreadPoolExecutor sThreadUtilsScheduledExecutor;
     private static volatile ThreadPoolExecutor sHttpRequestExecutor;
-    private static volatile ThreadPoolExecutor sImageLoaderExecutor;
-    private static volatile ThreadPoolExecutor sStorageImageCacheExecutor;
     private static volatile MainThreadExecutor sMainThreadExecutor;
 
     private InternalExecutors() {
@@ -107,47 +103,6 @@ final class InternalExecutors {
                 }
             } finally {
                 HTTP_REQUEST_EXECUTOR_LOCK.unlock();
-            }
-        }
-        return executor;
-    }
-
-    @NonNull
-    public static ThreadPoolExecutor getImageLoaderExecutor() {
-        ThreadPoolExecutor executor = sImageLoaderExecutor;
-        if (executor == null) {
-            IMAGE_LOADER_EXECUTOR_LOCK.lock();
-            try {
-                executor = sImageLoaderExecutor;
-                if (executor == null) {
-                    int threadCount = Math.round(CPU_COUNT * 1.5F);
-                    executor = new AsyncExecutor(threadCount, threadCount, 0, TimeUnit.NANOSECONDS,
-                            new LinkedBlockingQueue<Runnable>(),
-                            new AsyncThreadFactory(Thread.MIN_PRIORITY));
-                    sImageLoaderExecutor = executor;
-                }
-            } finally {
-                IMAGE_LOADER_EXECUTOR_LOCK.unlock();
-            }
-        }
-        return executor;
-    }
-
-    @NonNull
-    public static ThreadPoolExecutor getStorageImageCacheExecutor() {
-        ThreadPoolExecutor executor = sStorageImageCacheExecutor;
-        if (executor == null) {
-            STORAGE_IMAGE_CACHE_EXECUTOR_LOCK.lock();
-            try {
-                executor = sStorageImageCacheExecutor;
-                if (executor == null) {
-                    executor = new AsyncExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
-                            new LinkedBlockingQueue<Runnable>(),
-                            new AsyncThreadFactory(Thread.MIN_PRIORITY));
-                    sStorageImageCacheExecutor = executor;
-                }
-            } finally {
-                STORAGE_IMAGE_CACHE_EXECUTOR_LOCK.unlock();
             }
         }
         return executor;
