@@ -11,7 +11,6 @@ Some useful tools for Android
 * CollectionUtils - Tools for collections
 * ContextUtils - Convenience methods to get system services from context
 * CommonUtils - Common useful tools
-* ImageUtils - Tools for images
 * HashUtils - Tools for hashing
 * SnackbarUtils - Tools for making Snackbar from Fragment, Activity, Window or View
 * PrimitiveUtils - Convenience methods to unpack nullable packed primitive types
