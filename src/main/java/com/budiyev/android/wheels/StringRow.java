@@ -66,6 +66,7 @@ public class StringRow implements Iterable<String> {
         }
     }
 
+    @NonNull
     @Override
     public Iterator<String> iterator() {
         return mCells.iterator();
