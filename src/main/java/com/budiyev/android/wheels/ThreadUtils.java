@@ -48,8 +48,8 @@ public final class ThreadUtils {
     }
 
     /**
-     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
-     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest};
+     * this factory will use the same thread name prefix
      * and naming scheme as rest threads used by mentioned components.
      *
      * @return New thread factory
@@ -61,8 +61,8 @@ public final class ThreadUtils {
     }
 
     /**
-     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
-     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest};
+     * this factory will use the same thread name prefix
      * and naming scheme as rest threads used by mentioned components.
      *
      * @param threadPriority Priority of threads created by the factory
@@ -76,8 +76,8 @@ public final class ThreadUtils {
     }
 
     /**
-     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest}
-     * and {@link ImageLoader}; this factory will use the same thread name prefix
+     * Create new {@link ThreadFactory} same as used in {@link ThreadUtils}, {@link HttpRequest};
+     * this factory will use the same thread name prefix
      * and naming scheme as rest threads used by mentioned components.
      *
      * @param threadPriority Priority of threads created by the factory
@@ -98,7 +98,6 @@ public final class ThreadUtils {
      * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}</li>
-     * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * <li>Threads, created thread factories, returned by {@link #newThreadFactory()},
      * {@link #newThreadFactory(int)} and {@link #newThreadFactory(int, boolean)}</li>
@@ -121,7 +120,6 @@ public final class ThreadUtils {
      * <b>Affects:</b>
      * <ul>
      * <li>{@link ThreadUtils}</li>
-     * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * <li>Threads, created thread factories, returned by {@link #newThreadFactory()},
      * {@link #newThreadFactory(int)} and {@link #newThreadFactory(int, boolean)}</li>
@@ -141,7 +139,6 @@ public final class ThreadUtils {
      * <ul>
      * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
      * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
-     * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * </ul>
      */
@@ -157,7 +154,6 @@ public final class ThreadUtils {
      * <ul>
      * <li>{@link ThreadUtils}, excluding {@link ThreadUtils#runAsync(AsyncTask, Object[])},
      * {@link ThreadUtils#runAsync(AsyncTask, long, Object[])}</li>
-     * <li>{@link ImageLoader}</li>
      * <li>{@link HttpRequest}</li>
      * </ul>
      */
