@@ -30,7 +30,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Tools for collections
@@ -273,7 +272,7 @@ public final class CollectionUtils {
         if (position < 0 || step < 1) {
             throw new IllegalArgumentException();
         }
-        if (Objects.equals(item, list.get(position))) {
+        if (CommonUtils.equals(item, list.get(position))) {
             return position;
         } else {
             int listSize = list.size();
@@ -290,13 +289,13 @@ public final class CollectionUtils {
                 }
                 int startOffset = position - previousOffset - 1;
                 for (int i = startOffset; i >= start; i--) {
-                    if (Objects.equals(item, list.get(i))) {
+                    if (CommonUtils.equals(item, list.get(i))) {
                         return i;
                     }
                 }
                 int endOffset = position + previousOffset + 1;
                 for (int i = endOffset; i < end; i++) {
-                    if (Objects.equals(item, list.get(i))) {
+                    if (CommonUtils.equals(item, list.get(i))) {
                         return i;
                     }
                 }
@@ -321,7 +320,7 @@ public final class CollectionUtils {
             return ((Collection<T>) iterable).contains(element);
         } else {
             for (T e : iterable) {
-                if (Objects.equals(e, element)) {
+                if (CommonUtils.equals(e, element)) {
                     return true;
                 }
             }
@@ -338,7 +337,7 @@ public final class CollectionUtils {
      */
     public static <T> boolean contains(@NonNull T[] array, @Nullable T element) {
         for (T e : array) {
-            if (Objects.equals(e, element)) {
+            if (CommonUtils.equals(e, element)) {
                 return true;
             }
         }

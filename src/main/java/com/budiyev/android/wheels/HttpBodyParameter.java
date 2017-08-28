@@ -27,7 +27,6 @@ import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * Parameter of HTTP request (multipart/form-data)
@@ -41,8 +40,8 @@ public final class HttpBodyParameter {
     final String contentType;
 
     HttpBodyParameter(@NonNull String key, @NonNull String value) {
-        this.key = Objects.requireNonNull(key);
-        this.value = Objects.requireNonNull(value);
+        this.key = CommonUtils.requireNonNull(key);
+        this.value = CommonUtils.requireNonNull(value);
         this.file = null;
         this.stream = null;
         this.fileName = null;
@@ -50,9 +49,9 @@ public final class HttpBodyParameter {
     }
 
     HttpBodyParameter(@NonNull String key, @NonNull File file) {
-        this.key = Objects.requireNonNull(key);
+        this.key = CommonUtils.requireNonNull(key);
         this.value = null;
-        this.file = Objects.requireNonNull(file);
+        this.file = CommonUtils.requireNonNull(file);
         this.stream = null;
         this.fileName = null;
         this.contentType = null;
@@ -60,17 +59,17 @@ public final class HttpBodyParameter {
 
     HttpBodyParameter(@NonNull String key, @NonNull InputStream stream, @NonNull String fileName,
             @NonNull String contentType) {
-        this.key = Objects.requireNonNull(key);
+        this.key = CommonUtils.requireNonNull(key);
         this.value = null;
         this.file = null;
-        this.stream = Objects.requireNonNull(stream);
-        this.fileName = Objects.requireNonNull(fileName);
-        this.contentType = Objects.requireNonNull(contentType);
+        this.stream = CommonUtils.requireNonNull(stream);
+        this.fileName = CommonUtils.requireNonNull(fileName);
+        this.contentType = CommonUtils.requireNonNull(contentType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, value, file, stream, fileName, contentType);
+        return CommonUtils.hash(key, value, file, stream, fileName, contentType);
     }
 
     @Override
@@ -79,10 +78,11 @@ public final class HttpBodyParameter {
             return true;
         } else if (obj instanceof HttpBodyParameter) {
             HttpBodyParameter other = (HttpBodyParameter) obj;
-            return Objects.equals(key, other.key) && Objects.equals(value, other.value) &&
-                    Objects.equals(file, other.file) && Objects.equals(stream, other.stream) &&
-                    Objects.equals(fileName, other.fileName) &&
-                    Objects.equals(contentType, other.contentType);
+            return CommonUtils.equals(key, other.key) && CommonUtils.equals(value, other.value) &&
+                    CommonUtils.equals(file, other.file) &&
+                    CommonUtils.equals(stream, other.stream) &&
+                    CommonUtils.equals(fileName, other.fileName) &&
+                    CommonUtils.equals(contentType, other.contentType);
         } else {
             return false;
         }

@@ -24,7 +24,6 @@
 package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -53,27 +52,20 @@ public final class CsvParser {
      * @param outputStream Stream to save result
      * @param separator    Column separator
      * @param charset      Charset name
-     * @return true if success, false otherwise
      */
-    public static boolean encode(@NonNull StringTable table, @NonNull OutputStream outputStream,
-            char separator, @NonNull String charset) {
-        try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, charset))) {
-            for (StringRow row : table) {
-                int size = row.size();
-                for (int i = 0; i < size; i++) {
-                    writer.append(QUOTE)
-                            .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
-                            .append(QUOTE);
-                    if (i != size - 1) {
-                        writer.append(separator);
-                    }
+    public static void encode(@NonNull StringTable table, @NonNull OutputStream outputStream,
+            char separator, @NonNull String charset) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, charset));
+        for (StringRow row : table) {
+            int size = row.size();
+            for (int i = 0; i < size; i++) {
+                writer.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                        .append(QUOTE);
+                if (i != size - 1) {
+                    writer.append(separator);
                 }
-                writer.append(LF);
             }
-            return true;
-        } catch (IOException e) {
-            return false;
+            writer.append(LF);
         }
     }
 
@@ -110,38 +102,35 @@ public final class CsvParser {
      * @param charset     Charset name
      * @return Table
      */
-    @Nullable
+    @NonNull
     public static StringTable parse(@NonNull InputStream inputStream, char separator,
-            @NonNull String charset) {
-        try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
-            StringTable table = new StringTable();
-            StringBuilder row = new StringBuilder();
-            boolean inQuotes = false;
-            char[] buffer = new char[BUFFER_SIZE];
-            for (; ; ) {
-                int read = reader.read(buffer);
-                if (read == -1) {
-                    if (row.length() > 0) {
-                        table.add(parseRow(row.toString(), separator));
-                    }
-                    break;
+            @NonNull String charset) throws IOException {
+        InputStreamReader reader = new InputStreamReader(inputStream, charset);
+        StringTable table = new StringTable();
+        StringBuilder row = new StringBuilder();
+        boolean inQuotes = false;
+        char[] buffer = new char[BUFFER_SIZE];
+        for (; ; ) {
+            int read = reader.read(buffer);
+            if (read == -1) {
+                if (row.length() > 0) {
+                    table.add(parseRow(row.toString(), separator));
                 }
-                for (int i = 0; i < read; i++) {
-                    if (buffer[i] == CsvParser.LF && !inQuotes) {
-                        table.add(parseRow(row.toString(), separator));
-                        row.delete(0, row.length());
-                    } else {
-                        if (buffer[i] == CsvParser.QUOTE) {
-                            inQuotes = !inQuotes;
-                        }
-                        row.append(buffer[i]);
+                break;
+            }
+            for (int i = 0; i < read; i++) {
+                if (buffer[i] == CsvParser.LF && !inQuotes) {
+                    table.add(parseRow(row.toString(), separator));
+                    row.delete(0, row.length());
+                } else {
+                    if (buffer[i] == CsvParser.QUOTE) {
+                        inQuotes = !inQuotes;
                     }
+                    row.append(buffer[i]);
                 }
             }
-            return table;
-        } catch (IOException e) {
-            return null;
         }
+        return table;
     }
 
     /**

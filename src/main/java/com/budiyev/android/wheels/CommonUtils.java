@@ -28,11 +28,13 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.StatFs;
 import android.support.annotation.AnyRes;
 import android.support.annotation.NonNull;
@@ -45,10 +47,12 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -279,7 +283,13 @@ public final class CommonUtils {
      * @return Number of free bytes
      */
     public static long getAvailableBytes(@NonNull File path) {
-        return new StatFs(path.getAbsolutePath()).getAvailableBytes();
+        StatFs statFs = new StatFs(path.getAbsolutePath());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return statFs.getAvailableBytes();
+        } else {
+            //noinspection deprecation
+            return statFs.getBlockSize() * statFs.getAvailableBlocks();
+        }
     }
 
     /**
@@ -289,7 +299,13 @@ public final class CommonUtils {
      * @return Total number of bytes
      */
     public static long getTotalBytes(@NonNull File path) {
-        return new StatFs(path.getAbsolutePath()).getTotalBytes();
+        StatFs statFs = new StatFs(path.getAbsolutePath());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return statFs.getTotalBytes();
+        } else {
+            //noinspection deprecation
+            return statFs.getBlockSize() * statFs.getBlockCount();
+        }
     }
 
     /**
@@ -419,5 +435,36 @@ public final class CommonUtils {
                 resources.getResourcePackageName(resourceId) + "/" +
                 resources.getResourceTypeName(resourceId) + "/" +
                 resources.getResourceEntryName(resourceId));
+    }
+
+    @NonNull
+    public static <T> T requireNonNull(@Nullable T value) {
+        if (value == null) {
+            throw new NullPointerException();
+        }
+        return value;
+    }
+
+    public static boolean equals(@Nullable Object a, @Nullable Object b) {
+        return a == b || a != null && a.equals(b);
+    }
+
+    public static int hash(@Nullable Object... objects) {
+        return Arrays.hashCode(objects);
+    }
+
+    public static void close(@Nullable Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    public static void close(@Nullable Cursor cursor) {
+        if (cursor != null) {
+            cursor.close();
+        }
     }
 }

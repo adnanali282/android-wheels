@@ -251,8 +251,9 @@ public final class HashUtils {
     @NonNull
     public static byte[] generateHashBytes(@NonNull InputStream inputStream,
             @NonNull String algorithm) {
-        try (DigestInputStream digestStream = new DigestInputStream(inputStream,
-                MessageDigest.getInstance(algorithm))) {
+        try {
+            DigestInputStream digestStream =
+                    new DigestInputStream(inputStream, MessageDigest.getInstance(algorithm));
             byte[] buffer = new byte[BUFFER_SIZE];
             for (; ; ) {
                 if (digestStream.read(buffer) < 0) {
@@ -262,6 +263,8 @@ public final class HashUtils {
             return digestStream.getMessageDigest().digest();
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            CommonUtils.close(inputStream);
         }
     }
 

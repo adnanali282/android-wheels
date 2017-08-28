@@ -28,7 +28,6 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Future;
 
 /**
@@ -73,7 +72,7 @@ public final class GetHttpRequestBuilder implements HttpRequestBuilder {
         if (mCallbacks == null) {
             mCallbacks = new ArrayList<>();
         }
-        mCallbacks.add(Objects.requireNonNull(callback));
+        mCallbacks.add(CommonUtils.requireNonNull(callback));
         return this;
     }
 

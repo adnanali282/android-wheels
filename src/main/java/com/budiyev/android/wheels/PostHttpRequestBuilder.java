@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Future;
 
 /**
@@ -113,7 +112,7 @@ public final class PostHttpRequestBuilder implements HttpRequestBuilder {
         if (mCallbacks == null) {
             mCallbacks = new ArrayList<>();
         }
-        mCallbacks.add(Objects.requireNonNull(callback));
+        mCallbacks.add(CommonUtils.requireNonNull(callback));
         return this;
     }
 

@@ -24,6 +24,7 @@
 package com.budiyev.android.wheels;
 
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -206,6 +207,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static CaptioningManager getCaptioningManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.CAPTIONING_SERVICE));
     }
@@ -329,14 +331,17 @@ public final class ContextUtils {
     }
 
     /**
-     * Obtain a {@link WifiManager} instance associated with specified {@link Context}
+     * Obtain a {@link WifiManager} instance associated with specified {@link Context},
+     * use application context to avoid memory leaks
      *
      * @param context Context
      * @return {@link WifiManager} associated with specified {@link Context}
      * @throws InvalidContextException if {@link WifiManager} can't be obtained
      *                                 from specified {@link Context}
+     * @see Context#getApplicationContext()
      */
     @NonNull
+    @SuppressLint("WifiManagerPotentialLeak")
     public static WifiManager getWifiManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.WIFI_SERVICE));
     }
@@ -363,6 +368,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     public static NsdManager getNsdManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.NSD_SERVICE));
     }
@@ -403,6 +409,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     public static MediaRouter getMediaRouter(@NonNull Context context) {
         return validate(context.getSystemService(Context.MEDIA_ROUTER_SERVICE));
     }
@@ -617,6 +624,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public static BluetoothManager getBluetoothManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.BLUETOOTH_SERVICE));
     }
@@ -643,6 +651,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     public static InputManager getInputManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.INPUT_SERVICE));
     }
@@ -656,6 +665,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static DisplayManager getDisplayManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.DISPLAY_SERVICE));
     }
@@ -669,6 +679,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static UserManager getUserManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.USER_SERVICE));
     }
@@ -710,6 +721,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static AppOpsManager getAppOpsManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.APP_OPS_SERVICE));
     }
@@ -737,6 +749,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static PrintManager getPrintManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.PRINT_SERVICE));
     }
@@ -750,6 +763,7 @@ public final class ContextUtils {
      *                                 from specified {@link Context}
      */
     @NonNull
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static ConsumerIrManager getConsumerIrManager(@NonNull Context context) {
         return validate(context.getSystemService(Context.CONSUMER_IR_SERVICE));
     }

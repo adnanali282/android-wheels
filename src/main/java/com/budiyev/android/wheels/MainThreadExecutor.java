@@ -29,7 +29,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -64,14 +63,14 @@ final class MainThreadExecutor extends AbstractExecutorService {
 
     @NonNull
     public Future<?> submit(@NonNull Runnable task, long delay) {
-        RunnableFuture<Void> future = newTaskFor(Objects.requireNonNull(task), null);
+        RunnableFuture<Void> future = newTaskFor(CommonUtils.requireNonNull(task), null);
         execute(future, delay);
         return future;
     }
 
     @NonNull
     public <T> Future<T> submit(@NonNull Callable<T> task, long delay) {
-        RunnableFuture<T> future = newTaskFor(Objects.requireNonNull(task));
+        RunnableFuture<T> future = newTaskFor(CommonUtils.requireNonNull(task));
         execute(future, delay);
         return future;
     }

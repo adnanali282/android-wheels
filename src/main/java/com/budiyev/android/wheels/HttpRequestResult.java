@@ -35,7 +35,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -244,7 +243,8 @@ public final class HttpRequestResult {
                 if (stream == null) {
                     return null;
                 }
-                try (InputStreamReader streamReader = new InputStreamReader(stream, charset)) {
+                try {
+                    InputStreamReader streamReader = new InputStreamReader(stream, charset);
                     StringBuilder responseBuilder = new StringBuilder();
                     char[] buffer = new char[BUFFER_SIZE];
                     for (int read; ; ) {
@@ -263,6 +263,8 @@ public final class HttpRequestResult {
                     mDataType = NONE;
                     mDataString = null;
                     return null;
+                } finally {
+                    CommonUtils.close(stream);
                 }
             } else if (mDataType == STRING) {
                 return mDataString;
@@ -358,7 +360,7 @@ public final class HttpRequestResult {
 
     @Override
     public int hashCode() {
-        return Objects
+        return CommonUtils
                 .hash(mDataString, mDataType, mDataStream, mHeaderFields, mResultType, mHttpCode);
     }
 
@@ -370,9 +372,9 @@ public final class HttpRequestResult {
             HttpRequestResult other = (HttpRequestResult) obj;
             return mDataType == other.mDataType && mResultType == other.mResultType &&
                     mHttpCode == other.mHttpCode &&
-                    Objects.equals(mDataString, other.mDataString) &&
-                    Objects.equals(mDataStream, other.mDataStream) &&
-                    Objects.equals(mHeaderFields, other.mHeaderFields);
+                    CommonUtils.equals(mDataString, other.mDataString) &&
+                    CommonUtils.equals(mDataStream, other.mDataStream) &&
+                    CommonUtils.equals(mHeaderFields, other.mHeaderFields);
         } else {
             return false;
         }

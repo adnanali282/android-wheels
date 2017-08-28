@@ -37,7 +37,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URLConnection;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -89,8 +88,9 @@ final class PostHttpRequest extends HttpRequest {
                 connection.setConnectTimeout(CONNECTION_TIMEOUT);
                 if (!CollectionUtils.isNullOrEmpty(mBodyParameters)) {
                     OutputStream outputStream = connection.getOutputStream();
-                    try (BufferedWriter writer = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, CHARSET_UTF_8))) {
+                    try {
+                        BufferedWriter writer = new BufferedWriter(
+                                new OutputStreamWriter(outputStream, CHARSET_UTF_8));
                         for (HttpBodyParameter bodyParameter : mBodyParameters) {
                             if (bodyParameter.value != null) {
                                 writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
@@ -109,12 +109,15 @@ final class PostHttpRequest extends HttpRequest {
                                         .append(contentType).append(LINE_END)
                                         .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
                                         .append(LINE_END).append(LINE_END).flush();
-                                try (FileInputStream fileInput = new FileInputStream(
-                                        bodyParameter.file)) {
+                                FileInputStream fileInput = null;
+                                try {
+                                    fileInput = new FileInputStream(bodyParameter.file);
                                     byte[] buffer = new byte[BUFFER_SIZE];
                                     for (int read; (read = fileInput.read(buffer)) != -1; ) {
                                         outputStream.write(buffer, 0, read);
                                     }
+                                } finally {
+                                    CommonUtils.close(fileInput);
                                 }
                                 writer.append(LINE_END);
                             } else if (bodyParameter.stream != null &&
@@ -128,17 +131,22 @@ final class PostHttpRequest extends HttpRequest {
                                         .append(bodyParameter.contentType).append(LINE_END)
                                         .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
                                         .append(LINE_END).append(LINE_END).flush();
-                                try (InputStream inputStream = bodyParameter.stream) {
+                                InputStream inputStream = bodyParameter.stream;
+                                try {
                                     byte[] buffer = new byte[BUFFER_SIZE];
                                     for (int read; (read = inputStream.read(buffer)) != -1; ) {
                                         outputStream.write(buffer, 0, read);
                                     }
+                                } finally {
+                                    CommonUtils.close(inputStream);
                                 }
                                 writer.append(LINE_END);
                             }
                         }
                         writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH)
                                 .append(LINE_END).flush();
+                    } finally {
+                        CommonUtils.close(outputStream);
                     }
                 }
                 processResponse(connection, result);
@@ -178,7 +186,7 @@ final class PostHttpRequest extends HttpRequest {
             @Nullable Iterable<HttpQueryParameter> queryParameters,
             @Nullable Iterable<HttpBodyParameter> bodyParameters,
             @Nullable Iterable<HttpRequestCallback> callbacks) {
-        mUrl = Objects.requireNonNull(url);
+        mUrl = CommonUtils.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
         mBodyParameters = bodyParameters;
@@ -203,7 +211,7 @@ final class PostHttpRequest extends HttpRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUrl, mHeaderParameters, mQueryParameters, mBodyParameters);
+        return CommonUtils.hash(mUrl, mHeaderParameters, mQueryParameters, mBodyParameters);
     }
 
     @Override
@@ -212,10 +220,10 @@ final class PostHttpRequest extends HttpRequest {
             return true;
         } else if (obj instanceof PostHttpRequest) {
             PostHttpRequest other = (PostHttpRequest) obj;
-            return Objects.equals(mUrl, other.mUrl) &&
-                    Objects.equals(mHeaderParameters, other.mHeaderParameters) &&
-                    Objects.equals(mQueryParameters, other.mQueryParameters) &&
-                    Objects.equals(mBodyParameters, other.mBodyParameters);
+            return CommonUtils.equals(mUrl, other.mUrl) &&
+                    CommonUtils.equals(mHeaderParameters, other.mHeaderParameters) &&
+                    CommonUtils.equals(mQueryParameters, other.mQueryParameters) &&
+                    CommonUtils.equals(mBodyParameters, other.mBodyParameters);
         } else {
             return false;
         }

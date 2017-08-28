@@ -23,6 +23,7 @@
  */
 package com.budiyev.android.wheels;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -31,7 +32,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * String table, used with {@link CsvParser}
@@ -42,9 +42,19 @@ import java.util.Objects;
  * @see CsvParser#encode(StringTable, char)
  */
 public class StringTable implements Iterable<StringRow> {
+    private static final String LINE_SEPARATOR;
     private final List<StringRow> mRows = new ArrayList<>();
 
+    static {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            LINE_SEPARATOR = System.lineSeparator();
+        } else {
+            LINE_SEPARATOR = "\n";
+        }
+    }
+
     public StringTable() {
+
     }
 
     public StringTable(int rows, int columns) {
@@ -94,7 +104,7 @@ public class StringTable implements Iterable<StringRow> {
      * @param row Row
      */
     public void add(@NonNull StringRow row) {
-        mRows.add(Objects.requireNonNull(row));
+        mRows.add(CommonUtils.requireNonNull(row));
     }
 
     /**
@@ -174,7 +184,7 @@ public class StringTable implements Iterable<StringRow> {
         if (position < 0) {
             throw new IllegalArgumentException();
         }
-        Objects.requireNonNull(row);
+        CommonUtils.requireNonNull(row);
         StringRow previousValue = null;
         if (!insertEmptyRowsIfNeeded(position)) {
             previousValue = mRows.get(position);
@@ -228,7 +238,7 @@ public class StringTable implements Iterable<StringRow> {
         if (position < 0) {
             throw new IllegalArgumentException();
         }
-        Objects.requireNonNull(row);
+        CommonUtils.requireNonNull(row);
         if (insertEmptyRowsIfNeeded(position)) {
             mRows.add(row);
             return null;
@@ -291,7 +301,7 @@ public class StringTable implements Iterable<StringRow> {
     @Override
     public boolean equals(Object o) {
         return o == this ||
-                o instanceof StringTable && Objects.equals(((StringTable) o).mRows, mRows);
+                o instanceof StringTable && CommonUtils.equals(((StringTable) o).mRows, mRows);
     }
 
     @Override
@@ -307,7 +317,7 @@ public class StringTable implements Iterable<StringRow> {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("StringTable [");
             for (int i = 0, s = mRows.size(); i < s; i++) {
-                stringBuilder.append(System.lineSeparator()).append(mRows.get(i));
+                stringBuilder.append(LINE_SEPARATOR).append(mRows.get(i));
             }
             return stringBuilder.append(']').toString();
         }

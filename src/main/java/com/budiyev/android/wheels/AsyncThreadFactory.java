@@ -26,7 +26,6 @@ package com.budiyev.android.wheels;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
-import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -80,6 +79,6 @@ final class AsyncThreadFactory implements ThreadFactory {
      * Accessible via {@link ThreadUtils#setBackgroundThreadNamePrefix(String)}
      */
     public static void setThreadNamePrefix(@NonNull String prefix) {
-        sThreadNamePrefix = Objects.requireNonNull(prefix);
+        sThreadNamePrefix = CommonUtils.requireNonNull(prefix);
     }
 }

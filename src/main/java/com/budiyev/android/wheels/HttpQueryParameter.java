@@ -26,8 +26,6 @@ package com.budiyev.android.wheels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.Objects;
-
 /**
  * Query string request parameter
  */
@@ -36,13 +34,13 @@ public final class HttpQueryParameter {
     final String value;
 
     HttpQueryParameter(@NonNull String key, @Nullable String value) {
-        this.key = Objects.requireNonNull(key);
+        this.key = CommonUtils.requireNonNull(key);
         this.value = value;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, value);
+        return CommonUtils.hash(key, value);
     }
 
     @Override
@@ -51,7 +49,7 @@ public final class HttpQueryParameter {
             return true;
         } else if (obj instanceof HttpQueryParameter) {
             HttpQueryParameter other = (HttpQueryParameter) obj;
-            return Objects.equals(key, other.key) && Objects.equals(value, other.value);
+            return CommonUtils.equals(key, other.key) && CommonUtils.equals(value, other.value);
         } else {
             return false;
         }

@@ -31,7 +31,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -98,7 +97,7 @@ final class GetHttpRequest extends HttpRequest {
     GetHttpRequest(@NonNull String url, @Nullable Iterable<HttpHeaderParameter> headerParameters,
             @Nullable Iterable<HttpQueryParameter> queryParameters,
             @Nullable Iterable<HttpRequestCallback> callbacks) {
-        mUrl = Objects.requireNonNull(url);
+        mUrl = CommonUtils.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;
         mCallbacks = callbacks;
@@ -122,7 +121,7 @@ final class GetHttpRequest extends HttpRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUrl, mHeaderParameters, mQueryParameters);
+        return CommonUtils.hash(mUrl, mHeaderParameters, mQueryParameters);
     }
 
     @Override
@@ -131,9 +130,9 @@ final class GetHttpRequest extends HttpRequest {
             return true;
         } else if (obj instanceof GetHttpRequest) {
             GetHttpRequest other = (GetHttpRequest) obj;
-            return Objects.equals(mUrl, other.mUrl) &&
-                    Objects.equals(mHeaderParameters, other.mHeaderParameters) &&
-                    Objects.equals(mQueryParameters, other.mQueryParameters);
+            return CommonUtils.equals(mUrl, other.mUrl) &&
+                    CommonUtils.equals(mHeaderParameters, other.mHeaderParameters) &&
+                    CommonUtils.equals(mQueryParameters, other.mQueryParameters);
         } else {
             return false;
         }

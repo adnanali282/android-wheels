@@ -25,8 +25,6 @@ package com.budiyev.android.wheels;
 
 import android.support.annotation.NonNull;
 
-import java.util.Objects;
-
 /**
  * Query header request parameter
  */
@@ -35,13 +33,13 @@ public final class HttpHeaderParameter {
     final String value;
 
     HttpHeaderParameter(@NonNull String key, @NonNull String value) {
-        this.key = Objects.requireNonNull(key);
-        this.value = Objects.requireNonNull(value);
+        this.key = CommonUtils.requireNonNull(key);
+        this.value = CommonUtils.requireNonNull(value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, value);
+        return CommonUtils.hash(key, value);
     }
 
     @Override
@@ -50,7 +48,7 @@ public final class HttpHeaderParameter {
             return true;
         } else if (obj instanceof HttpHeaderParameter) {
             HttpHeaderParameter other = (HttpHeaderParameter) obj;
-            return Objects.equals(key, other.key) && Objects.equals(value, other.value);
+            return CommonUtils.equals(key, other.key) && CommonUtils.equals(value, other.value);
         } else {
             return false;
         }

@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Row of {@link StringTable}
@@ -96,7 +95,7 @@ public class StringRow implements Iterable<String> {
      * @param cell Cell value
      */
     public void add(@NonNull String cell) {
-        mCells.add(Objects.requireNonNull(cell));
+        mCells.add(CommonUtils.requireNonNull(cell));
     }
 
     /**
@@ -128,7 +127,7 @@ public class StringRow implements Iterable<String> {
         if (position < 0) {
             throw new IllegalArgumentException();
         }
-        Objects.requireNonNull(cell);
+        CommonUtils.requireNonNull(cell);
         String previousValue = null;
         if (!insertEmptyCellsIfNeeded(position)) {
             previousValue = mCells.get(position);
@@ -152,7 +151,7 @@ public class StringRow implements Iterable<String> {
         if (position < 0) {
             throw new IllegalArgumentException();
         }
-        Objects.requireNonNull(cell);
+        CommonUtils.requireNonNull(cell);
         if (insertEmptyCellsIfNeeded(position)) {
             mCells.add(cell);
             return null;
@@ -198,7 +197,7 @@ public class StringRow implements Iterable<String> {
     @Override
     public boolean equals(Object o) {
         return o == this ||
-                o instanceof StringRow && Objects.equals(((StringRow) o).mCells, mCells);
+                o instanceof StringRow && CommonUtils.equals(((StringRow) o).mCells, mCells);
     }
 
     @Override
