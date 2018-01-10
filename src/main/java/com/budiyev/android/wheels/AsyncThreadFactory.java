@@ -23,11 +23,11 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 
 /**
  * Thread factory for internal usage in AndroidWheels
@@ -42,13 +42,11 @@ final class AsyncThreadFactory implements ThreadFactory {
         this(Thread.NORM_PRIORITY, false);
     }
 
-    public AsyncThreadFactory(
-            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority) {
+    public AsyncThreadFactory(@IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority) {
         this(threadPriority, false);
     }
 
-    public AsyncThreadFactory(
-            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
+    public AsyncThreadFactory(@IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
             boolean daemonThread) {
         mThreadPriority = threadPriority;
         mDaemonThread = daemonThread;

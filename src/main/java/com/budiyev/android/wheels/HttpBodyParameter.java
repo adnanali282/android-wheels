@@ -23,10 +23,10 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-
 import java.io.File;
 import java.io.InputStream;
+
+import android.support.annotation.NonNull;
 
 /**
  * Parameter of HTTP request (multipart/form-data)
@@ -79,10 +79,8 @@ public final class HttpBodyParameter {
         } else if (obj instanceof HttpBodyParameter) {
             HttpBodyParameter other = (HttpBodyParameter) obj;
             return CommonUtils.equals(key, other.key) && CommonUtils.equals(value, other.value) &&
-                    CommonUtils.equals(file, other.file) &&
-                    CommonUtils.equals(stream, other.stream) &&
-                    CommonUtils.equals(fileName, other.fileName) &&
-                    CommonUtils.equals(contentType, other.contentType);
+                    CommonUtils.equals(file, other.file) && CommonUtils.equals(stream, other.stream) &&
+                    CommonUtils.equals(fileName, other.fileName) && CommonUtils.equals(contentType, other.contentType);
         } else {
             return false;
         }

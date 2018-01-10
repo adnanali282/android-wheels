@@ -23,9 +23,9 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-
 import java.util.concurrent.Future;
+
+import android.support.annotation.NonNull;
 
 /**
  * Common interface for {@link HttpRequest} builders

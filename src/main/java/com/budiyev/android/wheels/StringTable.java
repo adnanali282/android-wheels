@@ -23,15 +23,15 @@
  */
 package com.budiyev.android.wheels;
 
-import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * String table, used with {@link CsvParser}
@@ -300,8 +300,7 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public boolean equals(Object o) {
-        return o == this ||
-                o instanceof StringTable && CommonUtils.equals(((StringTable) o).mRows, mRows);
+        return o == this || o instanceof StringTable && CommonUtils.equals(((StringTable) o).mRows, mRows);
     }
 
     @Override

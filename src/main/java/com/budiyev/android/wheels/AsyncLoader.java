@@ -23,6 +23,8 @@
  */
 package com.budiyev.android.wheels;
 
+import java.util.concurrent.Future;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
@@ -31,8 +33,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-
-import java.util.concurrent.Future;
 
 /**
  * Abstract Loader based on {@link ThreadUtils}

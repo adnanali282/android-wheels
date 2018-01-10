@@ -23,14 +23,14 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+
+import android.support.annotation.NonNull;
 
 /**
  * Parser of CSV format
@@ -53,14 +53,13 @@ public final class CsvParser {
      * @param separator    Column separator
      * @param charset      Charset name
      */
-    public static void encode(@NonNull StringTable table, @NonNull OutputStream outputStream,
-            char separator, @NonNull String charset) throws IOException {
+    public static void encode(@NonNull StringTable table, @NonNull OutputStream outputStream, char separator,
+            @NonNull String charset) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, charset));
         for (StringRow row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
-                writer.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
-                        .append(QUOTE);
+                writer.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING)).append(QUOTE);
                 if (i != size - 1) {
                     writer.append(separator);
                 }
@@ -82,8 +81,7 @@ public final class CsvParser {
         for (StringRow row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
-                stringBuilder.append(QUOTE)
-                        .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                stringBuilder.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
                         .append(QUOTE);
                 if (i != size - 1) {
                     stringBuilder.append(separator);
@@ -103,8 +101,8 @@ public final class CsvParser {
      * @return Table
      */
     @NonNull
-    public static StringTable parse(@NonNull InputStream inputStream, char separator,
-            @NonNull String charset) throws IOException {
+    public static StringTable parse(@NonNull InputStream inputStream, char separator, @NonNull String charset)
+            throws IOException {
         InputStreamReader reader = new InputStreamReader(inputStream, charset);
         StringTable table = new StringTable();
         StringBuilder row = new StringBuilder();
@@ -180,8 +178,7 @@ public final class CsvParser {
                 int p = i - 1;
                 if ((p > -1 && rowString.charAt(p) == separator || i == 0) && !inElementQuotes) {
                     inElementQuotes = true;
-                } else if ((n < length && rowString.charAt(n) == separator || n == length) &&
-                        inElementQuotes) {
+                } else if ((n < length && rowString.charAt(n) == separator || n == length) && inElementQuotes) {
                     inElementQuotes = false;
                 } else if (n < length && rowString.charAt(n) == CsvParser.QUOTE) {
                     cell.append(current);

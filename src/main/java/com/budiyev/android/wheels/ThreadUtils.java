@@ -23,13 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.os.AsyncTask;
-import android.os.Looper;
-import android.support.annotation.AnyThread;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +30,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import android.os.AsyncTask;
+import android.os.Looper;
+import android.support.annotation.AnyThread;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Tools for asynchronous tasks in Android
@@ -87,8 +87,7 @@ public final class ThreadUtils {
     @NonNull
     @AnyThread
     public static ThreadFactory newThreadFactory(
-            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority,
-            boolean daemonThreads) {
+            @IntRange(from = Thread.MIN_PRIORITY, to = Thread.MAX_PRIORITY) int threadPriority, boolean daemonThreads) {
         return new AsyncThreadFactory(threadPriority, daemonThreads);
     }
 
@@ -197,8 +196,7 @@ public final class ThreadUtils {
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
-            @NonNull AsyncTask<Parameters, Progress, Result> task,
-            @Nullable Parameters... parameters) {
+            @NonNull AsyncTask<Parameters, Progress, Result> task, @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters));
         return task;
     }
@@ -230,13 +228,12 @@ public final class ThreadUtils {
     @AnyThread
     public static ScheduledFuture<Future<?>> runAsync(@NonNull final Runnable task, long delay,
             @NonNull TimeUnit unit) {
-        return InternalExecutors.getThreadUtilsScheduledExecutor()
-                .schedule(new Callable<Future<?>>() {
-                    @Override
-                    public Future<?> call() throws Exception {
-                        return InternalExecutors.getThreadUtilsExecutor().submit(task);
-                    }
-                }, delay, unit);
+        return InternalExecutors.getThreadUtilsScheduledExecutor().schedule(new Callable<Future<?>>() {
+            @Override
+            public Future<?> call() throws Exception {
+                return InternalExecutors.getThreadUtilsExecutor().submit(task);
+            }
+        }, delay, unit);
     }
 
     /**
@@ -264,15 +261,14 @@ public final class ThreadUtils {
      */
     @NonNull
     @AnyThread
-    public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull final Callable<T> task,
-            long delay, @NonNull TimeUnit unit) {
-        return InternalExecutors.getThreadUtilsScheduledExecutor()
-                .schedule(new Callable<Future<T>>() {
-                    @Override
-                    public Future<T> call() throws Exception {
-                        return InternalExecutors.getThreadUtilsExecutor().submit(task);
-                    }
-                }, delay, unit);
+    public static <T> ScheduledFuture<Future<T>> runAsync(@NonNull final Callable<T> task, long delay,
+            @NonNull TimeUnit unit) {
+        return InternalExecutors.getThreadUtilsScheduledExecutor().schedule(new Callable<Future<T>>() {
+            @Override
+            public Future<T> call() throws Exception {
+                return InternalExecutors.getThreadUtilsExecutor().submit(task);
+            }
+        }, delay, unit);
     }
 
     /**
@@ -287,8 +283,7 @@ public final class ThreadUtils {
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
-            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
-            @Nullable Parameters... parameters) {
+            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay, @Nullable Parameters... parameters) {
         InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), delay);
         return task;
     }
@@ -308,10 +303,9 @@ public final class ThreadUtils {
     @AnyThread
     @SafeVarargs
     public static <Parameters, Progress, Result> AsyncTask<Parameters, Progress, Result> runAsync(
-            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay,
-            @NonNull TimeUnit unit, @Nullable Parameters... parameters) {
-        InternalExecutors.getMainThreadExecutor()
-                .execute(wrapAsyncTask(task, parameters), unit.toMillis(delay));
+            @NonNull AsyncTask<Parameters, Progress, Result> task, long delay, @NonNull TimeUnit unit,
+            @Nullable Parameters... parameters) {
+        InternalExecutors.getMainThreadExecutor().execute(wrapAsyncTask(task, parameters), unit.toMillis(delay));
         return task;
     }
 
@@ -362,8 +356,7 @@ public final class ThreadUtils {
      */
     @NonNull
     @AnyThread
-    public static Future<?> runOnMainThread(@NonNull Runnable task, long delay,
-            @NonNull TimeUnit unit) {
+    public static Future<?> runOnMainThread(@NonNull Runnable task, long delay, @NonNull TimeUnit unit) {
         return InternalExecutors.getMainThreadExecutor().submit(task, unit.toMillis(delay));
     }
 
@@ -392,8 +385,7 @@ public final class ThreadUtils {
      */
     @NonNull
     @AnyThread
-    public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay,
-            @NonNull TimeUnit unit) {
+    public static <T> Future<T> runOnMainThread(@NonNull Callable<T> task, long delay, @NonNull TimeUnit unit) {
         return InternalExecutors.getMainThreadExecutor().submit(task, unit.toMillis(delay));
     }
 
@@ -438,8 +430,7 @@ public final class ThreadUtils {
         }
     }
 
-    static void throwExecutionExceptionIfNeeded(@Nullable Runnable runnable,
-            @Nullable Throwable throwable) {
+    static void throwExecutionExceptionIfNeeded(@Nullable Runnable runnable, @Nullable Throwable throwable) {
         if (sThrowExecutionExceptions) {
             if (throwable == null) {
                 if (runnable instanceof Future<?>) {
@@ -459,8 +450,7 @@ public final class ThreadUtils {
     @SafeVarargs
     @NonNull
     private static <Parameters, Progress, Result> Runnable wrapAsyncTask(
-            @NonNull final AsyncTask<Parameters, Progress, Result> asyncTask,
-            final Parameters... parameters) {
+            @NonNull final AsyncTask<Parameters, Progress, Result> asyncTask, final Parameters... parameters) {
         return new Runnable() {
             @Override
             public void run() {

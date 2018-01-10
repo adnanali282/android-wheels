@@ -23,6 +23,15 @@
  */
 package com.budiyev.android.wheels;
 
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -46,15 +55,6 @@ import android.view.ViewManager;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public final class CommonUtils {
     private static final String URI_SCHEME_HTTP = "http";
@@ -90,10 +90,8 @@ public final class CommonUtils {
         int height = view.getHeight();
         if (width == 0 || height == 0) {
             DisplayMetrics metrics = view.getResources().getDisplayMetrics();
-            int widthSpec =
-                    View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.EXACTLY);
-            int heightSpec = View.MeasureSpec
-                    .makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.EXACTLY);
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.EXACTLY);
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.EXACTLY);
             view.measure(widthSpec, heightSpec);
             width = view.getMeasuredWidth();
             height = view.getMeasuredHeight();
@@ -136,8 +134,7 @@ public final class CommonUtils {
      * @return Bitmap
      */
     @NonNull
-    public static Bitmap drawViewOnBitmap(@NonNull View view, int width, int height,
-            @NonNull Bitmap.Config config) {
+    public static Bitmap drawViewOnBitmap(@NonNull View view, int width, int height, @NonNull Bitmap.Config config) {
         if (view.getWidth() != width || view.getHeight() != height) {
             view.layout(0, 0, width, height);
         }
@@ -191,8 +188,7 @@ public final class CommonUtils {
      * @return Text or {@code null} if specified resource wasn't found
      */
     @Nullable
-    public static CharSequence getTextByResourceName(@NonNull Context context,
-            @NonNull String resourceName) {
+    public static CharSequence getTextByResourceName(@NonNull Context context, @NonNull String resourceName) {
         Resources resources = context.getResources();
         int resId = resources.getIdentifier(resourceName, "string", context.getPackageName());
         try {
@@ -211,8 +207,7 @@ public final class CommonUtils {
      *                                 from specified {@link Context}
      */
     public static void hideSoftwareInput(@NonNull Context context, @NonNull View view) {
-        ContextUtils.getInputMethodManager(context)
-                .hideSoftInputFromWindow(view.getWindowToken(), 0);
+        ContextUtils.getInputMethodManager(context).hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     /**
@@ -265,8 +260,7 @@ public final class CommonUtils {
      * @throws IOException
      */
     @Nullable
-    public static InputStream getDataStreamFromUri(@NonNull Context context,
-            @NonNull Uri uri) throws IOException {
+    public static InputStream getDataStreamFromUri(@NonNull Context context, @NonNull Uri uri) throws IOException {
         String scheme = uri.getScheme();
         if (URI_SCHEME_HTTP.equalsIgnoreCase(scheme) || URI_SCHEME_HTTPS.equalsIgnoreCase(scheme) ||
                 URI_SCHEME_FTP.equalsIgnoreCase(scheme)) {
@@ -358,8 +352,7 @@ public final class CommonUtils {
     @Nullable
     public static String getFileExtension(@NonNull String path) {
         int dot = path.lastIndexOf('.');
-        int separator = Math.max(path.lastIndexOf(File.pathSeparatorChar),
-                path.lastIndexOf(File.separatorChar));
+        int separator = Math.max(path.lastIndexOf(File.pathSeparatorChar), path.lastIndexOf(File.separatorChar));
         if (dot > separator) {
             return path.substring(dot + 1);
         } else {
@@ -431,10 +424,10 @@ public final class CommonUtils {
     @NonNull
     public static Uri getResourceUri(@NonNull Context context, @AnyRes int resourceId) {
         Resources resources = context.getResources();
-        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                resources.getResourcePackageName(resourceId) + "/" +
-                resources.getResourceTypeName(resourceId) + "/" +
-                resources.getResourceEntryName(resourceId));
+        return Uri
+                .parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + resources.getResourcePackageName(resourceId) +
+                        "/" + resources.getResourceTypeName(resourceId) + "/" +
+                        resources.getResourceEntryName(resourceId));
     }
 
     @NonNull

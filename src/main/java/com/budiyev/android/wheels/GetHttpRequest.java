@@ -23,9 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -33,6 +30,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Instance class for GET HTTP requests
@@ -95,8 +95,7 @@ final class GetHttpRequest extends HttpRequest {
     };
 
     GetHttpRequest(@NonNull String url, @Nullable Iterable<HttpHeaderParameter> headerParameters,
-            @Nullable Iterable<HttpQueryParameter> queryParameters,
-            @Nullable Iterable<HttpRequestCallback> callbacks) {
+            @Nullable Iterable<HttpQueryParameter> queryParameters, @Nullable Iterable<HttpRequestCallback> callbacks) {
         mUrl = CommonUtils.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;

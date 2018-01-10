@@ -23,10 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +33,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.concurrent.Future;
+
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * HTTP request API, based on {@link HttpURLConnection}
@@ -52,8 +52,8 @@ public abstract class HttpRequest {
     }
 
     @NonNull
-    protected static String buildParamsUrlString(@NonNull Iterable<HttpQueryParameter> params,
-            @NonNull String charset) throws UnsupportedEncodingException {
+    protected static String buildParamsUrlString(@NonNull Iterable<HttpQueryParameter> params, @NonNull String charset)
+            throws UnsupportedEncodingException {
         StringBuilder dataBuilder = new StringBuilder();
         boolean firstEntry = true;
         for (HttpQueryParameter queryParameter : params) {
@@ -74,8 +74,7 @@ public abstract class HttpRequest {
     }
 
     @NonNull
-    protected static HttpURLConnection openHttpUrlConnection(@NonNull String query) throws
-            IOException {
+    protected static HttpURLConnection openHttpUrlConnection(@NonNull String query) throws IOException {
         URLConnection connection = new URL(query).openConnection();
         if (connection instanceof HttpURLConnection) {
             return (HttpURLConnection) connection;
@@ -91,8 +90,8 @@ public abstract class HttpRequest {
         }
     }
 
-    protected static void processResponse(@NonNull HttpURLConnection connection,
-            @NonNull HttpRequestResult result) throws IOException {
+    protected static void processResponse(@NonNull HttpURLConnection connection, @NonNull HttpRequestResult result)
+            throws IOException {
         InputStream dataStream;
         try {
             dataStream = connection.getInputStream();
@@ -120,8 +119,7 @@ public abstract class HttpRequest {
      * Maximum number of requests that can be executed simultaneously
      * by calling {@link #submit()}
      */
-    public static void setParallelRequestsLimit(
-            @IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
+    public static void setParallelRequestsLimit(@IntRange(from = 1, to = Integer.MAX_VALUE) int limit) {
         InternalExecutors.setPoolSize(InternalExecutors.getHttpRequestExecutor(), limit);
     }
 
@@ -136,8 +134,7 @@ public abstract class HttpRequest {
     @NonNull
     public static HttpRequest newGetRequest(@NonNull String url,
             @Nullable Iterable<HttpHeaderParameter> headerParameters,
-            @Nullable Iterable<HttpQueryParameter> queryParameters,
-            @Nullable Iterable<HttpRequestCallback> callbacks) {
+            @Nullable Iterable<HttpQueryParameter> queryParameters, @Nullable Iterable<HttpRequestCallback> callbacks) {
         return new GetHttpRequest(url, headerParameters, queryParameters, callbacks);
     }
 
@@ -175,10 +172,8 @@ public abstract class HttpRequest {
     public static HttpRequest newPostRequest(@NonNull String url,
             @Nullable Iterable<HttpHeaderParameter> headerParameters,
             @Nullable Iterable<HttpQueryParameter> queryParameters,
-            @Nullable Iterable<HttpBodyParameter> bodyParameters,
-            @Nullable Iterable<HttpRequestCallback> callbacks) {
-        return new PostHttpRequest(url, headerParameters, queryParameters, bodyParameters,
-                callbacks);
+            @Nullable Iterable<HttpBodyParameter> bodyParameters, @Nullable Iterable<HttpRequestCallback> callbacks) {
+        return new PostHttpRequest(url, headerParameters, queryParameters, bodyParameters, callbacks);
     }
 
     /**
@@ -210,8 +205,7 @@ public abstract class HttpRequest {
      * @return New request header parameter
      */
     @NonNull
-    public static HttpHeaderParameter newHeaderParameter(@NonNull String key,
-            @NonNull String value) {
+    public static HttpHeaderParameter newHeaderParameter(@NonNull String key, @NonNull String value) {
         return new HttpHeaderParameter(key, value);
     }
 
@@ -223,8 +217,7 @@ public abstract class HttpRequest {
      * @return New query string request parameter
      */
     @NonNull
-    public static HttpQueryParameter newQueryParameter(@NonNull String key,
-            @Nullable String value) {
+    public static HttpQueryParameter newQueryParameter(@NonNull String key, @Nullable String value) {
         return new HttpQueryParameter(key, value);
     }
 
@@ -262,9 +255,8 @@ public abstract class HttpRequest {
      * @return New POST request body parameter
      */
     @NonNull
-    public static HttpBodyParameter newBodyParameter(@NonNull String key,
-            @NonNull InputStream inputStream, @NonNull String fileName,
-            @NonNull String contentType) {
+    public static HttpBodyParameter newBodyParameter(@NonNull String key, @NonNull InputStream inputStream,
+            @NonNull String fileName, @NonNull String contentType) {
         return new HttpBodyParameter(key, inputStream, fileName, contentType);
     }
 

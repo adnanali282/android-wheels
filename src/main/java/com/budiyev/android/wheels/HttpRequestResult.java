@@ -23,10 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,6 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Request result of {@link HttpRequest}
@@ -77,8 +77,8 @@ public final class HttpRequestResult {
      * see {@link #getException()} for details
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING,
-            ERROR_PROTOCOL, ERROR_IO, ERROR_UNEXPECTED})
+    @IntDef({NONE, SUCCESS, ERROR_HTTP, ERROR_MALFORMED_URL, ERROR_UNSUPPORTED_ENCODING, ERROR_PROTOCOL, ERROR_IO,
+            ERROR_UNEXPECTED})
     public @interface ResultType {
     }
 
@@ -360,8 +360,7 @@ public final class HttpRequestResult {
 
     @Override
     public int hashCode() {
-        return CommonUtils
-                .hash(mDataString, mDataType, mDataStream, mHeaderFields, mResultType, mHttpCode);
+        return CommonUtils.hash(mDataString, mDataType, mDataStream, mHeaderFields, mResultType, mHttpCode);
     }
 
     @Override
@@ -370,8 +369,7 @@ public final class HttpRequestResult {
             return true;
         } else if (obj instanceof HttpRequestResult) {
             HttpRequestResult other = (HttpRequestResult) obj;
-            return mDataType == other.mDataType && mResultType == other.mResultType &&
-                    mHttpCode == other.mHttpCode &&
+            return mDataType == other.mDataType && mResultType == other.mResultType && mHttpCode == other.mHttpCode &&
                     CommonUtils.equals(mDataString, other.mDataString) &&
                     CommonUtils.equals(mDataStream, other.mDataStream) &&
                     CommonUtils.equals(mHeaderFields, other.mHeaderFields);
@@ -382,8 +380,7 @@ public final class HttpRequestResult {
 
     @Override
     public String toString() {
-        return "HttpRequestResult [result type: " + getResultTypeString() + "; data type: " +
-                getDataTypeString() + "; response code: " + (mHttpCode == -1 ? "NONE" : mHttpCode) +
-                "]";
+        return "HttpRequestResult [result type: " + getResultTypeString() + "; data type: " + getDataTypeString() +
+                "; response code: " + (mHttpCode == -1 ? "NONE" : mHttpCode) + "]";
     }
 }

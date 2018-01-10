@@ -23,9 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +36,9 @@ import java.net.ProtocolException;
 import java.net.URLConnection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Instance class for POST HTTP requests
@@ -89,25 +89,20 @@ final class PostHttpRequest extends HttpRequest {
                 if (!CollectionUtils.isNullOrEmpty(mBodyParameters)) {
                     OutputStream outputStream = connection.getOutputStream();
                     try {
-                        BufferedWriter writer = new BufferedWriter(
-                                new OutputStreamWriter(outputStream, CHARSET_UTF_8));
+                        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, CHARSET_UTF_8));
                         for (HttpBodyParameter bodyParameter : mBodyParameters) {
                             if (bodyParameter.value != null) {
-                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
-                                        .append(QUOTE).append(LINE_END).append(CONTENT_TYPE_REQUEST)
-                                        .append(PLAIN_TEXT).append(LINE_END).append(LINE_END)
-                                        .append(bodyParameter.value).append(LINE_END);
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END).append(CONTENT_DISPOSITION)
+                                        .append(bodyParameter.key).append(QUOTE).append(LINE_END)
+                                        .append(CONTENT_TYPE_REQUEST).append(PLAIN_TEXT).append(LINE_END)
+                                        .append(LINE_END).append(bodyParameter.value).append(LINE_END);
                             } else if (bodyParameter.file != null) {
                                 String fileName = bodyParameter.file.getName();
-                                String contentType =
-                                        URLConnection.guessContentTypeFromName(fileName);
-                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
-                                        .append(QUOTE).append(FILENAME).append(fileName)
-                                        .append(QUOTE).append(LINE_END).append(CONTENT_TYPE_REQUEST)
-                                        .append(contentType).append(LINE_END)
-                                        .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
+                                String contentType = URLConnection.guessContentTypeFromName(fileName);
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END).append(CONTENT_DISPOSITION)
+                                        .append(bodyParameter.key).append(QUOTE).append(FILENAME).append(fileName)
+                                        .append(QUOTE).append(LINE_END).append(CONTENT_TYPE_REQUEST).append(contentType)
+                                        .append(LINE_END).append(CONTENT_TRANSFER_ENCODING).append(BINARY)
                                         .append(LINE_END).append(LINE_END).flush();
                                 FileInputStream fileInput = null;
                                 try {
@@ -120,17 +115,14 @@ final class PostHttpRequest extends HttpRequest {
                                     CommonUtils.close(fileInput);
                                 }
                                 writer.append(LINE_END);
-                            } else if (bodyParameter.stream != null &&
-                                    bodyParameter.fileName != null &&
+                            } else if (bodyParameter.stream != null && bodyParameter.fileName != null &&
                                     bodyParameter.contentType != null) {
-                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END)
-                                        .append(CONTENT_DISPOSITION).append(bodyParameter.key)
-                                        .append(QUOTE).append(FILENAME)
-                                        .append(bodyParameter.fileName).append(QUOTE)
-                                        .append(LINE_END).append(CONTENT_TYPE_REQUEST)
-                                        .append(bodyParameter.contentType).append(LINE_END)
-                                        .append(CONTENT_TRANSFER_ENCODING).append(BINARY)
-                                        .append(LINE_END).append(LINE_END).flush();
+                                writer.append(DOUBLE_DASH).append(boundary).append(LINE_END).append(CONTENT_DISPOSITION)
+                                        .append(bodyParameter.key).append(QUOTE).append(FILENAME)
+                                        .append(bodyParameter.fileName).append(QUOTE).append(LINE_END)
+                                        .append(CONTENT_TYPE_REQUEST).append(bodyParameter.contentType).append(LINE_END)
+                                        .append(CONTENT_TRANSFER_ENCODING).append(BINARY).append(LINE_END)
+                                        .append(LINE_END).flush();
                                 InputStream inputStream = bodyParameter.stream;
                                 try {
                                     byte[] buffer = new byte[BUFFER_SIZE];
@@ -143,8 +135,7 @@ final class PostHttpRequest extends HttpRequest {
                                 writer.append(LINE_END);
                             }
                         }
-                        writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH)
-                                .append(LINE_END).flush();
+                        writer.append(DOUBLE_DASH).append(boundary).append(DOUBLE_DASH).append(LINE_END).flush();
                     } finally {
                         CommonUtils.close(outputStream);
                     }
@@ -184,8 +175,7 @@ final class PostHttpRequest extends HttpRequest {
 
     PostHttpRequest(@NonNull String url, @Nullable Iterable<HttpHeaderParameter> headerParameters,
             @Nullable Iterable<HttpQueryParameter> queryParameters,
-            @Nullable Iterable<HttpBodyParameter> bodyParameters,
-            @Nullable Iterable<HttpRequestCallback> callbacks) {
+            @Nullable Iterable<HttpBodyParameter> bodyParameters, @Nullable Iterable<HttpRequestCallback> callbacks) {
         mUrl = CommonUtils.requireNonNull(url);
         mHeaderParameters = headerParameters;
         mQueryParameters = queryParameters;

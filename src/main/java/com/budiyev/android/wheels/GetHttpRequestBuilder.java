@@ -23,12 +23,12 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Builder for GET HTTP requests

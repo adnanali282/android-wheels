@@ -871,8 +871,7 @@ public final class ContextUtils {
     @SuppressWarnings("unchecked")
     private static <T> T validate(@Nullable Object service) {
         if (service == null) {
-            throw new InvalidContextException(
-                    "Specified context is not valid or service is not available.");
+            throw new InvalidContextException("Specified context is not valid or service is not available.");
         }
         return (T) service;
     }

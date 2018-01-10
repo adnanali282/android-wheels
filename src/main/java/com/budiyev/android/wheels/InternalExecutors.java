@@ -23,9 +23,6 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
@@ -33,6 +30,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 
 /**
  * Executors for internal usage in AndroidWheels

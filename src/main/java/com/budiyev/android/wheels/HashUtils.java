@@ -23,15 +23,15 @@
  */
 package com.budiyev.android.wheels;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 
 /**
  * Hashing tools
@@ -249,11 +249,9 @@ public final class HashUtils {
      * @return Hash bytes
      */
     @NonNull
-    public static byte[] generateHashBytes(@NonNull InputStream inputStream,
-            @NonNull String algorithm) {
+    public static byte[] generateHashBytes(@NonNull InputStream inputStream, @NonNull String algorithm) {
         try {
-            DigestInputStream digestStream =
-                    new DigestInputStream(inputStream, MessageDigest.getInstance(algorithm));
+            DigestInputStream digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance(algorithm));
             byte[] buffer = new byte[BUFFER_SIZE];
             for (; ; ) {
                 if (digestStream.read(buffer) < 0) {
